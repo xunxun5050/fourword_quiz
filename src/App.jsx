@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import {
   FaBolt,
+  FaCalendarDay,
   FaChartBar,
   FaCheck,
   FaClock,
+  FaFileAlt,
   FaHome,
+  FaImage,
+  FaMedal,
   FaPlay,
   FaRedoAlt,
-  FaShareAlt,
   FaStopwatch,
   FaTimes,
   FaTrophy,
@@ -20,6 +23,7 @@ const STORAGE_KEYS = {
   bestScore: "sjse_best_score",
   bestAccuracy: "sjse_best_accuracy",
   playCount: "sjse_play_count",
+  dailyLeaderboard: "sjse_daily_leaderboard",
 };
 
 const DIFFICULTIES = {
@@ -32,6 +36,11 @@ const INITIAL_STATS = {
   bestScore: 0,
   bestAccuracy: 0,
   playCount: 0,
+};
+
+const INITIAL_LEADERBOARD = {
+  date: "",
+  entries: [],
 };
 
 const initialState = {
@@ -179,6 +188,72 @@ function saveStats(stats) {
   localStorage.setItem(STORAGE_KEYS.playCount, String(stats.playCount));
 }
 
+function getTodayKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function loadDailyLeaderboard() {
+  if (typeof window === "undefined") return INITIAL_LEADERBOARD;
+
+  const today = getTodayKey();
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.dailyLeaderboard) || "null");
+    if (!saved || saved.date !== today || !Array.isArray(saved.entries)) {
+      return { date: today, entries: [] };
+    }
+    return {
+      date: saved.date,
+      entries: saved.entries.filter((entry) => Number(entry.attempted) > 0),
+    };
+  } catch {
+    return { date: today, entries: [] };
+  }
+}
+
+function saveDailyLeaderboard(leaderboard) {
+  localStorage.setItem(STORAGE_KEYS.dailyLeaderboard, JSON.stringify(leaderboard));
+}
+
+function formatPlayedAt(isoDate) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(isoDate));
+}
+
+function buildLeaderboardEntry({ accuracy, difficulty, score, attempted, history }) {
+  const now = new Date();
+  const totalTimeSpent = history.reduce((sum, record) => sum + record.timeSpent, 0);
+  return {
+    id: `${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+    score,
+    accuracy,
+    attempted,
+    difficulty,
+    playedAt: now.toISOString(),
+    totalTimeSpent: Number(totalTimeSpent.toFixed(1)),
+  };
+}
+
+function updateDailyLeaderboard(current, entry) {
+  const today = getTodayKey();
+  const entries = current.date === today ? current.entries : [];
+  const next = [...entries, entry]
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+      if (a.totalTimeSpent !== b.totalTimeSpent) return a.totalTimeSpent - b.totalTimeSpent;
+      return new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime();
+    })
+    .slice(0, 10);
+
+  return { date: today, entries: next };
+}
+
 function getAccuracy(score, attempted) {
   if (attempted === 0) return 0;
   return Math.round((score / attempted) * 100);
@@ -190,6 +265,232 @@ function getGrade(accuracy) {
   if (accuracy >= 50) return "사자성어 중급";
   if (accuracy >= 30) return "사자성어 입문";
   return "다시 도전";
+}
+
+function getExportTimestamp() {
+  const date = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+    "-",
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+  ].join("");
+}
+
+function getAnswerLabel(record) {
+  if (record.correct) return "정답";
+  if (record.userAnswer === null) return "시간 초과";
+  return "오답";
+}
+
+function getRecordAnswer(record) {
+  return record.userAnswer ?? "시간 초과";
+}
+
+function buildResultExportText({ accuracy, difficulty, history, score }) {
+  const lines = [
+    "사자성어 퀴즈 결과",
+    "",
+    `정답: ${score}개`,
+    `시도: ${history.length}문제`,
+    `정확도: ${accuracy}%`,
+    `난이도: ${DIFFICULTIES[difficulty].label}`,
+    `저장일시: ${new Date().toLocaleString("ko-KR")}`,
+    "",
+    "문제 복기",
+  ];
+
+  if (history.length === 0) {
+    lines.push("저장할 문제 기록이 없습니다.");
+    return lines.join("\n");
+  }
+
+  history.forEach((record, index) => {
+    lines.push(
+      "",
+      `${index + 1}. [${getAnswerLabel(record)}] ${record.source.idiom} (${record.source.reading})`,
+      `뜻: ${record.source.meaning}`,
+      `문제 유형: ${record.type === "A" ? "빈칸 한자" : "뜻 보고 맞히기"}`,
+      `내 답: ${getRecordAnswer(record)}`,
+      `정답: ${record.answer}`,
+      `소요 시간: ${record.timeSpent.toFixed(1)}초`,
+    );
+  });
+
+  return lines.join("\n");
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function wrapCanvasText(context, text, maxWidth) {
+  const words = String(text).split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (context.measureText(testLine).width <= maxWidth) {
+      currentLine = testLine;
+      return;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+      return;
+    }
+
+    let chunk = "";
+    [...word].forEach((char) => {
+      const testChunk = `${chunk}${char}`;
+      if (context.measureText(testChunk).width <= maxWidth) {
+        chunk = testChunk;
+      } else {
+        lines.push(chunk);
+        chunk = char;
+      }
+    });
+    currentLine = chunk;
+  });
+
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+function drawWrappedText(context, text, x, y, maxWidth, lineHeight) {
+  const lines = wrapCanvasText(context, text, maxWidth);
+  lines.forEach((line, index) => {
+    context.fillText(line, x, y + index * lineHeight);
+  });
+  return lines.length * lineHeight;
+}
+
+function buildResultImageBlob({ accuracy, difficulty, history, score }) {
+  return new Promise((resolve, reject) => {
+    const width = 1200;
+    const rowBaseHeight = 240;
+    const height = Math.max(760, 330 + Math.max(1, history.length) * rowBaseHeight);
+    const canvas = document.createElement("canvas");
+    const scale = window.devicePixelRatio || 1;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      reject(new Error("이미지 생성에 실패했습니다."));
+      return;
+    }
+
+    context.scale(scale, scale);
+    context.fillStyle = "#fffdf6";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#f25a48";
+    context.fillRect(0, 0, 18, height);
+    context.fillStyle = "#09878f";
+    context.fillRect(width - 18, 0, 18, height);
+
+    context.fillStyle = "#162027";
+    context.font = "900 54px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText("사자성어 퀴즈 결과", 64, 84);
+    context.fillStyle = "#f25a48";
+    context.font = "900 88px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText(`${score}개 정답`, 64, 180);
+
+    context.fillStyle = "#162027";
+    context.font = "800 28px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText(
+      `정확도 ${accuracy}% · 시도 ${history.length}문제 · 난이도 ${DIFFICULTIES[difficulty].label}`,
+      64,
+      230,
+    );
+    context.fillStyle = "rgba(22, 32, 39, 0.62)";
+    context.font = "700 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText(`저장일시 ${new Date().toLocaleString("ko-KR")}`, 64, 270);
+
+    context.strokeStyle = "rgba(9, 135, 143, 0.55)";
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(64, 306);
+    context.lineTo(width - 64, 306);
+    context.stroke();
+
+    let y = 366;
+    const rows = history.length > 0 ? history : [];
+    if (rows.length === 0) {
+      context.fillStyle = "rgba(22, 32, 39, 0.7)";
+      context.font = "800 30px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText("저장할 문제 기록이 없습니다.", 64, y);
+    }
+
+    rows.forEach((record, index) => {
+      const isCorrect = record.correct;
+      context.fillStyle = isCorrect ? "#0ba968" : "#e94b3c";
+      context.fillRect(64, y - 38, 44, 44);
+      context.fillStyle = "#ffffff";
+      context.font = "900 26px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText(isCorrect ? "O" : "X", 76, y - 8);
+
+      context.fillStyle = "#162027";
+      context.font = "900 38px Songti SC, AppleMyungjo, serif";
+      context.fillText(`${index + 1}. ${record.source.idiom}`, 128, y);
+
+      context.fillStyle = "rgba(22, 32, 39, 0.72)";
+      context.font = "800 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText(`${record.source.reading} · ${getAnswerLabel(record)}`, 128, y + 34);
+
+      context.fillStyle = "#162027";
+      context.font = "700 24px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      const meaningHeight = drawWrappedText(
+        context,
+        `뜻: ${record.source.meaning}`,
+        128,
+        y + 72,
+        width - 210,
+        32,
+      );
+
+      context.fillStyle = isCorrect ? "#075d65" : "#a53127";
+      context.font = "800 21px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      const answerY = y + 84 + meaningHeight;
+      context.fillText(
+        `내 답: ${getRecordAnswer(record)} · 정답: ${record.answer} · ${record.timeSpent.toFixed(1)}초`,
+        128,
+        answerY,
+      );
+
+      const separatorY = Math.max(y + rowBaseHeight - 34, answerY + 26);
+      context.strokeStyle = "rgba(15, 35, 42, 0.16)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(64, separatorY);
+      context.lineTo(width - 64, separatorY);
+      context.stroke();
+
+      y = separatorY + 46;
+    });
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("이미지 저장 파일을 만들 수 없습니다."));
+      }
+    }, "image/png");
+  });
 }
 
 function reducer(state, action) {
@@ -286,7 +587,8 @@ function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [now, setNow] = useState(Date.now());
   const [stats, setStats] = useState(loadStats);
-  const [copyState, setCopyState] = useState("idle");
+  const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
+  const [exportState, setExportState] = useState("idle");
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -300,6 +602,21 @@ function App() {
     const interval = window.setInterval(() => setNow(Date.now()), 100);
     return () => window.clearInterval(interval);
   }, [state.phase]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setDailyLeaderboard((current) => {
+        const today = getTodayKey();
+        if (current.date === today) return current;
+
+        const resetLeaderboard = { date: today, entries: [] };
+        saveDailyLeaderboard(resetLeaderboard);
+        return resetLeaderboard;
+      });
+    }, 60_000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "feedback") return;
@@ -327,10 +644,37 @@ function App() {
       bestAccuracy: Math.max(stats.bestAccuracy, accuracy),
       playCount: stats.playCount + 1,
     };
+    const nextLeaderboard =
+      state.attempted > 0
+        ? updateDailyLeaderboard(
+            dailyLeaderboard,
+            buildLeaderboardEntry({
+              accuracy,
+              difficulty: state.difficulty,
+              score: state.score,
+              attempted: state.attempted,
+              history: state.history,
+            }),
+          )
+        : dailyLeaderboard;
     saveStats(nextStats);
+    if (state.attempted > 0) {
+      saveDailyLeaderboard(nextLeaderboard);
+    }
     setStats(nextStats);
+    setDailyLeaderboard(nextLeaderboard);
     dispatch({ type: "MARK_SAVED" });
-  }, [accuracy, state.phase, state.resultSaved, state.score, stats]);
+  }, [
+    accuracy,
+    dailyLeaderboard,
+    state.attempted,
+    state.difficulty,
+    state.history,
+    state.phase,
+    state.resultSaved,
+    state.score,
+    stats,
+  ]);
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -368,17 +712,37 @@ function App() {
     dispatch({ type: "ANSWER", answer, now: Date.now() });
   }
 
-  async function copyResult() {
-    const text = `사자성어 퀴즈 결과: 정답 ${state.score}개, 정확도 ${accuracy}%, ${getGrade(
+  function exportTextResult() {
+    if (state.history.length === 0) return;
+    const text = buildResultExportText({
       accuracy,
-    )}`;
+      difficulty: state.difficulty,
+      history: state.history,
+      score: state.score,
+    });
+    const filename = `sajaseongeo-result-${getExportTimestamp()}.txt`;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+
+    downloadBlob(blob, filename);
+    setExportState("text");
+    window.setTimeout(() => setExportState("idle"), 1600);
+  }
+
+  async function exportImageResult() {
+    if (state.history.length === 0) return;
     try {
-      await navigator.clipboard.writeText(text);
-      setCopyState("copied");
-      window.setTimeout(() => setCopyState("idle"), 1600);
+      const blob = await buildResultImageBlob({
+        accuracy,
+        difficulty: state.difficulty,
+        history: state.history,
+        score: state.score,
+      });
+      downloadBlob(blob, `sajaseongeo-result-${getExportTimestamp()}.png`);
+      setExportState("image");
+      window.setTimeout(() => setExportState("idle"), 1600);
     } catch {
-      setCopyState("failed");
-      window.setTimeout(() => setCopyState("idle"), 1600);
+      setExportState("failed");
+      window.setTimeout(() => setExportState("idle"), 1600);
     }
   }
 
@@ -404,6 +768,7 @@ function App() {
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
             onStart={startGame}
+            dailyLeaderboard={dailyLeaderboard}
             stats={stats}
           />
         )}
@@ -427,10 +792,12 @@ function App() {
         {state.phase === "result" && (
           <ResultView
             accuracy={accuracy}
-            copyState={copyState}
             difficulty={state.difficulty}
             history={state.history}
-            onCopy={copyResult}
+            dailyLeaderboard={dailyLeaderboard}
+            exportState={exportState}
+            onExportImage={exportImageResult}
+            onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
             onRestart={startGame}
             score={state.score}
@@ -512,7 +879,7 @@ function Metric({ danger = false, icon, label, value }) {
   );
 }
 
-function HomeView({ difficulty, onDifficultyChange, onStart, stats }) {
+function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, stats }) {
   return (
     <section className="home-view">
       <div className="home-copy">
@@ -532,6 +899,8 @@ function HomeView({ difficulty, onDifficultyChange, onStart, stats }) {
           <strong>{stats.bestScore}개</strong>
           <small>최고 정확도 {stats.bestAccuracy}% · 플레이 {stats.playCount}회</small>
         </div>
+
+        <DailyLeaderboard leaderboard={dailyLeaderboard} limit={3} variant="compact" />
 
         <div className="difficulty-picker">
           <span>난이도 선택</span>
@@ -653,10 +1022,12 @@ function GameView({
 
 function ResultView({
   accuracy,
-  copyState,
+  dailyLeaderboard,
   difficulty,
+  exportState,
   history,
-  onCopy,
+  onExportImage,
+  onExportText,
   onHome,
   onRestart,
   score,
@@ -683,6 +1054,7 @@ function ResultView({
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이
         </div>
+        <DailyLeaderboard leaderboard={dailyLeaderboard} limit={5} variant="result" />
       </div>
 
       <div className="history-panel">
@@ -721,13 +1093,63 @@ function ResultView({
         <button className="secondary-action" onClick={onHome} type="button">
           <FaHome /> 홈으로
         </button>
-        <button className="secondary-action" onClick={onCopy} type="button">
-          <FaShareAlt /> {copyState === "copied" ? "복사 완료" : "공유하기"}
+        <button
+          className="secondary-action"
+          disabled={history.length === 0}
+          onClick={onExportText}
+          type="button"
+        >
+          <FaFileAlt /> {exportState === "text" ? "텍스트 저장됨" : "텍스트 저장"}
+        </button>
+        <button
+          className="secondary-action"
+          disabled={history.length === 0}
+          onClick={onExportImage}
+          type="button"
+        >
+          <FaImage /> {exportState === "image" ? "이미지 저장됨" : "이미지 저장"}
         </button>
         <button className="primary-action" onClick={onRestart} type="button">
           <FaRedoAlt /> 다시 하기
         </button>
       </footer>
+    </section>
+  );
+}
+
+function DailyLeaderboard({ leaderboard, limit = 5, variant = "compact" }) {
+  const entries = leaderboard.entries.slice(0, limit);
+
+  return (
+    <section className={`daily-leaderboard is-${variant}`} aria-label="오늘의 리더보드">
+      <div className="leaderboard-head">
+        <strong>
+          <FaMedal /> 오늘의 리더보드
+        </strong>
+        <span>
+          <FaCalendarDay /> {leaderboard.date || getTodayKey()}
+        </span>
+      </div>
+
+      {entries.length === 0 ? (
+        <p className="leaderboard-empty">오늘 첫 기록을 세워보세요.</p>
+      ) : (
+        <ol className="leaderboard-list">
+          {entries.map((entry, index) => (
+            <li className="leaderboard-row" key={entry.id}>
+              <span className="leaderboard-rank">{index + 1}</span>
+              <div>
+                <strong>{entry.score}개 정답</strong>
+                <small>
+                  정확도 {entry.accuracy}% · {DIFFICULTIES[entry.difficulty].label} ·{" "}
+                  {formatPlayedAt(entry.playedAt)}
+                </small>
+              </div>
+              <em>{entry.attempted}문제</em>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }
