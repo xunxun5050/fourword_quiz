@@ -13,8 +13,8 @@ final result: passed
 - Mobile 390 x 844: passed
 - Console errors: none observed
 - Core flow: home, difficulty selection, start, answer feedback, timeout feedback, result review, restart actions verified
-- Daily leaderboard: home empty state, result entry creation, same-day ranking display, and zero-attempt exclusion verified
-- Result export: text/image export controls render on result view with per-question idiom, meaning, answer, user answer, correctness, and elapsed time data
+- Daily leaderboard: home empty state, result entry creation, same-day ranking display, difficulty-separated ranking, and zero-attempt exclusion verified
+- Result export: text/image export controls render on result view; text export is limited to No, idiom reading, and meaning
 - Accessibility basics: buttons expose accessible names, keyboard number shortcuts are implemented, timer status uses `aria-live`
 
 ## Notes

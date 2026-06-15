@@ -3,3 +3,5 @@ dist/
 .npm-cache/
 .tools/
 .DS_Store
+.env*
+!.env.example

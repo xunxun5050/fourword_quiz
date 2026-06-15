@@ -31,6 +31,7 @@ const DIFFICULTIES = {
   normal: { label: "보통", seconds: 10 },
   hard: { label: "어려움", seconds: 7 },
 };
+const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
 
 const INITIAL_STATS = {
   bestScore: 0,
@@ -40,7 +41,7 @@ const INITIAL_STATS = {
 
 const INITIAL_LEADERBOARD = {
   date: "",
-  entries: [],
+  entriesByDifficulty: createEmptyLeaderboardEntries(),
 };
 
 const initialState = {
@@ -195,21 +196,72 @@ function getTodayKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+function createEmptyLeaderboardEntries() {
+  return Object.fromEntries(DIFFICULTY_KEYS.map((difficulty) => [difficulty, []]));
+}
+
+function createDailyLeaderboard(date = getTodayKey()) {
+  return {
+    date,
+    entriesByDifficulty: createEmptyLeaderboardEntries(),
+  };
+}
+
+function sortLeaderboardEntries(entries) {
+  const safeEntries = Array.isArray(entries) ? entries : [];
+
+  return safeEntries
+    .filter((entry) => Number(entry.attempted) > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+      if (a.totalTimeSpent !== b.totalTimeSpent) return a.totalTimeSpent - b.totalTimeSpent;
+      return new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime();
+    })
+    .slice(0, 10);
+}
+
+function normalizeDailyLeaderboard(saved, today = getTodayKey()) {
+  if (!saved || saved.date !== today) {
+    return createDailyLeaderboard(today);
+  }
+
+  const normalized = createDailyLeaderboard(saved.date);
+
+  if (saved.entriesByDifficulty && typeof saved.entriesByDifficulty === "object") {
+    DIFFICULTY_KEYS.forEach((difficulty) => {
+      normalized.entriesByDifficulty[difficulty] = sortLeaderboardEntries(
+        saved.entriesByDifficulty[difficulty] || [],
+      );
+    });
+    return normalized;
+  }
+
+  if (Array.isArray(saved.entries)) {
+    saved.entries.forEach((entry) => {
+      const difficulty = DIFFICULTIES[entry.difficulty] ? entry.difficulty : "normal";
+      normalized.entriesByDifficulty[difficulty].push({ ...entry, difficulty });
+    });
+
+    DIFFICULTY_KEYS.forEach((difficulty) => {
+      normalized.entriesByDifficulty[difficulty] = sortLeaderboardEntries(
+        normalized.entriesByDifficulty[difficulty],
+      );
+    });
+  }
+
+  return normalized;
+}
+
 function loadDailyLeaderboard() {
   if (typeof window === "undefined") return INITIAL_LEADERBOARD;
 
   const today = getTodayKey();
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.dailyLeaderboard) || "null");
-    if (!saved || saved.date !== today || !Array.isArray(saved.entries)) {
-      return { date: today, entries: [] };
-    }
-    return {
-      date: saved.date,
-      entries: saved.entries.filter((entry) => Number(entry.attempted) > 0),
-    };
+    return normalizeDailyLeaderboard(saved, today);
   } catch {
-    return { date: today, entries: [] };
+    return createDailyLeaderboard(today);
   }
 }
 
@@ -241,17 +293,31 @@ function buildLeaderboardEntry({ accuracy, difficulty, score, attempted, history
 
 function updateDailyLeaderboard(current, entry) {
   const today = getTodayKey();
-  const entries = current.date === today ? current.entries : [];
-  const next = [...entries, entry]
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
-      if (a.totalTimeSpent !== b.totalTimeSpent) return a.totalTimeSpent - b.totalTimeSpent;
-      return new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime();
-    })
-    .slice(0, 10);
+  const normalized =
+    current.date === today ? normalizeDailyLeaderboard(current, today) : createDailyLeaderboard(today);
+  const difficulty = DIFFICULTIES[entry.difficulty] ? entry.difficulty : "normal";
+  const entries = normalized.entriesByDifficulty[difficulty] || [];
 
-  return { date: today, entries: next };
+  return {
+    date: today,
+    entriesByDifficulty: {
+      ...normalized.entriesByDifficulty,
+      [difficulty]: sortLeaderboardEntries([...entries, { ...entry, difficulty }]),
+    },
+  };
+}
+
+function getLeaderboardEntries(leaderboard, difficulty) {
+  const difficultyKey = DIFFICULTIES[difficulty] ? difficulty : "normal";
+  if (leaderboard.entriesByDifficulty) {
+    return leaderboard.entriesByDifficulty[difficultyKey] || [];
+  }
+
+  if (Array.isArray(leaderboard.entries)) {
+    return leaderboard.entries.filter((entry) => entry.difficulty === difficultyKey);
+  }
+
+  return [];
 }
 
 function getAccuracy(score, attempted) {
@@ -290,33 +356,12 @@ function getRecordAnswer(record) {
   return record.userAnswer ?? "시간 초과";
 }
 
-function buildResultExportText({ accuracy, difficulty, history, score }) {
-  const lines = [
-    "사자성어 퀴즈 결과",
-    "",
-    `정답: ${score}개`,
-    `시도: ${history.length}문제`,
-    `정확도: ${accuracy}%`,
-    `난이도: ${DIFFICULTIES[difficulty].label}`,
-    `저장일시: ${new Date().toLocaleString("ko-KR")}`,
-    "",
-    "문제 복기",
-  ];
-
-  if (history.length === 0) {
-    lines.push("저장할 문제 기록이 없습니다.");
-    return lines.join("\n");
-  }
+function buildResultExportText({ history }) {
+  const lines = ["No\t사자성어 훈음\t뜻"];
 
   history.forEach((record, index) => {
     lines.push(
-      "",
-      `${index + 1}. [${getAnswerLabel(record)}] ${record.source.idiom} (${record.source.reading})`,
-      `뜻: ${record.source.meaning}`,
-      `문제 유형: ${record.type === "A" ? "빈칸 한자" : "뜻 보고 맞히기"}`,
-      `내 답: ${getRecordAnswer(record)}`,
-      `정답: ${record.answer}`,
-      `소요 시간: ${record.timeSpent.toFixed(1)}초`,
+      `${index + 1}\t${record.source.idiom} (${record.source.reading})\t${record.source.meaning}`,
     );
   });
 
@@ -609,7 +654,7 @@ function App() {
         const today = getTodayKey();
         if (current.date === today) return current;
 
-        const resetLeaderboard = { date: today, entries: [] };
+        const resetLeaderboard = createDailyLeaderboard(today);
         saveDailyLeaderboard(resetLeaderboard);
         return resetLeaderboard;
       });
@@ -715,10 +760,7 @@ function App() {
   function exportTextResult() {
     if (state.history.length === 0) return;
     const text = buildResultExportText({
-      accuracy,
-      difficulty: state.difficulty,
       history: state.history,
-      score: state.score,
     });
     const filename = `sajaseongeo-result-${getExportTimestamp()}.txt`;
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -900,7 +942,12 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, s
           <small>최고 정확도 {stats.bestAccuracy}% · 플레이 {stats.playCount}회</small>
         </div>
 
-        <DailyLeaderboard leaderboard={dailyLeaderboard} limit={3} variant="compact" />
+        <DailyLeaderboard
+          difficulty={difficulty}
+          leaderboard={dailyLeaderboard}
+          limit={3}
+          variant="compact"
+        />
 
         <div className="difficulty-picker">
           <span>난이도 선택</span>
@@ -1054,7 +1101,12 @@ function ResultView({
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이
         </div>
-        <DailyLeaderboard leaderboard={dailyLeaderboard} limit={5} variant="result" />
+        <DailyLeaderboard
+          difficulty={difficulty}
+          leaderboard={dailyLeaderboard}
+          limit={5}
+          variant="result"
+        />
       </div>
 
       <div className="history-panel">
@@ -1117,14 +1169,15 @@ function ResultView({
   );
 }
 
-function DailyLeaderboard({ leaderboard, limit = 5, variant = "compact" }) {
-  const entries = leaderboard.entries.slice(0, limit);
+function DailyLeaderboard({ difficulty, leaderboard, limit = 5, variant = "compact" }) {
+  const difficultyKey = DIFFICULTIES[difficulty] ? difficulty : "normal";
+  const entries = getLeaderboardEntries(leaderboard, difficultyKey).slice(0, limit);
 
   return (
     <section className={`daily-leaderboard is-${variant}`} aria-label="오늘의 리더보드">
       <div className="leaderboard-head">
         <strong>
-          <FaMedal /> 오늘의 리더보드
+          <FaMedal /> 오늘의 리더보드 · {DIFFICULTIES[difficultyKey].label}
         </strong>
         <span>
           <FaCalendarDay /> {leaderboard.date || getTodayKey()}
