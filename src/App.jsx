@@ -25,6 +25,7 @@ const STORAGE_KEYS = {
   playCount: "sjse_play_count",
   dailyLeaderboard: "sjse_daily_leaderboard",
 };
+const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
 
 const DIFFICULTIES = {
   easy: { label: "쉬움", seconds: 15 },
@@ -790,6 +791,7 @@ function App() {
 
   return (
     <main className="app-shell">
+      <AdSenseAuto />
       <div className="arcade-stage">
         <Hud
           phase={state.phase}
@@ -854,6 +856,34 @@ function App() {
       </div>
     </main>
   );
+}
+
+function AdSenseAuto() {
+  useEffect(() => {
+    if (!ADSENSE_CLIENT || ADSENSE_CLIENT === "ca-pub-0000000000000000") {
+      return undefined;
+    }
+
+    const scriptId = "adsense-auto-ads";
+    if (document.getElementById(scriptId)) {
+      return undefined;
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
+      ADSENSE_CLIENT,
+    )}`;
+    document.head.appendChild(script);
+
+    return () => {
+      script.remove();
+    };
+  }, []);
+
+  return null;
 }
 
 function Hud({
