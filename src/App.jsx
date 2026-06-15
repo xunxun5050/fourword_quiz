@@ -24,8 +24,11 @@ const STORAGE_KEYS = {
   bestAccuracy: "sjse_best_accuracy",
   playCount: "sjse_play_count",
   dailyLeaderboard: "sjse_daily_leaderboard",
+  nickname: "sjse_nickname",
+  playerId: "sjse_player_id",
 };
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
+const MAX_LEADERBOARD_ENTRIES = 5;
 
 const DIFFICULTIES = {
   easy: { label: "쉬움", seconds: 15 },
@@ -33,6 +36,30 @@ const DIFFICULTIES = {
   hard: { label: "어려움", seconds: 7 },
 };
 const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
+const NICKNAME_ADJECTIVES = [
+  "반짝이는",
+  "차분한",
+  "날렵한",
+  "청명한",
+  "든든한",
+  "명랑한",
+  "느긋한",
+  "또렷한",
+  "푸른",
+  "따뜻한",
+];
+const NICKNAME_NOUNS = [
+  "붓",
+  "별빛",
+  "구름",
+  "등불",
+  "서책",
+  "나침반",
+  "매화",
+  "소나무",
+  "물결",
+  "찻잔",
+];
 
 const INITIAL_STATS = {
   bestScore: 0,
@@ -75,6 +102,23 @@ function sample(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function getIdiomReadingChars(item) {
+  return [...String(item.reading || "").replace(/[^가-힣]/g, "")];
+}
+
+function getCharacterReading(item, index) {
+  return getIdiomReadingChars(item)[index] || "";
+}
+
+function findChoiceReading(char, index, allItems, source) {
+  if ([...source.idiom][index] === char) {
+    return getCharacterReading(source, index);
+  }
+
+  const match = allItems.find((candidate) => [...candidate.idiom][index] === char);
+  return match ? getCharacterReading(match, index) : "";
+}
+
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
 }
@@ -110,6 +154,7 @@ function makeTypeAQuestion(item, allItems) {
     answer,
     3,
   );
+  const choices = shuffle([answer, ...distractors]);
 
   return {
     type: "A",
@@ -117,7 +162,11 @@ function makeTypeAQuestion(item, allItems) {
     answer,
     blankIndex,
     prompt: chars.map((char, index) => (index === blankIndex ? "?" : char)).join(""),
-    choices: shuffle([answer, ...distractors]),
+    promptReadings: getIdiomReadingChars(item),
+    choices,
+    choiceReadings: Object.fromEntries(
+      choices.map((choice) => [choice, findChoiceReading(choice, blankIndex, allItems, item)]),
+    ),
     source: item,
   };
 }
@@ -130,13 +179,20 @@ function makeTypeBQuestion(item, allItems) {
     .filter((candidate) => candidate.id !== item.id && candidate.category !== item.category)
     .map((candidate) => candidate.idiom);
   const distractors = fillChoices([sameCategoryIdioms, randomIdioms], item.idiom, 3);
+  const choices = shuffle([item.idiom, ...distractors]);
 
   return {
     type: "B",
     idiomId: item.id,
     answer: item.idiom,
     prompt: item.meaning,
-    choices: shuffle([item.idiom, ...distractors]),
+    choices,
+    choiceReadings: Object.fromEntries(
+      choices.map((choice) => [
+        choice,
+        allItems.find((candidate) => candidate.idiom === choice)?.reading || "",
+      ]),
+    ),
     source: item,
   };
 }
@@ -191,10 +247,15 @@ function saveStats(stats) {
 }
 
 function getTodayKey(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function createEmptyLeaderboardEntries() {
@@ -219,7 +280,7 @@ function sortLeaderboardEntries(entries) {
       if (a.totalTimeSpent !== b.totalTimeSpent) return a.totalTimeSpent - b.totalTimeSpent;
       return new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime();
     })
-    .slice(0, 10);
+    .slice(0, MAX_LEADERBOARD_ENTRIES);
 }
 
 function normalizeDailyLeaderboard(saved, today = getTodayKey()) {
@@ -270,19 +331,90 @@ function saveDailyLeaderboard(leaderboard) {
   localStorage.setItem(STORAGE_KEYS.dailyLeaderboard, JSON.stringify(leaderboard));
 }
 
+function createRandomNickname() {
+  const adjective = sample(NICKNAME_ADJECTIVES);
+  const noun = sample(NICKNAME_NOUNS);
+  const suffix = Math.floor(100 + Math.random() * 900);
+
+  return `${adjective}${noun}${suffix}`;
+}
+
+function createPlayerId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function loadPlayerProfile() {
+  if (typeof window === "undefined") {
+    return { nickname: createRandomNickname(), playerId: createPlayerId() };
+  }
+
+  const savedNickname = localStorage.getItem(STORAGE_KEYS.nickname);
+  const savedPlayerId = localStorage.getItem(STORAGE_KEYS.playerId);
+  const profile = {
+    nickname: savedNickname || createRandomNickname(),
+    playerId: savedPlayerId || createPlayerId(),
+  };
+
+  localStorage.setItem(STORAGE_KEYS.nickname, profile.nickname);
+  localStorage.setItem(STORAGE_KEYS.playerId, profile.playerId);
+
+  return profile;
+}
+
+async function parseJsonResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!response.ok || !contentType.includes("application/json")) {
+    throw new Error("Leaderboard API unavailable");
+  }
+
+  return response.json();
+}
+
+async function fetchSharedLeaderboard() {
+  const response = await fetch("/api/leaderboard", {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  });
+  const data = await parseJsonResponse(response);
+
+  return normalizeDailyLeaderboard(data.leaderboard, getTodayKey());
+}
+
+async function submitSharedLeaderboard(entry) {
+  const response = await fetch("/api/leaderboard", {
+    body: JSON.stringify(entry),
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+  const data = await parseJsonResponse(response);
+
+  return normalizeDailyLeaderboard(data.leaderboard, getTodayKey());
+}
+
 function formatPlayedAt(isoDate) {
   return new Intl.DateTimeFormat("ko-KR", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZone: "Asia/Seoul",
   }).format(new Date(isoDate));
 }
 
-function buildLeaderboardEntry({ accuracy, difficulty, score, attempted, history }) {
+function buildLeaderboardEntry({ accuracy, difficulty, score, attempted, history, playerProfile }) {
   const now = new Date();
   const totalTimeSpent = history.reduce((sum, record) => sum + record.timeSpent, 0);
   return {
     id: `${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+    nickname: playerProfile.nickname,
+    playerId: playerProfile.playerId,
     score,
     accuracy,
     attempted,
@@ -292,18 +424,37 @@ function buildLeaderboardEntry({ accuracy, difficulty, score, attempted, history
   };
 }
 
+function isBetterLeaderboardEntry(next, previous) {
+  if (!previous) return true;
+  if (next.score !== previous.score) return next.score > previous.score;
+  if (next.accuracy !== previous.accuracy) return next.accuracy > previous.accuracy;
+  if (next.totalTimeSpent !== previous.totalTimeSpent) {
+    return next.totalTimeSpent < previous.totalTimeSpent;
+  }
+
+  return new Date(next.playedAt).getTime() > new Date(previous.playedAt).getTime();
+}
+
 function updateDailyLeaderboard(current, entry) {
   const today = getTodayKey();
   const normalized =
     current.date === today ? normalizeDailyLeaderboard(current, today) : createDailyLeaderboard(today);
   const difficulty = DIFFICULTIES[entry.difficulty] ? entry.difficulty : "normal";
   const entries = normalized.entriesByDifficulty[difficulty] || [];
+  const previous = entries.find((item) => item.playerId && item.playerId === entry.playerId);
+  const mergedEntries = entries.filter((item) => !entry.playerId || item.playerId !== entry.playerId);
+
+  if (isBetterLeaderboardEntry(entry, previous)) {
+    mergedEntries.push(entry);
+  } else if (previous) {
+    mergedEntries.push(previous);
+  }
 
   return {
     date: today,
     entriesByDifficulty: {
       ...normalized.entriesByDifficulty,
-      [difficulty]: sortLeaderboardEntries([...entries, { ...entry, difficulty }]),
+      [difficulty]: sortLeaderboardEntries(mergedEntries.map((item) => ({ ...item, difficulty }))),
     },
   };
 }
@@ -635,6 +786,7 @@ function App() {
   const [stats, setStats] = useState(loadStats);
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
+  const [playerProfile] = useState(loadPlayerProfile);
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -650,18 +802,34 @@ function App() {
   }, [state.phase]);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setDailyLeaderboard((current) => {
-        const today = getTodayKey();
-        if (current.date === today) return current;
+    let cancelled = false;
 
-        const resetLeaderboard = createDailyLeaderboard(today);
-        saveDailyLeaderboard(resetLeaderboard);
-        return resetLeaderboard;
-      });
-    }, 60_000);
+    async function refreshLeaderboard() {
+      try {
+        const sharedLeaderboard = await fetchSharedLeaderboard();
+        if (cancelled) return;
+        saveDailyLeaderboard(sharedLeaderboard);
+        setDailyLeaderboard(sharedLeaderboard);
+      } catch {
+        if (cancelled) return;
+        setDailyLeaderboard((current) => {
+          const today = getTodayKey();
+          if (current.date === today) return current;
 
-    return () => window.clearInterval(interval);
+          const resetLeaderboard = createDailyLeaderboard(today);
+          saveDailyLeaderboard(resetLeaderboard);
+          return resetLeaderboard;
+        });
+      }
+    }
+
+    refreshLeaderboard();
+    const interval = window.setInterval(refreshLeaderboard, 60_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -685,27 +853,35 @@ function App() {
   useEffect(() => {
     if (state.phase !== "result" || state.resultSaved) return;
 
+    const leaderboardEntry =
+      state.attempted > 0
+        ? buildLeaderboardEntry({
+            accuracy,
+            difficulty: state.difficulty,
+            score: state.score,
+            attempted: state.attempted,
+            history: state.history,
+            playerProfile,
+          })
+        : null;
     const nextStats = {
       bestScore: Math.max(stats.bestScore, state.score),
       bestAccuracy: Math.max(stats.bestAccuracy, accuracy),
       playCount: stats.playCount + 1,
     };
     const nextLeaderboard =
-      state.attempted > 0
-        ? updateDailyLeaderboard(
-            dailyLeaderboard,
-            buildLeaderboardEntry({
-              accuracy,
-              difficulty: state.difficulty,
-              score: state.score,
-              attempted: state.attempted,
-              history: state.history,
-            }),
-          )
+      leaderboardEntry
+        ? updateDailyLeaderboard(dailyLeaderboard, leaderboardEntry)
         : dailyLeaderboard;
     saveStats(nextStats);
-    if (state.attempted > 0) {
+    if (leaderboardEntry) {
       saveDailyLeaderboard(nextLeaderboard);
+      submitSharedLeaderboard(leaderboardEntry)
+        .then((sharedLeaderboard) => {
+          saveDailyLeaderboard(sharedLeaderboard);
+          setDailyLeaderboard(sharedLeaderboard);
+        })
+        .catch(() => {});
     }
     setStats(nextStats);
     setDailyLeaderboard(nextLeaderboard);
@@ -720,6 +896,7 @@ function App() {
     state.resultSaved,
     state.score,
     stats,
+    playerProfile,
   ]);
 
   useEffect(() => {
@@ -813,6 +990,7 @@ function App() {
             }
             onStart={startGame}
             dailyLeaderboard={dailyLeaderboard}
+            playerProfile={playerProfile}
             stats={stats}
           />
         )}
@@ -844,6 +1022,7 @@ function App() {
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
             onRestart={startGame}
+            playerProfile={playerProfile}
             score={state.score}
             stats={stats}
           />
@@ -955,7 +1134,7 @@ function Metric({ danger = false, icon, label, value }) {
   );
 }
 
-function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, stats }) {
+function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, playerProfile, stats }) {
   return (
     <section className="home-view">
       <div className="home-copy">
@@ -974,12 +1153,13 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, s
           <span>최고 기록</span>
           <strong>{stats.bestScore}개</strong>
           <small>최고 정확도 {stats.bestAccuracy}% · 플레이 {stats.playCount}회</small>
+          <small className="nickname-line">닉네임 {playerProfile.nickname}</small>
         </div>
 
         <DailyLeaderboard
           difficulty={difficulty}
           leaderboard={dailyLeaderboard}
-          limit={3}
+          limit={5}
           variant="compact"
         />
 
@@ -1011,6 +1191,7 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, s
 
 function GameView({
   currentQuestion,
+  difficulty,
   lastResult,
   onAnswer,
   onFinish,
@@ -1021,6 +1202,7 @@ function GameView({
   selectedAnswer,
 }) {
   const isFeedback = Boolean(lastResult);
+  const showEasyHints = difficulty === "easy";
   const timerTone =
     questionLeft <= 4 ? "danger" : questionLeft <= 7 ? "warning" : "normal";
 
@@ -1033,8 +1215,12 @@ function GameView({
         {currentQuestion.type === "A" ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
             {[...currentQuestion.prompt].map((char, index) => (
-              <span className={char === "?" ? "blank-char" : ""} key={`${char}-${index}`}>
-                {char}
+              <span
+                className={`prompt-char ${char === "?" ? "blank-char" : ""}`}
+                key={`${char}-${index}`}
+              >
+                <span>{char}</span>
+                {showEasyHints && <small>{currentQuestion.promptReadings?.[index]}</small>}
               </span>
             ))}
           </div>
@@ -1051,8 +1237,9 @@ function GameView({
         <strong>{displaySeconds(questionLeft)}초</strong>
       </div>
 
-      <div className="choice-grid">
+      <div className={`choice-grid ${showEasyHints ? "has-easy-hints" : ""}`}>
         {currentQuestion.choices.map((choice, index) => {
+          const choiceReading = currentQuestion.choiceReadings?.[choice];
           const isAnswer = choice === currentQuestion.answer;
           const isSelected = choice === selectedAnswer;
           const stateClass = isFeedback
@@ -1065,14 +1252,17 @@ function GameView({
 
           return (
             <button
-              aria-label={`${index + 1}번 선택지 ${choice}`}
+              aria-label={`${index + 1}번 선택지 ${choice}${showEasyHints && choiceReading ? ` ${choiceReading}` : ""}`}
               className={`choice-button ${stateClass}`}
               disabled={isFeedback}
               key={`${choice}-${index}`}
               onClick={() => onAnswer(choice)}
               type="button"
             >
-              <span>{choice}</span>
+              <span className="choice-main">{choice}</span>
+              {showEasyHints && choiceReading && (
+                <small className="choice-reading">{choiceReading}</small>
+              )}
               {isFeedback && isAnswer && <FaCheck className="choice-icon" aria-hidden="true" />}
               {isFeedback && isSelected && !isAnswer && (
                 <FaTimes className="choice-icon" aria-hidden="true" />
@@ -1111,6 +1301,7 @@ function ResultView({
   onExportText,
   onHome,
   onRestart,
+  playerProfile,
   score,
   stats,
 }) {
@@ -1133,7 +1324,7 @@ function ResultView({
         </p>
         <div className="best-strip">
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
-          {stats.playCount}회 플레이
+          {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
         </div>
         <DailyLeaderboard
           difficulty={difficulty}
@@ -1226,7 +1417,7 @@ function DailyLeaderboard({ difficulty, leaderboard, limit = 5, variant = "compa
             <li className="leaderboard-row" key={entry.id}>
               <span className="leaderboard-rank">{index + 1}</span>
               <div>
-                <strong>{entry.score}개 정답</strong>
+                <strong>{entry.nickname || "익명"} · {entry.score}개 정답</strong>
                 <small>
                   정확도 {entry.accuracy}% · {DIFFICULTIES[entry.difficulty].label} ·{" "}
                   {formatPlayedAt(entry.playedAt)}

@@ -382,6 +382,10 @@ button:focus-visible {
   font-weight: 800;
 }
 
+.nickname-line {
+  color: var(--teal-dark) !important;
+}
+
 .daily-leaderboard {
   display: grid;
   gap: 8px;
@@ -591,6 +595,27 @@ button:focus-visible {
   text-shadow: 0 5px 0 rgba(0, 0, 0, 0.08);
 }
 
+.prompt-char {
+  display: grid;
+  gap: 6px;
+  min-width: 0.9em;
+  place-items: center;
+}
+
+.prompt-char > span {
+  line-height: 0.9;
+}
+
+.prompt-char small {
+  color: var(--teal-dark);
+  font-family:
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  font-size: clamp(0.92rem, 1.6vw, 1.35rem);
+  font-weight: 950;
+  line-height: 1;
+  text-shadow: none;
+}
+
 .blank-char {
   color: var(--coral);
 }
@@ -687,8 +712,10 @@ button:focus-visible {
 .choice-button {
   position: relative;
   display: grid;
+  gap: 8px;
   min-height: clamp(82px, 12vh, 128px);
   place-items: center;
+  align-content: center;
   border: 4px solid var(--teal);
   border-radius: 8px;
   background: rgba(255, 253, 246, 0.95);
@@ -711,12 +738,27 @@ button:focus-visible {
   box-shadow: 0 4px 0 rgba(7, 93, 101, 0.55);
 }
 
-.choice-button span {
+.choice-main {
   font-family:
     "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
   font-size: clamp(2.75rem, 5.7vw, 5.9rem);
   font-weight: 900;
   line-height: 1;
+}
+
+.choice-reading {
+  color: var(--teal-dark);
+  font-size: clamp(0.92rem, 1.6vw, 1.3rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.choice-grid.has-easy-hints .choice-button {
+  gap: 6px;
+}
+
+.choice-grid.has-easy-hints .choice-main {
+  font-size: clamp(2.15rem, 4.8vw, 5rem);
 }
 
 .choice-button.is-correct {
@@ -1233,8 +1275,16 @@ button:focus-visible {
     min-height: clamp(46px, 8.2dvh, 62px);
   }
 
-  .choice-button span {
+  .choice-main {
     font-size: clamp(2.25rem, 12vw, 3.5rem);
+  }
+
+  .choice-grid.has-easy-hints .choice-main {
+    font-size: clamp(1.8rem, 9.2vw, 2.75rem);
+  }
+
+  .choice-reading {
+    font-size: 0.9rem;
   }
 
   .timer-row {
