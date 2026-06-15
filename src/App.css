@@ -60,6 +60,11 @@ button:focus-visible {
     #101920;
 }
 
+.app-shell.is-result-phase {
+  align-items: start;
+  overflow-y: auto;
+}
+
 .arcade-stage {
   position: relative;
   display: grid;
@@ -76,6 +81,12 @@ button:focus-visible {
   border: 4px solid #0b2a31;
   border-radius: 8px;
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+.app-shell.is-result-phase .arcade-stage {
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
 }
 
 .arcade-stage::after {
@@ -101,26 +112,72 @@ button:focus-visible {
 }
 
 .logo-lockup {
-  display: grid;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
   width: fit-content;
-  transform: rotate(-3deg);
-  color: white;
+  transform: rotate(-2deg);
+  color: var(--ink);
   font-weight: 950;
-  line-height: 0.9;
-  text-shadow:
-    3px 3px 0 #121a20,
-    -2px 2px 0 #121a20,
-    0 6px 0 rgba(0, 0, 0, 0.15);
+  line-height: 1;
 }
 
-.logo-lockup span {
-  font-size: clamp(1.15rem, 2vw, 2.1rem);
+.logo-hanja {
+  display: grid;
+  width: clamp(42px, 4.1vw, 56px);
+  height: clamp(42px, 4.1vw, 56px);
+  place-items: center;
+  transform: rotate(-7deg);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--coral);
+  color: white;
+  font-family:
+    "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
+  font-size: clamp(1rem, 1.6vw, 1.38rem);
+  box-shadow: 0 5px 0 #8f2e25;
 }
 
-.logo-lockup strong {
+.logo-copy {
+  display: grid;
+  padding: 6px 10px 7px;
+  transform: rotate(1deg);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 5px 0 rgba(22, 32, 39, 0.22);
+}
+
+.logo-copy span {
+  color: var(--teal-dark);
+  font-size: clamp(0.88rem, 1.3vw, 1.1rem);
+}
+
+.logo-copy strong {
   color: var(--yellow);
-  font-size: clamp(1.55rem, 2.55vw, 2.7rem);
+  font-size: clamp(1.3rem, 2vw, 2.25rem);
   letter-spacing: 0;
+  text-shadow:
+    2px 2px 0 var(--ink),
+    -1px 1px 0 var(--ink),
+    0 4px 0 rgba(0, 0, 0, 0.14);
+}
+
+.logo-spark {
+  display: grid;
+  width: clamp(24px, 2.3vw, 32px);
+  height: clamp(24px, 2.3vw, 32px);
+  place-items: center;
+  align-self: start;
+  transform: translate(-4px, -7px) rotate(12deg);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--coral);
+  font-size: clamp(0.9rem, 1.3vw, 1.18rem);
+  box-shadow: 0 4px 0 rgba(22, 32, 39, 0.18);
 }
 
 .hud-metrics {
@@ -741,6 +798,10 @@ button:focus-visible {
   overflow: hidden;
 }
 
+.app-shell.is-result-phase .result-summary {
+  overflow: visible;
+}
+
 .score-line {
   display: flex;
   gap: 14px;
@@ -804,6 +865,20 @@ button:focus-visible {
   overflow: auto;
   padding-right: 6px;
   overscroll-behavior: contain;
+}
+
+.app-shell.is-result-phase .result-view {
+  overflow: visible;
+  padding-bottom: clamp(24px, 4vh, 42px);
+}
+
+.app-shell.is-result-phase .history-panel {
+  overflow: visible;
+}
+
+.app-shell.is-result-phase .history-list {
+  overflow: visible;
+  padding-right: 0;
 }
 
 .history-item {
@@ -879,6 +954,11 @@ button:focus-visible {
   gap: 14px;
 }
 
+.app-shell.is-result-phase .result-actions {
+  position: static;
+  grid-column: 1 / -1;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -948,34 +1028,57 @@ button:focus-visible {
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 0;
+    padding: 10px;
   }
 
   .arcade-stage {
-    height: 100dvh;
+    height: calc(100dvh - 20px);
     min-height: 0;
-    border: 0;
-    border-radius: 0;
+    border-width: 3px;
+    border-radius: 8px;
   }
 
   .hud {
     grid-template-columns: 1fr auto;
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 10px;
+    padding: 10px 12px;
     border-bottom-width: 3px;
   }
 
-  .logo-lockup span {
-    font-size: 0.95rem;
+  .logo-lockup {
+    gap: 5px;
   }
 
-  .logo-lockup strong {
-    font-size: 1.45rem;
+  .logo-hanja {
+    width: 38px;
+    height: 38px;
+    font-size: 0.96rem;
+    box-shadow: 0 4px 0 #8f2e25;
+  }
+
+  .logo-copy {
+    padding: 5px 8px 6px;
+    box-shadow: 0 4px 0 rgba(22, 32, 39, 0.2);
+  }
+
+  .logo-copy span {
+    font-size: 0.78rem;
+  }
+
+  .logo-copy strong {
+    font-size: 1.18rem;
+  }
+
+  .logo-spark {
+    width: 22px;
+    height: 22px;
+    transform: translate(-5px, -7px) rotate(12deg);
+    font-size: 0.82rem;
   }
 
   .icon-home {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     font-size: 1.35rem;
   }
 
@@ -992,7 +1095,7 @@ button:focus-visible {
       "value";
     justify-items: center;
     gap: 1px;
-    padding: 4px 3px;
+    padding: 5px 3px;
     text-align: center;
   }
 
@@ -1018,8 +1121,8 @@ button:focus-visible {
   .home-view,
   .game-view,
   .result-view {
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 14px;
+    padding-left: 14px;
   }
 
   .home-copy {
@@ -1027,9 +1130,9 @@ button:focus-visible {
   }
 
   .home-view {
-    gap: 10px;
-    padding-top: 12px;
-    padding-bottom: 72px;
+    gap: 14px;
+    padding-top: 14px;
+    padding-bottom: 78px;
   }
 
   .home-copy h1,
@@ -1055,7 +1158,7 @@ button:focus-visible {
   .start-panel,
   .result-summary,
   .history-panel {
-    padding: 10px;
+    padding: 12px;
   }
 
   .daily-leaderboard {
@@ -1086,28 +1189,28 @@ button:focus-visible {
   .primary-action,
   .secondary-action,
   .result-action {
-    min-height: 44px;
+    min-height: 46px;
     gap: 8px;
     font-size: 0.94rem;
   }
 
   .game-view {
-    grid-template-rows: minmax(118px, 0.7fr) auto minmax(0, 1fr);
-    gap: 10px;
-    padding-top: 10px;
-    padding-bottom: 68px;
+    grid-template-rows: minmax(108px, 0.68fr) auto minmax(0, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+    padding-bottom: 74px;
   }
 
   .question-frame {
     min-height: 0;
-    padding: 24px 14px 16px;
+    padding: 22px 14px 16px;
     border-width: 4px;
     clip-path: polygon(4% 0, 96% 0, 100% 14%, 96% 100%, 4% 100%, 0 86%);
   }
 
   .hanja-prompt {
     gap: 8px;
-    font-size: clamp(3.1rem, 15vw, 5rem);
+    font-size: clamp(2.75rem, 13.5vw, 4.5rem);
   }
 
   .meaning-prompt {
@@ -1127,7 +1230,7 @@ button:focus-visible {
   }
 
   .choice-button {
-    min-height: 0;
+    min-height: clamp(46px, 8.2dvh, 62px);
   }
 
   .choice-button span {
@@ -1161,9 +1264,28 @@ button:focus-visible {
   }
 
   .result-view {
-    gap: 10px;
-    padding-top: 10px;
+    gap: 14px;
+    padding-top: 14px;
     padding-bottom: 112px;
+  }
+
+  .app-shell.is-result-phase .arcade-stage {
+    min-height: calc(100dvh - 20px);
+    height: auto;
+  }
+
+  .app-shell.is-result-phase .result-view {
+    grid-template-rows: auto auto auto;
+    padding: 14px;
+    padding-bottom: 18px;
+  }
+
+  .app-shell.is-result-phase .history-panel {
+    padding: 14px;
+  }
+
+  .app-shell.is-result-phase .result-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .result-summary .daily-leaderboard {
@@ -1190,27 +1312,31 @@ button:focus-visible {
   }
 
   .history-title {
-    padding-bottom: 8px;
+    padding-bottom: 10px;
+  }
+
+  .history-title strong {
+    font-size: 1.28rem;
   }
 
   .history-item {
-    gap: 8px;
-    padding: 8px 0;
+    gap: 10px;
+    padding: 11px 0;
   }
 
   .history-item strong {
-    font-size: 1.15rem;
+    font-size: 1.34rem;
   }
 
   .history-item small,
   .history-item em {
-    font-size: 0.76rem;
-    line-height: 1.32;
+    font-size: 0.84rem;
+    line-height: 1.42;
   }
 
   .result-mark {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
 
   .history-list {
@@ -1279,6 +1405,10 @@ button:focus-visible {
     gap: 7px;
   }
 
+  .choice-button {
+    min-height: clamp(40px, 6.7dvh, 50px);
+  }
+
   .game-actions .secondary-action,
   .game-actions .result-action,
   .result-actions .primary-action,
@@ -1291,6 +1421,9 @@ button:focus-visible {
     padding-bottom: 96px;
   }
 
+  .app-shell.is-result-phase .result-view {
+    padding-bottom: 18px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

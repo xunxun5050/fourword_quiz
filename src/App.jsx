@@ -790,7 +790,7 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${state.phase === "result" ? "is-result-phase" : ""}`}>
       <AdSenseAuto />
       <div className="arcade-stage">
         <Hud
@@ -900,8 +900,12 @@ function Hud({
   return (
     <header className="hud">
       <div className="logo-lockup" aria-label="사자성어 퀴즈">
-        <span>사자성어</span>
-        <strong>퀴즈</strong>
+        <span className="logo-hanja" aria-hidden="true">四字</span>
+        <span className="logo-copy">
+          <span>사자성어</span>
+          <strong>퀴즈</strong>
+        </span>
+        <span className="logo-spark" aria-hidden="true">!</span>
       </div>
 
       <div className="hud-metrics" aria-label="게임 정보">
