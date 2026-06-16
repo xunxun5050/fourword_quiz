@@ -569,6 +569,10 @@ button:focus-visible {
   box-shadow: var(--shadow);
 }
 
+.game-view.has-prompt-readings .question-frame {
+  padding-block: clamp(28px, 4.2vw, 58px) clamp(32px, 4.6vw, 64px);
+}
+
 .question-type {
   position: absolute;
   top: 16px;
@@ -614,6 +618,10 @@ button:focus-visible {
   font-weight: 950;
   line-height: 1;
   text-shadow: none;
+}
+
+.prompt-reading-spacer {
+  visibility: hidden;
 }
 
 .blank-char {
@@ -1243,6 +1251,10 @@ button:focus-visible {
     padding-bottom: 74px;
   }
 
+  .game-view.has-prompt-readings {
+    grid-template-rows: minmax(124px, 0.72fr) auto minmax(0, 1fr);
+  }
+
   .question-frame {
     min-height: 0;
     padding: 22px 14px 16px;
@@ -1250,9 +1262,27 @@ button:focus-visible {
     clip-path: polygon(4% 0, 96% 0, 100% 14%, 96% 100%, 4% 100%, 0 86%);
   }
 
+  .game-view.has-prompt-readings .question-frame {
+    padding: 26px 12px 24px;
+  }
+
   .hanja-prompt {
     gap: 8px;
     font-size: clamp(2.75rem, 13.5vw, 4.5rem);
+  }
+
+  .game-view.has-prompt-readings .hanja-prompt {
+    gap: 7px;
+    font-size: clamp(2.45rem, 11.8vw, 4rem);
+  }
+
+  .game-view.has-prompt-readings .prompt-char {
+    gap: 4px;
+  }
+
+  .game-view.has-prompt-readings .prompt-char small {
+    font-size: clamp(0.76rem, 3.2vw, 0.95rem);
+    line-height: 1.05;
   }
 
   .meaning-prompt {
@@ -1443,8 +1473,17 @@ button:focus-visible {
     padding-bottom: 62px;
   }
 
+  .game-view.has-prompt-readings {
+    grid-template-rows: minmax(112px, 0.72fr) auto minmax(0, 1fr);
+  }
+
   .question-frame {
     padding-top: 20px;
+  }
+
+  .game-view.has-prompt-readings .question-frame {
+    padding-top: 23px;
+    padding-bottom: 22px;
   }
 
   .timer-track {

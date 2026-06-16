@@ -1141,7 +1141,7 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, p
         <span className="kicker">
           <FaStopwatch /> 60초 한자 스프린트
         </span>
-        <h1>뜻도 한자도 빠르게 맞혀요</h1>
+        <h1>성어를 채우고 뜻을 맞혀요</h1>
         <p>
           같은 사자성어는 한 판에 한 번만 등장합니다. 빈칸 한자와 뜻풀이 문제를
           번갈아 풀며 최고 기록을 갱신해보세요.
@@ -1203,26 +1203,46 @@ function GameView({
 }) {
   const isFeedback = Boolean(lastResult);
   const showEasyHints = difficulty === "easy";
+  const hasPromptReadings = showEasyHints && currentQuestion.type === "A";
+  const gameViewClassName = [
+    "game-view",
+    lastResult ? `is-${lastResult}` : "",
+    hasPromptReadings ? "has-prompt-readings" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const timerTone =
     questionLeft <= 4 ? "danger" : questionLeft <= 7 ? "warning" : "normal";
 
   return (
-    <section className={`game-view ${lastResult ? `is-${lastResult}` : ""}`}>
+    <section className={gameViewClassName}>
       <div className="question-frame">
         <span className="question-type">
           {currentQuestion.type === "A" ? "빈칸 한자" : "뜻 보고 맞히기"}
         </span>
         {currentQuestion.type === "A" ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
-            {[...currentQuestion.prompt].map((char, index) => (
-              <span
-                className={`prompt-char ${char === "?" ? "blank-char" : ""}`}
-                key={`${char}-${index}`}
-              >
-                <span>{char}</span>
-                {showEasyHints && <small>{currentQuestion.promptReadings?.[index]}</small>}
-              </span>
-            ))}
+            {[...currentQuestion.prompt].map((char, index) => {
+              const isBlank = char === "?";
+              const reading = currentQuestion.promptReadings?.[index] ?? "";
+
+              return (
+                <span
+                  className={`prompt-char ${isBlank ? "blank-char" : ""}`}
+                  key={`${char}-${index}`}
+                >
+                  <span>{char}</span>
+                  {hasPromptReadings && (
+                    <small
+                      aria-hidden={isBlank ? true : undefined}
+                      className={isBlank ? "prompt-reading-spacer" : undefined}
+                    >
+                      {isBlank ? "\u00a0" : reading || "\u00a0"}
+                    </small>
+                  )}
+                </span>
+              );
+            })}
           </div>
         ) : (
           <p className="meaning-prompt">{currentQuestion.prompt}</p>
