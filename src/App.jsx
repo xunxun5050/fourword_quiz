@@ -29,6 +29,7 @@ const STORAGE_KEYS = {
 };
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
 const MAX_LEADERBOARD_ENTRIES = 5;
+const HOME_PREVIEW_IDIOMS = idioms.slice(0, 4);
 
 const DIFFICULTIES = {
   easy: { label: "쉬움", seconds: 15 },
@@ -967,8 +968,8 @@ function App() {
   }
 
   return (
-    <main className={`app-shell ${state.phase === "result" ? "is-result-phase" : ""}`}>
-      <AdSenseAuto />
+    <main className={`app-shell is-${state.phase}-phase`}>
+      <AdSenseAuto enabled={state.phase === "home"} />
       <div className="arcade-stage">
         <Hud
           phase={state.phase}
@@ -1037,9 +1038,9 @@ function App() {
   );
 }
 
-function AdSenseAuto() {
+function AdSenseAuto({ enabled }) {
   useEffect(() => {
-    if (!ADSENSE_CLIENT || ADSENSE_CLIENT === "ca-pub-0000000000000000") {
+    if (!enabled || !ADSENSE_CLIENT || ADSENSE_CLIENT === "ca-pub-0000000000000000") {
       return undefined;
     }
 
@@ -1059,8 +1060,11 @@ function AdSenseAuto() {
 
     return () => {
       script.remove();
+      document
+        .querySelectorAll(".google-auto-placed, ins.adsbygoogle")
+        .forEach((element) => element.remove());
     };
-  }, []);
+  }, [enabled]);
 
   return null;
 }
@@ -1146,6 +1150,25 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, p
           같은 사자성어는 한 판에 한 번만 등장합니다. 빈칸 한자와 뜻풀이 문제를
           번갈아 풀며 최고 기록을 갱신해보세요.
         </p>
+        <section className="home-learning" aria-labelledby="home-learning-title">
+          <div>
+            <span>학습 콘텐츠</span>
+            <h2 id="home-learning-title">오늘 익혀볼 사자성어</h2>
+            <p>
+              수록된 {idioms.length}개 성어 중 일부를 먼저 살펴보세요. 한자 모양,
+              한글 독음, 뜻을 함께 보면 빈칸 문제가 더 빨리 풀립니다.
+            </p>
+          </div>
+          <ul className="idiom-preview-list">
+            {HOME_PREVIEW_IDIOMS.map((item) => (
+              <li key={item.idiom}>
+                <strong>{item.idiom}</strong>
+                <span>{item.reading}</span>
+                <p>{item.meaning}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
 
       <div className="start-panel">

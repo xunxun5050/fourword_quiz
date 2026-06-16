@@ -65,6 +65,11 @@ button:focus-visible {
   overflow-y: auto;
 }
 
+.app-shell.is-home-phase {
+  align-items: start;
+  overflow-y: auto;
+}
+
 .arcade-stage {
   position: relative;
   display: grid;
@@ -84,6 +89,12 @@ button:focus-visible {
 }
 
 .app-shell.is-result-phase .arcade-stage {
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.app-shell.is-home-phase .arcade-stage {
   min-height: 100%;
   height: auto;
   overflow: visible;
@@ -310,6 +321,8 @@ button:focus-visible {
 }
 
 .home-copy {
+  display: grid;
+  gap: 14px;
   max-width: 720px;
   padding-left: clamp(28px, 4vw, 70px);
 }
@@ -345,6 +358,82 @@ button:focus-visible {
   font-size: clamp(1rem, 1.5vw, 1.25rem);
   font-weight: 700;
   line-height: 1.6;
+}
+
+.home-learning {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+  margin-top: 4px;
+}
+
+.home-learning div {
+  display: grid;
+  gap: 5px;
+}
+
+.home-learning div > span {
+  color: var(--coral);
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.home-learning h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.18rem, 1.7vw, 1.6rem);
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.home-learning div > p {
+  max-width: 620px;
+  font-size: clamp(0.9rem, 1.1vw, 1.02rem);
+  line-height: 1.5;
+}
+
+.idiom-preview-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.idiom-preview-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 8px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 2px solid rgba(8, 135, 143, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.84);
+}
+
+.idiom-preview-list strong {
+  color: var(--ink);
+  font-family:
+    "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
+  font-size: 1.3rem;
+  font-weight: 950;
+}
+
+.idiom-preview-list span {
+  color: var(--teal-dark);
+  font-size: 0.88rem;
+  font-weight: 950;
+}
+
+.idiom-preview-list p {
+  grid-column: 1 / -1;
+  max-width: none;
+  color: rgba(22, 32, 39, 0.76);
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.38;
 }
 
 .start-panel,
@@ -1183,6 +1272,45 @@ button:focus-visible {
     gap: 14px;
     padding-top: 14px;
     padding-bottom: 78px;
+  }
+
+  .home-learning {
+    gap: 9px;
+    margin-top: 0;
+  }
+
+  .home-learning div {
+    gap: 4px;
+  }
+
+  .home-learning h2 {
+    font-size: 1.04rem;
+  }
+
+  .home-learning div > p {
+    font-size: 0.82rem;
+    line-height: 1.42;
+  }
+
+  .idiom-preview-list {
+    gap: 7px;
+  }
+
+  .idiom-preview-list li {
+    padding: 7px;
+  }
+
+  .idiom-preview-list li:nth-child(n + 3) {
+    display: none;
+  }
+
+  .idiom-preview-list strong {
+    font-size: 1.02rem;
+  }
+
+  .idiom-preview-list span,
+  .idiom-preview-list p {
+    font-size: 0.76rem;
   }
 
   .home-copy h1,
