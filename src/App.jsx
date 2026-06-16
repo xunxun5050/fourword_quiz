@@ -1091,11 +1091,13 @@ function Hud({
         <span className="logo-spark" aria-hidden="true">!</span>
       </div>
 
-      <div className="hud-metrics" aria-label="게임 정보">
-        <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
-        <Metric icon={<FaTrophy />} label="점수" value={score} />
-        <Metric icon={<FaBolt />} label="문제" value={`Q.${Math.max(1, questionNumber || 1)}`} />
-      </div>
+      {phase !== "home" && (
+        <div className="hud-metrics" aria-label="게임 정보">
+          <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
+          <Metric icon={<FaTrophy />} label="점수" value={score} />
+          <Metric icon={<FaBolt />} label="문제" value={`Q.${Math.max(1, questionNumber || 1)}`} />
+        </div>
+      )}
 
       <div className="difficulty-group" aria-label="난이도">
         {Object.entries(DIFFICULTIES).map(([key, value]) => (
@@ -1155,7 +1157,7 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, p
             <span>학습 콘텐츠</span>
             <h2 id="home-learning-title">오늘 익혀볼 사자성어</h2>
             <p>
-              수록된 {idioms.length}개 성어 중 일부를 먼저 살펴보세요. 한자 모양,
+              수록된 사자성어 중 일부를 먼저 살펴보세요. 한자 모양,
               한글 독음, 뜻을 함께 보면 빈칸 문제가 더 빨리 풀립니다.
             </p>
           </div>
