@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/ko/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}

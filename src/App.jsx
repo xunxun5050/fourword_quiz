@@ -9,6 +9,7 @@ import {
   FaHome,
   FaImage,
   FaMedal,
+  FaPalette,
   FaPlay,
   FaRedoAlt,
   FaStopwatch,
@@ -18,18 +19,19 @@ import {
 import idioms from "./data/idioms.json";
 
 const TOTAL_SECONDS = 60;
+const COUNTDOWN_SECONDS = 3;
 const FEEDBACK_DELAY = 850;
 const STORAGE_KEYS = {
   bestScore: "sjse_best_score",
   bestAccuracy: "sjse_best_accuracy",
   playCount: "sjse_play_count",
   dailyLeaderboard: "sjse_daily_leaderboard",
+  gameTheme: "sjse_game_theme",
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
 };
 const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
 const MAX_LEADERBOARD_ENTRIES = 5;
-const HOME_PREVIEW_IDIOMS = idioms.slice(0, 4);
 
 const DIFFICULTIES = {
   easy: { label: "쉬움", seconds: 15 },
@@ -37,6 +39,193 @@ const DIFFICULTIES = {
   hard: { label: "어려움", seconds: 7 },
 };
 const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
+const GAME_THEMES = {
+  hanji: { label: "한지", description: "한지 보드", next: "notebook" },
+  notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
+};
+const GITHUB_REPOSITORY_URL = "https://github.com/xunxun5050/fourword_quiz";
+const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
+  "사자성어 퀴즈 건의",
+)}&body=${encodeURIComponent(
+  `건의 내용을 적어주세요.\n\n관련 저장소: ${GITHUB_REPOSITORY_URL}`,
+)}`;
+const INFO_PAGE_LINKS = [
+  { label: "건의하기", path: "/ko/feedback/" },
+  { label: "게임 방법", path: "/ko/how-to-play/" },
+  { label: "Contact", path: "/ko/contact/" },
+  { label: "이용약관", path: "/ko/terms/" },
+  { label: "개인정보", path: "/ko/privacy/" },
+  { label: "규칙", path: "/ko/rules/" },
+];
+const INFO_PAGES = {
+  "/ko/feedback/": {
+    title: "건의하기",
+    summary:
+      "사자성어 퀴즈가 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
+    sections: [
+      {
+        heading: "어떤 의견이든 좋아요",
+        body: [
+          "문제 오류, 뜻풀이 수정, 난이도 조정, 새로운 기능 아이디어를 환영합니다.",
+          "성어 추가 요청은 한자, 한글 독음, 뜻을 함께 적어주시면 검토가 더 빨라집니다.",
+        ],
+      },
+      {
+        heading: "보내면 좋은 정보",
+        body: [
+          "사용한 기기와 브라우저, 발생한 화면, 재현 방법을 적어주세요.",
+          "리더보드나 결과 저장 관련 문제라면 닉네임과 대략적인 플레이 시간을 함께 알려주세요.",
+          `관련 저장소: ${GITHUB_REPOSITORY_URL}`,
+        ],
+      },
+    ],
+    actions: [
+      {
+        href: FEEDBACK_MAILTO,
+        label: "메일로 건의하기",
+      },
+    ],
+  },
+  "/ko/how-to-play/": {
+    title: "게임 방법",
+    summary:
+      "60초 동안 한자 빈칸 문제와 뜻풀이 문제를 빠르게 풀어 정답 수를 올리는 게임입니다.",
+    sections: [
+      {
+        heading: "시작하기",
+        body: [
+          "홈 화면에서 난이도를 고른 뒤 게임 시작을 누르면 3초 카운트다운 후 문제가 시작됩니다.",
+          "쉬움은 문제당 15초, 보통은 10초, 어려움은 7초가 주어집니다.",
+        ],
+      },
+      {
+        heading: "문제 유형",
+        body: [
+          "빈칸 한자는 사자성어의 ? 자리에 들어갈 한자를 고르는 문제입니다.",
+          "뜻 보고 맞히기는 뜻풀이를 보고 알맞은 사자성어를 고르는 문제입니다.",
+        ],
+      },
+      {
+        heading: "점수와 결과",
+        body: [
+          "정답을 맞히면 1개 정답으로 기록되고, 60초가 끝나면 결과 화면에서 복기할 수 있습니다.",
+          "결과 화면에서는 나온 성어와 뜻, 정답 여부를 텍스트나 이미지로 저장할 수 있습니다.",
+        ],
+      },
+    ],
+  },
+  "/ko/contact/": {
+    title: "Contact",
+    summary:
+      "문의, 제휴, 오류 신고는 아래 안내에 맞춰 보내주세요.",
+    sections: [
+      {
+        heading: "문의 범위",
+        body: [
+          "서비스 이용 문의, 콘텐츠 오류 제보, 광고 및 제휴 문의를 받을 수 있습니다.",
+          "개인정보 관련 요청은 개인정보 페이지의 안내와 함께 확인해 주세요.",
+        ],
+      },
+      {
+        heading: "빠른 확인을 위한 정보",
+        body: [
+          "문의 목적, 발생한 화면, 사용 기기, 브라우저 정보를 함께 적어주시면 좋습니다.",
+          "답변이 필요한 문의는 회신 가능한 이메일 주소를 함께 보내주세요.",
+        ],
+      },
+    ],
+    actions: [
+      {
+        href: "mailto:contact@oshizi.com?subject=%EC%82%AC%EC%9E%90%EC%84%B1%EC%96%B4%20%ED%80%B4%EC%A6%88%20%EB%AC%B8%EC%9D%98",
+        label: "contact@oshizi.com",
+      },
+    ],
+  },
+  "/ko/terms/": {
+    title: "이용약관",
+    summary:
+      "사자성어 퀴즈를 이용하기 전에 알아두면 좋은 기본 약관입니다.",
+    sections: [
+      {
+        heading: "서비스 목적",
+        body: [
+          "이 서비스는 사자성어 학습과 복습을 돕는 퀴즈형 콘텐츠입니다.",
+          "게임 점수와 리더보드는 재미와 학습 동기를 위한 참고 정보로 제공됩니다.",
+        ],
+      },
+      {
+        heading: "이용자의 책임",
+        body: [
+          "서비스를 방해하거나 비정상적인 방법으로 점수, 리더보드, 저장 기능을 조작해서는 안 됩니다.",
+          "닉네임에는 타인을 불쾌하게 하거나 권리를 침해하는 표현을 사용하지 않아야 합니다.",
+        ],
+      },
+      {
+        heading: "콘텐츠와 변경",
+        body: [
+          "성어 데이터와 뜻풀이는 정확성을 높이기 위해 계속 수정될 수 있습니다.",
+          "서비스 화면, 기능, 정책은 운영 상황에 따라 사전 고지 후 변경될 수 있습니다.",
+        ],
+      },
+    ],
+  },
+  "/ko/privacy/": {
+    title: "개인정보",
+    summary:
+      "사자성어 퀴즈에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
+    sections: [
+      {
+        heading: "저장되는 정보",
+        body: [
+          "브라우저에는 닉네임, 플레이어 식별값, 최고 기록, 플레이 횟수, 결과 저장 상태가 저장될 수 있습니다.",
+          "리더보드 등록 시 닉네임, 점수, 정확도, 난이도, 시도 문제 수, 플레이 시간이 저장될 수 있습니다.",
+        ],
+      },
+      {
+        heading: "사용 목적",
+        body: [
+          "저장 정보는 게임 기록 유지, 하루 단위 리더보드 표시, 결과 복기를 위해 사용됩니다.",
+          "민감한 개인정보나 결제 정보는 게임 기능을 위해 요구하지 않습니다.",
+        ],
+      },
+      {
+        heading: "광고와 외부 서비스",
+        body: [
+          "Google AdSense가 활성화된 경우 광고 제공을 위해 쿠키 또는 유사 기술이 사용될 수 있습니다.",
+          "광고 개인화와 관련한 자세한 내용은 Google의 광고 및 개인정보 안내를 확인해 주세요.",
+        ],
+      },
+    ],
+  },
+  "/ko/rules/": {
+    title: "규칙",
+    summary:
+      "게임 점수, 제한 시간, 리더보드 기준을 정리한 규칙입니다.",
+    sections: [
+      {
+        heading: "기본 규칙",
+        body: [
+          "총 제한 시간은 60초이며, 시간이 끝나면 자동으로 결과 화면으로 이동합니다.",
+          "각 문제는 난이도별 제한 시간 안에 선택해야 하고, 정답 1개마다 점수 1점이 올라갑니다.",
+        ],
+      },
+      {
+        heading: "난이도",
+        body: [
+          "쉬움은 문제와 선택지에 한글 힌트가 함께 제공됩니다.",
+          "보통과 어려움은 더 빠른 판단을 요구하며, 문제당 제한 시간이 더 짧습니다.",
+        ],
+      },
+      {
+        heading: "리더보드",
+        body: [
+          "리더보드는 난이도별로 나뉘며 하루 동안 상위 5개 기록만 표시됩니다.",
+          "하루 기준은 한국 시간으로 계산되며, 새 날짜가 되면 새 기록판으로 시작합니다.",
+        ],
+      },
+    ],
+  },
+};
 const NICKNAME_ADJECTIVES = [
   "반짝이는",
   "차분한",
@@ -86,6 +275,7 @@ const initialState = {
   lastResult: null,
   totalStartedAt: null,
   questionStartedAt: null,
+  countdownStartedAt: null,
   feedbackUntil: null,
   resultSaved: true,
 };
@@ -231,6 +421,16 @@ function formatClock(value) {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
+function normalizeInfoPath(pathname) {
+  const normalizedPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  return INFO_PAGES[normalizedPath] ? normalizedPath : null;
+}
+
+function getInitialInfoPath() {
+  if (typeof window === "undefined") return null;
+  return normalizeInfoPath(window.location.pathname);
+}
+
 function loadStats() {
   if (typeof window === "undefined") return INITIAL_STATS;
 
@@ -364,6 +564,13 @@ function loadPlayerProfile() {
   localStorage.setItem(STORAGE_KEYS.playerId, profile.playerId);
 
   return profile;
+}
+
+function loadGameTheme() {
+  if (typeof window === "undefined") return "hanji";
+
+  const savedTheme = localStorage.getItem(STORAGE_KEYS.gameTheme);
+  return GAME_THEMES[savedTheme] ? savedTheme : "hanji";
 }
 
 async function parseJsonResponse(response) {
@@ -695,6 +902,19 @@ function reducer(state, action) {
   switch (action.type) {
     case "SET_DIFFICULTY":
       return state.phase === "home" ? { ...state, difficulty: action.difficulty } : state;
+    case "SHOW_LEADERBOARD":
+      return {
+        ...initialState,
+        phase: "leaderboard",
+        difficulty: action.difficulty,
+      };
+    case "COUNTDOWN":
+      return {
+        ...initialState,
+        phase: "countdown",
+        difficulty: action.difficulty,
+        countdownStartedAt: action.now,
+      };
     case "START": {
       const now = action.now;
       const { question, usedIds } = makeQuestion([]);
@@ -707,6 +927,7 @@ function reducer(state, action) {
         usedIds,
         totalStartedAt: now,
         questionStartedAt: now,
+        countdownStartedAt: null,
         resultSaved: false,
       };
     }
@@ -787,16 +1008,49 @@ function App() {
   const [stats, setStats] = useState(loadStats);
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
+  const [gameTheme, setGameTheme] = useState(loadGameTheme);
   const [playerProfile] = useState(loadPlayerProfile);
+  const [infoPath, setInfoPath] = useState(getInitialInfoPath);
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
   const questionLeft = secondsLeft(state.questionStartedAt, questionDuration, now);
   const questionProgress = Math.max(0, Math.min(1, questionLeft / questionDuration));
+  const infoPage = infoPath ? INFO_PAGES[infoPath] : null;
+  const countdownLeft =
+    state.phase === "countdown" && state.countdownStartedAt
+      ? Math.max(
+          1,
+          Math.ceil(COUNTDOWN_SECONDS - (now - state.countdownStartedAt) / 1000),
+        )
+      : COUNTDOWN_SECONDS;
   const accuracy = getAccuracy(state.score, state.attempted);
 
   useEffect(() => {
-    if (state.phase !== "playing" && state.phase !== "feedback") return undefined;
+    function handlePopState() {
+      setInfoPath(getInitialInfoPath());
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    document.title = infoPage ? `${infoPage.title} | 사자성어 퀴즈` : "사자성어 퀴즈";
+  }, [infoPage]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.gameTheme, gameTheme);
+  }, [gameTheme]);
+
+  useEffect(() => {
+    if (
+      state.phase !== "countdown" &&
+      state.phase !== "playing" &&
+      state.phase !== "feedback"
+    ) {
+      return undefined;
+    }
 
     const interval = window.setInterval(() => setNow(Date.now()), 100);
     return () => window.clearInterval(interval);
@@ -834,6 +1088,16 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (state.phase === "countdown") {
+      if (!state.countdownStartedAt) return;
+      if (now - state.countdownStartedAt >= COUNTDOWN_SECONDS * 1000) {
+        const startedAt = Date.now();
+        setNow(startedAt);
+        dispatch({ type: "START", difficulty: state.difficulty, now: startedAt });
+      }
+      return;
+    }
+
     if (state.phase !== "playing" && state.phase !== "feedback") return;
 
     if (totalLeft <= 0) {
@@ -849,7 +1113,15 @@ function App() {
     if (state.phase === "feedback" && state.feedbackUntil && now >= state.feedbackUntil) {
       dispatch({ type: "NEXT", now });
     }
-  }, [now, questionLeft, state.feedbackUntil, state.phase, totalLeft]);
+  }, [
+    now,
+    questionLeft,
+    state.countdownStartedAt,
+    state.difficulty,
+    state.feedbackUntil,
+    state.phase,
+    totalLeft,
+  ]);
 
   useEffect(() => {
     if (state.phase !== "result" || state.resultSaved) return;
@@ -922,9 +1194,46 @@ function App() {
     return "";
   }, [state.lastResult]);
 
+  function navigateInfoPage(path, event) {
+    if (
+      event &&
+      (event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey)
+    ) {
+      return;
+    }
+
+    event?.preventDefault();
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, "", path);
+    }
+    setInfoPath(path);
+  }
+
+  function navigateHomeRoute() {
+    if (window.location.pathname !== "/") {
+      window.history.pushState({}, "", "/");
+    }
+    setInfoPath(null);
+    dispatch({ type: "HOME" });
+  }
+
+  function showLeaderboardPreview() {
+    dispatch({ type: "SHOW_LEADERBOARD", difficulty: state.difficulty });
+  }
+
   function startGame() {
-    setNow(Date.now());
-    dispatch({ type: "START", difficulty: state.difficulty, now: Date.now() });
+    const startedAt = Date.now();
+    setNow(startedAt);
+    dispatch({ type: "COUNTDOWN", difficulty: state.difficulty, now: startedAt });
+  }
+
+  function toggleGameTheme() {
+    setGameTheme((currentTheme) => GAME_THEMES[currentTheme]?.next || "hanji");
   }
 
   function submitAnswer(answer) {
@@ -967,34 +1276,53 @@ function App() {
     }
   }
 
+  if (infoPage) {
+    return <InfoPage page={infoPage} onHome={navigateHomeRoute} />;
+  }
+
   return (
-    <main className={`app-shell is-${state.phase}-phase`}>
+    <main className={`app-shell is-${state.phase}-phase theme-${gameTheme}`}>
       <AdSenseAuto enabled={state.phase === "home"} />
       <div className="arcade-stage">
-        <Hud
-          phase={state.phase}
-          difficulty={state.difficulty}
-          onDifficultyChange={(difficulty) =>
-            dispatch({ type: "SET_DIFFICULTY", difficulty })
-          }
-          onHome={() => dispatch({ type: "HOME" })}
-          questionNumber={state.questionNumber}
-          score={state.score}
-          totalLeft={totalLeft}
-        />
-
-        {state.phase === "home" && (
-          <HomeView
+        {state.phase !== "countdown" &&
+          state.phase !== "leaderboard" &&
+          state.phase !== "result" && (
+          <Hud
+            phase={state.phase}
             difficulty={state.difficulty}
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onStart={startGame}
-            dailyLeaderboard={dailyLeaderboard}
-            playerProfile={playerProfile}
-            stats={stats}
+            onHome={() => dispatch({ type: "HOME" })}
+            questionNumber={state.questionNumber}
+            score={state.score}
+            totalLeft={totalLeft}
           />
         )}
+
+        {state.phase === "home" && (
+          <HomeView
+            difficulty={state.difficulty}
+            gameTheme={gameTheme}
+            onDifficultyChange={(difficulty) =>
+              dispatch({ type: "SET_DIFFICULTY", difficulty })
+            }
+            onNavigateInfo={navigateInfoPage}
+            onStart={showLeaderboardPreview}
+            onThemeToggle={toggleGameTheme}
+          />
+        )}
+
+        {state.phase === "leaderboard" && (
+          <LeaderboardPreviewView
+            difficulty={state.difficulty}
+            leaderboard={dailyLeaderboard}
+            onHome={() => dispatch({ type: "HOME" })}
+            onStart={startGame}
+          />
+        )}
+
+        {state.phase === "countdown" && <CountdownView count={countdownLeft} />}
 
         {(state.phase === "playing" || state.phase === "feedback") && state.currentQuestion && (
           <GameView
@@ -1030,8 +1358,13 @@ function App() {
         )}
 
         <p className="sr-only" aria-live="polite">
-          전체 남은 시간 {displaySeconds(totalLeft)}초, 문제 남은 시간{" "}
-          {displaySeconds(questionLeft)}초, 현재 점수 {state.score}점
+          {state.phase === "countdown"
+            ? `게임 시작까지 ${countdownLeft}초`
+            : state.phase === "leaderboard"
+              ? `오늘의 ${DIFFICULTIES[state.difficulty].label} 난이도 리더보드`
+            : `전체 남은 시간 ${displaySeconds(totalLeft)}초, 문제 남은 시간 ${displaySeconds(
+                questionLeft,
+              )}초, 현재 점수 ${state.score}점`}
         </p>
       </div>
     </main>
@@ -1069,6 +1402,45 @@ function AdSenseAuto({ enabled }) {
   return null;
 }
 
+function InfoPage({ onHome, page }) {
+  return (
+    <main className="app-shell is-info-phase">
+      <article className="info-stage">
+        <button className="info-home-button" onClick={onHome} type="button">
+          <FaHome /> 게임으로 돌아가기
+        </button>
+
+        <header className="info-header">
+          <span>사자성어 퀴즈</span>
+          <h1>{page.title}</h1>
+          <p>{page.summary}</p>
+        </header>
+
+        <div className="info-sections">
+          {page.sections.map((section) => (
+            <section className="info-section" key={section.heading}>
+              <h2>{section.heading}</h2>
+              {section.body.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </section>
+          ))}
+        </div>
+
+        {page.actions && (
+          <div className="info-actions">
+            {page.actions.map((action) => (
+              <a className="primary-action" href={action.href} key={action.href}>
+                {action.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </article>
+    </main>
+  );
+}
+
 function Hud({
   difficulty,
   onDifficultyChange,
@@ -1079,6 +1451,7 @@ function Hud({
   totalLeft,
 }) {
   const homeDisabled = phase === "home";
+  const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
 
   return (
     <header className="hud">
@@ -1099,20 +1472,30 @@ function Hud({
         </div>
       )}
 
-      <div className="difficulty-group" aria-label="난이도">
-        {Object.entries(DIFFICULTIES).map(([key, value]) => (
-          <button
-            aria-pressed={difficulty === key}
-            className={`difficulty-button ${difficulty === key ? "is-active" : ""}`}
-            disabled={phase !== "home"}
-            key={key}
-            onClick={() => onDifficultyChange(key)}
-            type="button"
-          >
-            {value.label}
-          </button>
-        ))}
-      </div>
+      {phase === "home" ? (
+        <div className="difficulty-group" aria-label="난이도">
+          {Object.entries(DIFFICULTIES).map(([key, value]) => (
+            <button
+              aria-pressed={difficulty === key}
+              className={`difficulty-button ${difficulty === key ? "is-active" : ""}`}
+              disabled={phase !== "home"}
+              key={key}
+              onClick={() => onDifficultyChange(key)}
+              type="button"
+            >
+              {value.label}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div
+          aria-label={`현재 난이도 ${selectedDifficulty.label}, 문제당 ${selectedDifficulty.seconds}초`}
+          className="difficulty-chip"
+        >
+          <span>난이도</span>
+          <strong>{selectedDifficulty.label}</strong>
+        </div>
+      )}
 
       <button
         aria-label="홈으로"
@@ -1140,54 +1523,36 @@ function Metric({ danger = false, icon, label, value }) {
   );
 }
 
-function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, playerProfile, stats }) {
+function HomeView({
+  difficulty,
+  gameTheme,
+  onDifficultyChange,
+  onNavigateInfo,
+  onStart,
+  onThemeToggle,
+}) {
+  const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
+  const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
+
   return (
     <section className="home-view">
-      <div className="home-copy">
-        <span className="kicker">
-          <FaStopwatch /> 60초 한자 스프린트
-        </span>
-        <h1>성어를 채우고 뜻을 맞혀요</h1>
-        <p>
-          같은 사자성어는 한 판에 한 번만 등장합니다. 빈칸 한자와 뜻풀이 문제를
-          번갈아 풀며 최고 기록을 갱신해보세요.
-        </p>
-        <section className="home-learning" aria-labelledby="home-learning-title">
-          <div>
-            <span>학습 콘텐츠</span>
-            <h2 id="home-learning-title">오늘 익혀볼 사자성어</h2>
-            <p>
-              수록된 사자성어 중 일부를 먼저 살펴보세요. 한자 모양,
-              한글 독음, 뜻을 함께 보면 빈칸 문제가 더 빨리 풀립니다.
-            </p>
-          </div>
-          <ul className="idiom-preview-list">
-            {HOME_PREVIEW_IDIOMS.map((item) => (
-              <li key={item.idiom}>
-                <strong>{item.idiom}</strong>
-                <span>{item.reading}</span>
-                <p>{item.meaning}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
+      <button
+        aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
+        className="theme-toggle"
+        onClick={onThemeToggle}
+        title={`${currentTheme.description} 테마`}
+        type="button"
+      >
+        <FaPalette aria-hidden="true" />
+        <span>{currentTheme.label}</span>
+      </button>
 
-      <div className="start-panel">
-        <div className="mini-scoreboard">
-          <span>최고 기록</span>
-          <strong>{stats.bestScore}개</strong>
-          <small>최고 정확도 {stats.bestAccuracy}% · 플레이 {stats.playCount}회</small>
-          <small className="nickname-line">닉네임 {playerProfile.nickname}</small>
+      <div className="landing-panel">
+        <div className="landing-copy">
+          <strong className="landing-title">사자성어 퀴즈</strong>
+          <span className="landing-mark" aria-hidden="true">四字</span>
+          <p className="landing-lead">60초 사자성어 스프린트</p>
         </div>
-
-        <DailyLeaderboard
-          difficulty={difficulty}
-          leaderboard={dailyLeaderboard}
-          limit={5}
-          variant="compact"
-        />
-
         <div className="difficulty-picker">
           <span>난이도 선택</span>
           <div className="difficulty-group is-large">
@@ -1209,6 +1574,76 @@ function HomeView({ dailyLeaderboard, difficulty, onDifficultyChange, onStart, p
         <button className="primary-action" onClick={onStart} type="button">
           <FaPlay /> 게임 시작
         </button>
+
+        <nav className="home-footer-links" aria-label="사이트 안내">
+          <div>
+            {INFO_PAGE_LINKS.slice(0, 3).map((link, index) => (
+              <span className="home-footer-item" key={link.path}>
+                {index > 0 && <span aria-hidden="true">·</span>}
+                <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
+                  {link.label}
+                </a>
+              </span>
+            ))}
+          </div>
+          <div>
+            {INFO_PAGE_LINKS.slice(3).map((link, index) => (
+              <span className="home-footer-item" key={link.path}>
+                {index > 0 && <span aria-hidden="true">·</span>}
+                <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
+                  {link.label}
+                </a>
+              </span>
+            ))}
+          </div>
+        </nav>
+      </div>
+    </section>
+  );
+}
+
+function CountdownView({ count }) {
+  return (
+    <section className="countdown-view" aria-label="게임 시작 카운트다운">
+      <div className="countdown-card" role="status" aria-live="assertive">
+        <span>잠시 후 시작</span>
+        <strong key={count}>{count}</strong>
+      </div>
+    </section>
+  );
+}
+
+function LeaderboardPreviewView({ difficulty, leaderboard, onHome, onStart }) {
+  const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
+
+  return (
+    <section className="leaderboard-preview-view">
+      <div className="leaderboard-preview-panel">
+        <div className="leaderboard-preview-copy">
+          <span className="kicker">
+            <FaMedal /> 오늘의 기록
+          </span>
+          <h1>{selectedDifficulty.label} 리더보드</h1>
+          <p>
+            오늘 같은 난이도로 플레이한 상위 5개 기록입니다. 준비되면 바로 시작해보세요.
+          </p>
+        </div>
+
+        <DailyLeaderboard
+          difficulty={difficulty}
+          leaderboard={leaderboard}
+          limit={5}
+          variant="preview"
+        />
+
+        <footer className="leaderboard-preview-actions">
+          <button className="secondary-action" onClick={onHome} type="button">
+            <FaHome /> 난이도 선택
+          </button>
+          <button className="primary-action" onClick={onStart} type="button">
+            <FaPlay /> 게임 시작
+          </button>
+        </footer>
       </div>
     </section>
   );
