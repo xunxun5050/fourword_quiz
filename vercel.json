@@ -1,4 +1,36 @@
 {
+  "redirects": [
+    {
+      "source": "/ko/feedback/",
+      "destination": "/ko/feedback",
+      "permanent": true
+    },
+    {
+      "source": "/ko/how-to-play/",
+      "destination": "/ko/how-to-play",
+      "permanent": true
+    },
+    {
+      "source": "/ko/contact/",
+      "destination": "/ko/contact",
+      "permanent": true
+    },
+    {
+      "source": "/ko/terms/",
+      "destination": "/ko/terms",
+      "permanent": true
+    },
+    {
+      "source": "/ko/privacy/",
+      "destination": "/ko/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/ko/rules/",
+      "destination": "/ko/rules",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/ko/:path*",

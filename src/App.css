@@ -133,7 +133,7 @@ button:focus-visible {
   grid-template-rows: 1fr;
   min-height: 100dvh;
   height: auto;
-  max-width: 680px;
+  max-width: 860px;
   overflow: visible;
   background: transparent;
   border: 0;
@@ -398,6 +398,14 @@ button:focus-visible {
   padding: clamp(24px, 7vh, 76px) clamp(18px, 5vw, 72px) clamp(76px, 10vh, 104px);
 }
 
+.home-hero {
+  display: grid;
+  width: 100%;
+  min-height: min(720px, 100dvh);
+  place-items: center;
+  padding: clamp(24px, 6vh, 62px) 0 clamp(28px, 7vh, 72px);
+}
+
 .theme-toggle {
   position: absolute;
   top: clamp(14px, 2.5vw, 26px);
@@ -484,8 +492,10 @@ button:focus-visible {
 
 .app-shell.is-home-phase .home-view {
   min-height: 100%;
-  place-items: center;
-  padding: clamp(24px, 6vh, 62px) 0;
+  align-content: start;
+  justify-items: center;
+  overflow: visible;
+  padding: 0;
 }
 
 .app-shell.is-home-phase .landing-panel {
@@ -563,11 +573,147 @@ button:focus-visible {
   box-shadow: none;
 }
 
+.home-content {
+  display: grid;
+  gap: clamp(26px, 4vw, 42px);
+  width: min(100%, 820px);
+  padding: 0 0 clamp(34px, 5vw, 58px);
+}
+
+.home-content-section {
+  display: grid;
+  gap: 16px;
+  padding-top: clamp(22px, 3.5vw, 34px);
+  border-top: 2px solid rgba(17, 24, 39, 0.12);
+}
+
+.home-section-heading {
+  display: grid;
+  gap: 7px;
+}
+
+.home-section-heading span {
+  color: #b74131;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.home-section-heading h2,
+.home-guide-item h3 {
+  margin: 0;
+  color: #111827;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.home-section-heading h2 {
+  font-size: clamp(1.24rem, 2.2vw, 1.76rem);
+}
+
+.home-section-heading p,
+.home-guide-item p,
+.home-data-list li {
+  margin: 0;
+  color: rgba(17, 24, 39, 0.72);
+  font-size: 0.92rem;
+  font-weight: 760;
+  line-height: 1.62;
+}
+
+.idiom-preview-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.idiom-preview-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 9px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.68);
+}
+
+.idiom-preview-list strong {
+  color: #111827;
+  font-family:
+    "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
+  font-size: 1.28rem;
+  font-weight: 950;
+}
+
+.idiom-preview-list span {
+  color: var(--teal-dark);
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.idiom-preview-list p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: rgba(17, 24, 39, 0.72);
+  font-size: 0.84rem;
+  font-weight: 760;
+  line-height: 1.48;
+}
+
+.home-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-guide-item {
+  display: grid;
+  gap: 8px;
+  padding: 15px;
+  border: 1px solid rgba(9, 135, 143, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.62);
+}
+
+.home-guide-item h3 {
+  color: var(--teal-dark);
+  font-size: 1rem;
+}
+
+.home-data-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.home-data-list li {
+  position: relative;
+  padding-left: 18px;
+}
+
+.home-data-list li::before {
+  position: absolute;
+  top: 0.72em;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  content: "";
+}
+
 .home-footer-links {
   display: grid;
   gap: 6px;
   justify-items: center;
   width: 100%;
+  padding-bottom: clamp(24px, 5vw, 52px);
   color: rgba(17, 24, 39, 0.54);
   font-size: 0.78rem;
   font-weight: 800;
@@ -1723,8 +1869,14 @@ button:focus-visible {
   }
 
   .app-shell.is-home-phase .home-view {
-    place-items: center;
-    padding: 22px 14px;
+    align-content: start;
+    justify-items: center;
+    padding: 0 14px;
+  }
+
+  .home-hero {
+    min-height: calc(100dvh - 20px);
+    padding: 22px 0 26px;
   }
 
   .landing-panel {
@@ -1734,6 +1886,51 @@ button:focus-visible {
 
   .app-shell.is-home-phase .landing-panel {
     width: min(100%, 340px);
+  }
+
+  .home-content {
+    gap: 28px;
+    width: min(100%, 520px);
+    padding-bottom: 32px;
+  }
+
+  .home-content-section {
+    gap: 13px;
+    padding-top: 22px;
+  }
+
+  .home-section-heading span {
+    font-size: 0.74rem;
+  }
+
+  .home-section-heading h2 {
+    font-size: clamp(1.08rem, 5.3vw, 1.42rem);
+  }
+
+  .home-section-heading p,
+  .home-guide-item p,
+  .home-data-list li {
+    font-size: 0.84rem;
+    line-height: 1.56;
+  }
+
+  .idiom-preview-list,
+  .home-guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .idiom-preview-list li,
+  .home-guide-item {
+    padding: 12px;
+  }
+
+  .idiom-preview-list strong {
+    font-size: 1.12rem;
+  }
+
+  .idiom-preview-list span,
+  .idiom-preview-list p {
+    font-size: 0.78rem;
   }
 
   .countdown-card {
@@ -1794,6 +1991,7 @@ button:focus-visible {
 
   .home-footer-links {
     gap: 4px;
+    padding-bottom: 30px;
     font-size: 0.72rem;
     line-height: 1.45;
   }

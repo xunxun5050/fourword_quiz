@@ -50,15 +50,15 @@ const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
   `건의 내용을 적어주세요.\n\n관련 저장소: ${GITHUB_REPOSITORY_URL}`,
 )}`;
 const INFO_PAGE_LINKS = [
-  { label: "건의하기", path: "/ko/feedback/" },
-  { label: "게임 방법", path: "/ko/how-to-play/" },
-  { label: "Contact", path: "/ko/contact/" },
-  { label: "이용약관", path: "/ko/terms/" },
-  { label: "개인정보", path: "/ko/privacy/" },
-  { label: "규칙", path: "/ko/rules/" },
+  { label: "건의하기", path: "/ko/feedback" },
+  { label: "게임 방법", path: "/ko/how-to-play" },
+  { label: "Contact", path: "/ko/contact" },
+  { label: "이용약관", path: "/ko/terms" },
+  { label: "개인정보", path: "/ko/privacy" },
+  { label: "규칙", path: "/ko/rules" },
 ];
 const INFO_PAGES = {
-  "/ko/feedback/": {
+  "/ko/feedback": {
     title: "건의하기",
     summary:
       "사자성어 퀴즈가 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
@@ -86,7 +86,7 @@ const INFO_PAGES = {
       },
     ],
   },
-  "/ko/how-to-play/": {
+  "/ko/how-to-play": {
     title: "게임 방법",
     summary:
       "60초 동안 한자 빈칸 문제와 뜻풀이 문제를 빠르게 풀어 정답 수를 올리는 게임입니다.",
@@ -114,7 +114,7 @@ const INFO_PAGES = {
       },
     ],
   },
-  "/ko/contact/": {
+  "/ko/contact": {
     title: "Contact",
     summary:
       "문의, 제휴, 오류 신고는 아래 안내에 맞춰 보내주세요.",
@@ -141,7 +141,7 @@ const INFO_PAGES = {
       },
     ],
   },
-  "/ko/terms/": {
+  "/ko/terms": {
     title: "이용약관",
     summary:
       "사자성어 퀴즈를 이용하기 전에 알아두면 좋은 기본 약관입니다.",
@@ -169,7 +169,7 @@ const INFO_PAGES = {
       },
     ],
   },
-  "/ko/privacy/": {
+  "/ko/privacy": {
     title: "개인정보",
     summary:
       "사자성어 퀴즈에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
@@ -197,7 +197,7 @@ const INFO_PAGES = {
       },
     ],
   },
-  "/ko/rules/": {
+  "/ko/rules": {
     title: "규칙",
     summary:
       "게임 점수, 제한 시간, 리더보드 기준을 정리한 규칙입니다.",
@@ -226,6 +226,26 @@ const INFO_PAGES = {
     ],
   },
 };
+const HOME_PREVIEW_IDIOMS = idioms.slice(0, 6);
+const HOME_GAME_GUIDE = [
+  {
+    title: "빈칸 한자",
+    body: "사자성어 네 글자 중 비어 있는 한자를 보고 알맞은 글자를 고릅니다.",
+  },
+  {
+    title: "뜻 보고 맞히기",
+    body: "뜻풀이를 읽고 그 의미에 맞는 사자성어를 빠르게 찾아봅니다.",
+  },
+  {
+    title: "결과 복기",
+    body: "게임이 끝나면 나온 성어, 독음, 뜻을 다시 확인하고 따로 저장할 수 있습니다.",
+  },
+];
+const HOME_DATA_NOTES = [
+  "수록된 사자성어는 한자 표기, 한글 독음, 뜻풀이를 함께 볼 수 있도록 정리했습니다.",
+  "우리말샘 기반 데이터를 게임에 맞게 다듬어 빈칸 문제와 뜻풀이 문제로 활용합니다.",
+  "오류나 어색한 뜻풀이는 건의하기를 통해 알려주면 검토 후 반영할 수 있습니다.",
+];
 const NICKNAME_ADJECTIVES = [
   "반짝이는",
   "차분한",
@@ -422,7 +442,8 @@ function formatClock(value) {
 }
 
 function normalizeInfoPath(pathname) {
-  const normalizedPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const normalizedPath =
+    pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
   return INFO_PAGES[normalizedPath] ? normalizedPath : null;
 }
 
@@ -1547,57 +1568,112 @@ function HomeView({
         <span>{currentTheme.label}</span>
       </button>
 
-      <div className="landing-panel">
-        <div className="landing-copy">
-          <strong className="landing-title">사자성어 퀴즈</strong>
-          <span className="landing-mark" aria-hidden="true">四字</span>
-          <p className="landing-lead">60초 사자성어 스프린트</p>
-        </div>
-        <div className="difficulty-picker">
-          <span>난이도 선택</span>
-          <div className="difficulty-group is-large">
-            {Object.entries(DIFFICULTIES).map(([key, value]) => (
-              <button
-                aria-pressed={difficulty === key}
-                className={`difficulty-button ${difficulty === key ? "is-active" : ""}`}
-                key={key}
-                onClick={() => onDifficultyChange(key)}
-                type="button"
-              >
-                {value.label}
-                <small>{value.seconds}초</small>
-              </button>
-            ))}
+      <div className="home-hero">
+        <div className="landing-panel">
+          <div className="landing-copy">
+            <strong className="landing-title">사자성어 퀴즈</strong>
+            <span className="landing-mark" aria-hidden="true">四字</span>
+            <p className="landing-lead">60초 사자성어 스프린트</p>
           </div>
-        </div>
+          <div className="difficulty-picker">
+            <span>난이도 선택</span>
+            <div className="difficulty-group is-large">
+              {Object.entries(DIFFICULTIES).map(([key, value]) => (
+                <button
+                  aria-pressed={difficulty === key}
+                  className={`difficulty-button ${difficulty === key ? "is-active" : ""}`}
+                  key={key}
+                  onClick={() => onDifficultyChange(key)}
+                  type="button"
+                >
+                  {value.label}
+                  <small>{value.seconds}초</small>
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <button className="primary-action" onClick={onStart} type="button">
-          <FaPlay /> 게임 시작
-        </button>
-
-        <nav className="home-footer-links" aria-label="사이트 안내">
-          <div>
-            {INFO_PAGE_LINKS.slice(0, 3).map((link, index) => (
-              <span className="home-footer-item" key={link.path}>
-                {index > 0 && <span aria-hidden="true">·</span>}
-                <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
-                  {link.label}
-                </a>
-              </span>
-            ))}
-          </div>
-          <div>
-            {INFO_PAGE_LINKS.slice(3).map((link, index) => (
-              <span className="home-footer-item" key={link.path}>
-                {index > 0 && <span aria-hidden="true">·</span>}
-                <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
-                  {link.label}
-                </a>
-              </span>
-            ))}
-          </div>
-        </nav>
+          <button className="primary-action" onClick={onStart} type="button">
+            <FaPlay /> 게임 시작
+          </button>
+        </div>
       </div>
+
+      <div className="home-content" aria-label="사자성어 학습 콘텐츠">
+        <section className="home-content-section">
+          <div className="home-section-heading">
+            <span>미리 보기</span>
+            <h2>오늘의 예시 성어</h2>
+            <p>
+              한자 모양과 한글 독음, 뜻을 함께 보면 빈칸 문제와 뜻풀이 문제를
+              더 자연스럽게 풀 수 있습니다.
+            </p>
+          </div>
+          <ul className="idiom-preview-list">
+            {HOME_PREVIEW_IDIOMS.map((item) => (
+              <li key={item.id}>
+                <strong>{item.idiom}</strong>
+                <span>{item.reading}</span>
+                <p>{item.meaning}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="home-content-section">
+          <div className="home-section-heading">
+            <span>게임 설명</span>
+            <h2>뜻과 한자를 번갈아 익혀요</h2>
+            <p>
+              사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
+              학습형 게임입니다.
+            </p>
+          </div>
+          <div className="home-guide-grid">
+            {HOME_GAME_GUIDE.map((item) => (
+              <article className="home-guide-item" key={item.title}>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="home-content-section">
+          <div className="home-section-heading">
+            <span>수록 데이터 안내</span>
+            <h2>한자, 독음, 뜻을 함께 정리했습니다</h2>
+          </div>
+          <ul className="home-data-list">
+            {HOME_DATA_NOTES.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <nav className="home-footer-links" aria-label="사이트 안내">
+        <div>
+          {INFO_PAGE_LINKS.slice(0, 3).map((link, index) => (
+            <span className="home-footer-item" key={link.path}>
+              {index > 0 && <span aria-hidden="true">·</span>}
+              <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
+                {link.label}
+              </a>
+            </span>
+          ))}
+        </div>
+        <div>
+          {INFO_PAGE_LINKS.slice(3).map((link, index) => (
+            <span className="home-footer-item" key={link.path}>
+              {index > 0 && <span aria-hidden="true">·</span>}
+              <a href={link.path} onClick={(event) => onNavigateInfo(link.path, event)}>
+                {link.label}
+              </a>
+            </span>
+          ))}
+        </div>
+      </nav>
     </section>
   );
 }
