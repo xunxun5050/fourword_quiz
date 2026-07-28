@@ -17,6 +17,8 @@ import {
   FaTrophy,
 } from "react-icons/fa";
 import idioms from "./data/idioms.json";
+import hanjaChars from "./data/hanjaChars.json";
+import hanjaWords from "./data/hanjaWords.json";
 
 const TOTAL_SECONDS = 60;
 const COUNTDOWN_SECONDS = 3;
@@ -39,6 +41,27 @@ const DIFFICULTIES = {
   hard: { label: "어려움", seconds: 7 },
 };
 const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
+const GRADE_KEYS = ["8", "7", "6", "5", "4", "3"];
+const GRADE_LABELS = {
+  8: "8급",
+  7: "7급",
+  6: "6급",
+  5: "5급",
+  4: "4급",
+  3: "3급",
+};
+const SUB_MODE_LABELS = {
+  idiom: "사자성어",
+  word: "단어",
+};
+const QUESTION_TYPE_LABELS = {
+  A: "빈칸 한자",
+  B: "뜻 보고 맞히기",
+  HE: "훈음 맞히기",
+  WM: "한자어 뜻풀이",
+  WB: "빈칸 한자 채우기",
+};
+const BLANK_PROMPT_TYPES = ["A", "WB", "HE"];
 const GAME_THEMES = {
   hanji: { label: "한지", description: "한지 보드", next: "notebook" },
   notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
@@ -284,6 +307,9 @@ const INITIAL_LEADERBOARD = {
 
 const initialState = {
   phase: "home",
+  mode: "casual",
+  grade: "8",
+  subMode: "word",
   difficulty: "normal",
   currentQuestion: null,
   questionNumber: 0,
@@ -369,7 +395,7 @@ function makeTypeAQuestion(item, allItems) {
 
   return {
     type: "A",
-    idiomId: item.id,
+    sourceId: item.id,
     answer,
     blankIndex,
     prompt: chars.map((char, index) => (index === blankIndex ? "?" : char)).join(""),
@@ -394,7 +420,7 @@ function makeTypeBQuestion(item, allItems) {
 
   return {
     type: "B",
-    idiomId: item.id,
+    sourceId: item.id,
     answer: item.idiom,
     prompt: item.meaning,
     choices,
@@ -423,6 +449,133 @@ function makeQuestion(usedIds) {
     question,
     usedIds: [...usedIds, item.id],
   };
+}
+
+function makeGradeIdiomQuestion(usedIds, grade) {
+  const pool = idioms.filter((item) => item.grade === grade);
+  const remaining = pool.filter((item) => !usedIds.includes(item.id));
+  if (remaining.length === 0) {
+    return { question: null, usedIds };
+  }
+
+  const item = sample(remaining);
+  const type = Math.random() < 0.5 ? "A" : "B";
+  const question = type === "A" ? makeTypeAQuestion(item, pool) : makeTypeBQuestion(item, pool);
+
+  return {
+    question,
+    usedIds: [...usedIds, item.id],
+  };
+}
+
+function makeHunEumQuestion(item, gradePool) {
+  const answer = `${item.hun} ${item.eum}`;
+  const sameGrade = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => `${candidate.hun} ${candidate.eum}`);
+  const allOther = hanjaChars
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => `${candidate.hun} ${candidate.eum}`);
+  const distractors = fillChoices([sameGrade, allOther], answer, 3);
+  const choices = shuffle([answer, ...distractors]);
+
+  return {
+    type: "HE",
+    sourceId: item.id,
+    answer,
+    prompt: item.char,
+    choices,
+    source: {
+      id: item.id,
+      idiom: item.char,
+      reading: item.eum,
+      meaning: `훈음: ${item.hun} ${item.eum}`,
+    },
+  };
+}
+
+function makeWordMeaningQuestion(item, gradePool) {
+  const sameGrade = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => candidate.word);
+  const allOther = hanjaWords
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => candidate.word);
+  const distractors = fillChoices([sameGrade, allOther], item.word, 3);
+  const choices = shuffle([item.word, ...distractors]);
+
+  return {
+    type: "WM",
+    sourceId: item.id,
+    answer: item.word,
+    prompt: item.meaning,
+    choices,
+    source: { id: item.id, idiom: item.word, reading: item.reading, meaning: item.meaning },
+  };
+}
+
+function makeWordBlankQuestion(item, gradePool) {
+  const chars = [...item.word];
+  const blankIndex = Math.floor(Math.random() * chars.length);
+  const answer = chars[blankIndex];
+  const sameGradeWordChars = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => [...candidate.word][blankIndex]);
+  const sameGradeHanjaChars = hanjaChars
+    .filter((candidate) => candidate.grade === item.grade)
+    .map((candidate) => candidate.char);
+  const allOtherWordChars = hanjaWords.flatMap((candidate) => [...candidate.word]);
+  const distractors = fillChoices(
+    [sameGradeWordChars, sameGradeHanjaChars, allOtherWordChars],
+    answer,
+    3,
+  );
+  const choices = shuffle([answer, ...distractors]);
+
+  return {
+    type: "WB",
+    sourceId: item.id,
+    answer,
+    prompt: chars.map((char, index) => (index === blankIndex ? "?" : char)).join(""),
+    choices,
+    source: { id: item.id, idiom: item.word, reading: item.reading, meaning: item.meaning },
+  };
+}
+
+function makeWordQuestion(usedIds, grade) {
+  const charPool = hanjaChars.filter((item) => item.grade === grade);
+  const wordPool = hanjaWords.filter((item) => item.grade === grade);
+  const remainingChars = charPool.filter((item) => !usedIds.includes(item.id));
+  const remainingWords = wordPool.filter((item) => !usedIds.includes(item.id));
+
+  const availableTypes = [];
+  if (remainingChars.length > 0) availableTypes.push("HE");
+  if (remainingWords.length > 0) availableTypes.push("WM", "WB");
+  if (availableTypes.length === 0) {
+    return { question: null, usedIds };
+  }
+
+  const type = sample(availableTypes);
+  if (type === "HE") {
+    const item = sample(remainingChars);
+    return { question: makeHunEumQuestion(item, charPool), usedIds: [...usedIds, item.id] };
+  }
+
+  const item = sample(remainingWords);
+  const question =
+    type === "WM" ? makeWordMeaningQuestion(item, wordPool) : makeWordBlankQuestion(item, wordPool);
+
+  return { question, usedIds: [...usedIds, item.id] };
+}
+
+function buildNextQuestion(usedIds, { mode, grade, subMode }) {
+  if (mode === "grade") {
+    return subMode === "word"
+      ? makeWordQuestion(usedIds, grade)
+      : makeGradeIdiomQuestion(usedIds, grade);
+  }
+
+  return makeQuestion(usedIds);
 }
 
 function secondsLeft(startedAt, duration, now) {
@@ -706,11 +859,12 @@ function getAccuracy(score, attempted) {
   return Math.round((score / attempted) * 100);
 }
 
-function getGrade(accuracy) {
-  if (accuracy >= 90) return "사자성어 마스터";
-  if (accuracy >= 70) return "사자성어 고수";
-  if (accuracy >= 50) return "사자성어 중급";
-  if (accuracy >= 30) return "사자성어 입문";
+function getResultTitle(accuracy, mode, subMode) {
+  const domain = mode === "grade" && subMode === "word" ? "한자" : "사자성어";
+  if (accuracy >= 90) return `${domain} 마스터`;
+  if (accuracy >= 70) return `${domain} 고수`;
+  if (accuracy >= 50) return `${domain} 중급`;
+  if (accuracy >= 30) return `${domain} 입문`;
   return "다시 도전";
 }
 
@@ -923,26 +1077,50 @@ function reducer(state, action) {
   switch (action.type) {
     case "SET_DIFFICULTY":
       return state.phase === "home" ? { ...state, difficulty: action.difficulty } : state;
+    case "SET_MODE":
+      return state.phase === "home" ? { ...state, mode: action.mode } : state;
+    case "SET_GRADE": {
+      if (state.phase !== "home") return state;
+      const nextSubMode =
+        action.grade === "8" && state.subMode === "idiom" ? "word" : state.subMode;
+      return { ...state, grade: action.grade, subMode: nextSubMode };
+    }
+    case "SET_SUBMODE": {
+      if (state.phase !== "home") return state;
+      if (action.subMode === "idiom" && state.grade === "8") return state;
+      return { ...state, subMode: action.subMode };
+    }
     case "SHOW_LEADERBOARD":
       return {
         ...initialState,
         phase: "leaderboard",
         difficulty: action.difficulty,
+        mode: "casual",
       };
     case "COUNTDOWN":
       return {
         ...initialState,
         phase: "countdown",
         difficulty: action.difficulty,
+        mode: action.mode,
+        grade: action.grade,
+        subMode: action.subMode,
         countdownStartedAt: action.now,
       };
     case "START": {
       const now = action.now;
-      const { question, usedIds } = makeQuestion([]);
+      const { question, usedIds } = buildNextQuestion([], {
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      });
       return {
         ...initialState,
         phase: "playing",
         difficulty: action.difficulty,
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
         currentQuestion: question,
         questionNumber: 1,
         usedIds,
@@ -964,7 +1142,7 @@ function reducer(state, action) {
         Math.max(0, (now - state.questionStartedAt) / 1000),
       );
       const record = {
-        idiomId: state.currentQuestion.idiomId,
+        sourceId: state.currentQuestion.sourceId,
         type: state.currentQuestion.type,
         prompt: state.currentQuestion.prompt,
         answer: state.currentQuestion.answer,
@@ -987,7 +1165,11 @@ function reducer(state, action) {
     }
     case "NEXT": {
       if (state.phase !== "feedback") return state;
-      const { question, usedIds } = makeQuestion(state.usedIds);
+      const { question, usedIds } = buildNextQuestion(state.usedIds, {
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      });
       if (!question) {
         return { ...state, phase: "result", currentQuestion: null, resultSaved: false };
       }
@@ -1015,7 +1197,13 @@ function reducer(state, action) {
         resultSaved: false,
       };
     case "HOME":
-      return { ...initialState, difficulty: state.difficulty };
+      return {
+        ...initialState,
+        difficulty: state.difficulty,
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      };
     case "MARK_SAVED":
       return { ...state, resultSaved: true };
     default:
@@ -1148,7 +1336,7 @@ function App() {
     if (state.phase !== "result" || state.resultSaved) return;
 
     const leaderboardEntry =
-      state.attempted > 0
+      state.mode === "casual" && state.attempted > 0
         ? buildLeaderboardEntry({
             accuracy,
             difficulty: state.difficulty,
@@ -1186,6 +1374,7 @@ function App() {
     state.attempted,
     state.difficulty,
     state.history,
+    state.mode,
     state.phase,
     state.resultSaved,
     state.score,
@@ -1250,7 +1439,14 @@ function App() {
   function startGame() {
     const startedAt = Date.now();
     setNow(startedAt);
-    dispatch({ type: "COUNTDOWN", difficulty: state.difficulty, now: startedAt });
+    dispatch({
+      type: "COUNTDOWN",
+      difficulty: state.difficulty,
+      mode: state.mode,
+      grade: state.grade,
+      subMode: state.subMode,
+      now: startedAt,
+    });
   }
 
   function toggleGameTheme() {
@@ -1311,6 +1507,9 @@ function App() {
           <Hud
             phase={state.phase}
             difficulty={state.difficulty}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
@@ -1325,11 +1524,17 @@ function App() {
           <HomeView
             difficulty={state.difficulty}
             gameTheme={gameTheme}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
+            onModeChange={(mode) => dispatch({ type: "SET_MODE", mode })}
+            onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
+            onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
-            onStart={showLeaderboardPreview}
+            onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
             onThemeToggle={toggleGameTheme}
           />
         )}
@@ -1365,6 +1570,9 @@ function App() {
           <ResultView
             accuracy={accuracy}
             difficulty={state.difficulty}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             history={state.history}
             dailyLeaderboard={dailyLeaderboard}
             exportState={exportState}
@@ -1464,15 +1672,19 @@ function InfoPage({ onHome, page }) {
 
 function Hud({
   difficulty,
+  grade,
+  mode,
   onDifficultyChange,
   onHome,
   phase,
   questionNumber,
   score,
+  subMode,
   totalLeft,
 }) {
   const homeDisabled = phase === "home";
   const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
+  const isGradeMode = mode === "grade";
 
   return (
     <header className="hud">
@@ -1518,6 +1730,18 @@ function Hud({
         </div>
       )}
 
+      {phase !== "home" && isGradeMode && (
+        <div
+          aria-label={`현재 급수 ${GRADE_LABELS[grade]}, ${SUB_MODE_LABELS[subMode]} 모드`}
+          className="difficulty-chip"
+        >
+          <span>급수</span>
+          <strong>
+            {GRADE_LABELS[grade]} · {SUB_MODE_LABELS[subMode]}
+          </strong>
+        </div>
+      )}
+
       <button
         aria-label="홈으로"
         className="icon-home"
@@ -1547,13 +1771,21 @@ function Metric({ danger = false, icon, label, value }) {
 function HomeView({
   difficulty,
   gameTheme,
+  grade,
+  mode,
   onDifficultyChange,
+  onGradeChange,
+  onModeChange,
   onNavigateInfo,
   onStart,
+  onSubModeChange,
   onThemeToggle,
+  subMode,
 }) {
   const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
   const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
+  const isGradeMode = mode === "grade";
+  const idiomDisabled = grade === "8";
 
   return (
     <section className="home-view">
@@ -1573,8 +1805,78 @@ function HomeView({
           <div className="landing-copy">
             <strong className="landing-title">사자성어 퀴즈</strong>
             <span className="landing-mark" aria-hidden="true">四字</span>
-            <p className="landing-lead">60초 사자성어 스프린트</p>
+            <p className="landing-lead">
+              {isGradeMode ? "한자급수 대비 스프린트" : "60초 사자성어 스프린트"}
+            </p>
           </div>
+
+          <div className="difficulty-picker">
+            <span>모드 선택</span>
+            <div className="difficulty-group" aria-label="모드">
+              <button
+                aria-pressed={mode === "casual"}
+                className={`difficulty-button ${mode === "casual" ? "is-active" : ""}`}
+                onClick={() => onModeChange("casual")}
+                type="button"
+              >
+                캐주얼 모드
+              </button>
+              <button
+                aria-pressed={isGradeMode}
+                className={`difficulty-button ${isGradeMode ? "is-active" : ""}`}
+                onClick={() => onModeChange("grade")}
+                type="button"
+              >
+                급수 대비 모드
+              </button>
+            </div>
+          </div>
+
+          {isGradeMode && (
+            <>
+              <div className="difficulty-picker">
+                <span>급수 선택</span>
+                <div className="difficulty-group is-large" aria-label="급수">
+                  {GRADE_KEYS.map((key) => (
+                    <button
+                      aria-pressed={grade === key}
+                      className={`difficulty-button ${grade === key ? "is-active" : ""}`}
+                      key={key}
+                      onClick={() => onGradeChange(key)}
+                      type="button"
+                    >
+                      {GRADE_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="difficulty-picker">
+                <span>유형 선택</span>
+                <div className="difficulty-group" aria-label="문제 유형">
+                  <button
+                    aria-pressed={subMode === "idiom"}
+                    className={`difficulty-button ${subMode === "idiom" ? "is-active" : ""}`}
+                    disabled={idiomDisabled}
+                    onClick={() => onSubModeChange("idiom")}
+                    title={idiomDisabled ? "8급은 사자성어 문제가 없어요" : undefined}
+                    type="button"
+                  >
+                    사자성어
+                  </button>
+                  <button
+                    aria-pressed={subMode === "word"}
+                    className={`difficulty-button ${subMode === "word" ? "is-active" : ""}`}
+                    onClick={() => onSubModeChange("word")}
+                    type="button"
+                  >
+                    단어
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="difficulty-picker">
             <span>난이도 선택</span>
             <div className="difficulty-group is-large">
@@ -1754,9 +2056,9 @@ function GameView({
     <section className={gameViewClassName}>
       <div className="question-frame">
         <span className="question-type">
-          {currentQuestion.type === "A" ? "빈칸 한자" : "뜻 보고 맞히기"}
+          {QUESTION_TYPE_LABELS[currentQuestion.type] || "문제"}
         </span>
-        {currentQuestion.type === "A" ? (
+        {BLANK_PROMPT_TYPES.includes(currentQuestion.type) ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
             {[...currentQuestion.prompt].map((char, index) => {
               const isBlank = char === "?";
@@ -1852,7 +2154,9 @@ function ResultView({
   dailyLeaderboard,
   difficulty,
   exportState,
+  grade,
   history,
+  mode,
   onExportImage,
   onExportText,
   onHome,
@@ -1860,8 +2164,10 @@ function ResultView({
   playerProfile,
   score,
   stats,
+  subMode,
 }) {
-  const grade = getGrade(accuracy);
+  const resultTitle = getResultTitle(accuracy, mode, subMode);
+  const isGradeMode = mode === "grade";
 
   return (
     <section className="result-view">
@@ -1869,7 +2175,7 @@ function ResultView({
         <span className="kicker">
           <FaTrophy /> 게임 결과
         </span>
-        <h1>{grade}</h1>
+        <h1>{resultTitle}</h1>
         <div className="score-line">
           <strong>{score}</strong>
           <span>개 정답</span>
@@ -1877,17 +2183,25 @@ function ResultView({
         <p>
           정확도 {accuracy}% · 시도 {history.length}문제 · 난이도{" "}
           {DIFFICULTIES[difficulty].label}
+          {isGradeMode && (
+            <>
+              {" "}
+              · {GRADE_LABELS[grade]} · {SUB_MODE_LABELS[subMode]}
+            </>
+          )}
         </p>
         <div className="best-strip">
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
         </div>
-        <DailyLeaderboard
-          difficulty={difficulty}
-          leaderboard={dailyLeaderboard}
-          limit={5}
-          variant="result"
-        />
+        {!isGradeMode && (
+          <DailyLeaderboard
+            difficulty={difficulty}
+            leaderboard={dailyLeaderboard}
+            limit={5}
+            variant="result"
+          />
+        )}
       </div>
 
       <div className="history-panel">
@@ -1900,7 +2214,7 @@ function ResultView({
             <p className="empty-history">아직 기록된 문제가 없어요. 바로 다시 도전해보세요.</p>
           ) : (
             history.map((record, index) => (
-              <article className="history-item" key={`${record.idiomId}-${index}`}>
+              <article className="history-item" key={`${record.sourceId}-${index}`}>
                 <span className={`result-mark ${record.correct ? "is-right" : "is-miss"}`}>
                   {record.correct ? <FaCheck /> : <FaTimes />}
                 </span>
