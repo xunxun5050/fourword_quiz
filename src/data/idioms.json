@@ -5,7 +5,7 @@
     "reading": "일석이조",
     "meaning": "한 가지 행동으로 두 가지 이득을 얻는다는 뜻.",
     "category": "지혜",
-    "grade": "7"
+    "grade": "4"
   },
   {
     "id": "002",
@@ -13,7 +13,7 @@
     "reading": "칠전팔기",
     "meaning": "여러 번 실패해도 굴하지 않고 다시 일어남.",
     "category": "노력",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "003",
@@ -21,7 +21,7 @@
     "reading": "동상이몽",
     "meaning": "겉으로는 함께하지만 속으로는 서로 다른 생각을 함.",
     "category": "관계",
-    "grade": "6"
+    "grade": null
   },
   {
     "id": "004",
@@ -29,7 +29,7 @@
     "reading": "마이동풍",
     "meaning": "남의 말을 귀담아듣지 않고 흘려버림.",
     "category": "태도",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "005",
@@ -37,7 +37,7 @@
     "reading": "이심전심",
     "meaning": "말하지 않아도 마음과 뜻이 서로 통함.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "006",
@@ -45,7 +45,7 @@
     "reading": "온고지신",
     "meaning": "옛것을 익혀 새것을 깨달음.",
     "category": "학습",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "007",
@@ -53,7 +53,7 @@
     "reading": "타산지석",
     "meaning": "남의 하찮은 언행도 자신을 수양하는 데 도움이 됨.",
     "category": "학습",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "008",
@@ -61,7 +61,7 @@
     "reading": "일일삼추",
     "meaning": "몹시 그리워 하루가 삼 년처럼 길게 느껴짐.",
     "category": "감정",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "009",
@@ -69,7 +69,7 @@
     "reading": "고진감래",
     "meaning": "고생 끝에 즐거움이 찾아옴.",
     "category": "노력",
-    "grade": "5"
+    "grade": "3"
   },
   {
     "id": "010",
@@ -85,7 +85,7 @@
     "reading": "대기만성",
     "meaning": "큰 인물은 늦게 이루어진다는 뜻.",
     "category": "성장",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "012",
@@ -93,7 +93,7 @@
     "reading": "화룡점정",
     "meaning": "가장 중요한 부분을 완성하여 일을 끝맺음.",
     "category": "완성",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "013",
@@ -101,7 +101,7 @@
     "reading": "새옹지마",
     "meaning": "인생의 길흉화복은 쉽게 예측할 수 없음.",
     "category": "인생",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "014",
@@ -125,7 +125,7 @@
     "reading": "조삼모사",
     "meaning": "눈앞의 차이만 보고 결과가 같은 줄 모름.",
     "category": "지혜",
-    "grade": "6"
+    "grade": "3"
   },
   {
     "id": "017",
@@ -141,7 +141,7 @@
     "reading": "우공이산",
     "meaning": "끈기 있게 노력하면 어려운 일도 이룰 수 있음.",
     "category": "노력",
-    "grade": "5"
+    "grade": null
   },
   {
     "id": "019",
@@ -157,7 +157,7 @@
     "reading": "군계일학",
     "meaning": "평범한 무리 가운데 유난히 뛰어난 사람.",
     "category": "인물",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "021",
@@ -165,7 +165,7 @@
     "reading": "선견지명",
     "meaning": "앞일을 미리 내다보는 밝은 지혜.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "022",
@@ -173,7 +173,7 @@
     "reading": "관포지교",
     "meaning": "서로를 깊이 이해하는 두터운 우정.",
     "category": "관계",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "023",
@@ -189,7 +189,7 @@
     "reading": "자업자득",
     "meaning": "자기가 저지른 일의 결과를 스스로 받음.",
     "category": "인과",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "025",
@@ -197,7 +197,7 @@
     "reading": "인과응보",
     "meaning": "좋고 나쁜 일에는 그에 맞는 결과가 따름.",
     "category": "인과",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "026",
@@ -205,7 +205,7 @@
     "reading": "견물생심",
     "meaning": "물건을 보면 가지고 싶은 마음이 생김.",
     "category": "감정",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "027",
@@ -221,7 +221,7 @@
     "reading": "동문서답",
     "meaning": "묻는 말과 전혀 엉뚱한 대답을 함.",
     "category": "태도",
-    "grade": "7"
+    "grade": "5"
   },
   {
     "id": "029",
@@ -229,7 +229,7 @@
     "reading": "어부지리",
     "meaning": "둘이 다투는 사이에 제삼자가 이익을 얻음.",
     "category": "처세",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "030",
@@ -237,7 +237,7 @@
     "reading": "파죽지세",
     "meaning": "거침없이 밀고 나가는 기세.",
     "category": "기세",
-    "grade": "5"
+    "grade": "3"
   },
   {
     "id": "031",
@@ -261,7 +261,7 @@
     "reading": "과유불급",
     "meaning": "지나친 것은 미치지 못한 것과 같음.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "034",
@@ -277,7 +277,7 @@
     "reading": "맹인모상",
     "meaning": "일부분만 알고 전체를 안다고 여김.",
     "category": "지혜",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "036",
@@ -293,7 +293,7 @@
     "reading": "풍전등화",
     "meaning": "매우 위태로운 처지.",
     "category": "위기",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "038",
@@ -301,7 +301,7 @@
     "reading": "형설지공",
     "meaning": "어려운 형편에서도 부지런히 공부함.",
     "category": "학습",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "039",
@@ -309,7 +309,7 @@
     "reading": "구사일생",
     "meaning": "죽을 고비를 여러 번 넘기고 살아남.",
     "category": "위기",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "040",
@@ -317,7 +317,7 @@
     "reading": "난형난제",
     "meaning": "누가 더 낫다고 하기 어려울 만큼 서로 비슷함.",
     "category": "관계",
-    "grade": "6"
+    "grade": "jun3"
   },
   {
     "id": "041",
@@ -333,7 +333,7 @@
     "reading": "반면교사",
     "meaning": "남의 잘못을 보고 자신의 교훈으로 삼음.",
     "category": "학습",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "043",
@@ -341,7 +341,7 @@
     "reading": "감언이설",
     "meaning": "남을 꾀기 위한 달콤하고 이로운 듯한 말.",
     "category": "처세",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "044",
@@ -373,7 +373,7 @@
     "reading": "설상가상",
     "meaning": "어려운 일에 더 어려운 일이 겹침.",
     "category": "위기",
-    "grade": "5"
+    "grade": "3"
   },
   {
     "id": "048",
@@ -381,7 +381,7 @@
     "reading": "죽마고우",
     "meaning": "어릴 때부터 함께 자란 가까운 친구.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "049",
@@ -389,7 +389,7 @@
     "reading": "삼인성호",
     "meaning": "거짓말도 여러 사람이 말하면 참말처럼 여겨짐.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "050",
@@ -397,7 +397,7 @@
     "reading": "사필귀정",
     "meaning": "모든 일은 결국 바른 이치대로 돌아감.",
     "category": "인과",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "051",
@@ -421,7 +421,7 @@
     "reading": "욕속부달",
     "meaning": "빨리하려고 서두르면 도리어 이루지 못함.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "054",
@@ -429,7 +429,7 @@
     "reading": "유비무환",
     "meaning": "미리 준비하면 걱정할 일이 없음.",
     "category": "지혜",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "055",
@@ -445,7 +445,7 @@
     "reading": "각주구검",
     "meaning": "융통성 없이 낡은 생각이나 방법을 고집함.",
     "category": "태도",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "057",
@@ -493,7 +493,7 @@
     "reading": "명경지수",
     "meaning": "맑은 거울과 고요한 물처럼 깨끗하고 차분한 마음.",
     "category": "감정",
-    "grade": "4"
+    "grade": "3"
   },
   {
     "id": "063",
@@ -509,7 +509,7 @@
     "reading": "비일비재",
     "meaning": "한두 번이 아니라 자주 있음.",
     "category": "상황",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "065",
@@ -541,7 +541,7 @@
     "reading": "설중송탄",
     "meaning": "어려운 때에 꼭 필요한 도움을 줌.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "069",
@@ -549,7 +549,7 @@
     "reading": "동고동락",
     "meaning": "괴로움과 즐거움을 함께 나눔.",
     "category": "관계",
-    "grade": "7"
+    "grade": "jun4"
   },
   {
     "id": "070",
@@ -557,7 +557,7 @@
     "reading": "기사회생",
     "meaning": "죽을 고비에서 살아나거나 어려운 상황을 회복함.",
     "category": "위기",
-    "grade": "5"
+    "grade": "jun3"
   },
   {
     "id": "071",
@@ -573,7 +573,7 @@
     "reading": "안분지족",
     "meaning": "자기 분수를 지키며 만족할 줄 앎.",
     "category": "태도",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "073",
@@ -581,7 +581,7 @@
     "reading": "불문곡직",
     "meaning": "옳고 그름을 따지지 않음.",
     "category": "태도",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "074",
@@ -589,7 +589,7 @@
     "reading": "견리망의",
     "meaning": "이익을 보면 의리를 잊음.",
     "category": "처세",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "075",
@@ -605,7 +605,7 @@
     "reading": "결초보은",
     "meaning": "죽어서도 잊지 않고 은혜를 갚음.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "077",
@@ -613,7 +613,7 @@
     "reading": "문전성시",
     "meaning": "찾아오는 사람이 많아 문 앞이 시장처럼 붐빔.",
     "category": "상황",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "078",
@@ -629,7 +629,7 @@
     "reading": "동분서주",
     "meaning": "이리저리 바쁘게 돌아다님.",
     "category": "상황",
-    "grade": "7"
+    "grade": null
   },
   {
     "id": "080",
@@ -661,7 +661,7 @@
     "reading": "내우외환",
     "meaning": "안팎으로 어려움과 걱정이 겹침.",
     "category": "위기",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "084",
@@ -677,7 +677,7 @@
     "reading": "일거양득",
     "meaning": "한 가지 일로 두 가지 이익을 얻음.",
     "category": "기회",
-    "grade": "6"
+    "grade": "jun3"
   },
   {
     "id": "086",
@@ -685,7 +685,7 @@
     "reading": "천재일우",
     "meaning": "천 년에 한 번 만날 만큼 드문 좋은 기회.",
     "category": "기회",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "087",
@@ -693,7 +693,7 @@
     "reading": "백발백중",
     "meaning": "쏘거나 예상하는 것마다 모두 들어맞음.",
     "category": "기세",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "088",
@@ -733,7 +733,7 @@
     "reading": "언중유골",
     "meaning": "말 속에 숨은 뜻이나 날카로운 비판이 있음.",
     "category": "태도",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "093",
@@ -749,7 +749,7 @@
     "reading": "산전수전",
     "meaning": "세상의 온갖 어려움을 두루 겪음.",
     "category": "인생",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "095",
@@ -781,7 +781,7 @@
     "reading": "수주대토",
     "meaning": "노력하지 않고 우연한 행운만 기다림.",
     "category": "태도",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "099",
@@ -789,7 +789,7 @@
     "reading": "연목구어",
     "meaning": "불가능한 방법으로 원하는 것을 얻으려 함.",
     "category": "지혜",
-    "grade": "5"
+    "grade": null
   },
   {
     "id": "100",
@@ -797,7 +797,7 @@
     "reading": "목불식정",
     "meaning": "아주 간단한 글자도 모를 만큼 무식함.",
     "category": "학습",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "101",
@@ -805,7 +805,7 @@
     "reading": "근묵자흑",
     "meaning": "나쁜 사람과 가까이 지내면 나쁜 영향을 받기 쉬움.",
     "category": "관계",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "102",
@@ -813,7 +813,7 @@
     "reading": "계란유골",
     "meaning": "운이 나쁜 사람은 쉬운 일에서도 뜻밖의 방해를 만남.",
     "category": "인생",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "103",
@@ -821,7 +821,7 @@
     "reading": "백전백승",
     "meaning": "싸울 때마다 모두 이김.",
     "category": "기세",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "104",
@@ -829,7 +829,7 @@
     "reading": "입신양명",
     "meaning": "출세하여 이름을 세상에 널리 알림.",
     "category": "성장",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "105",
@@ -845,7 +845,7 @@
     "reading": "초록동색",
     "meaning": "같은 처지나 성향의 사람끼리 어울림.",
     "category": "관계",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "107",
@@ -853,7 +853,7 @@
     "reading": "각자도생",
     "meaning": "각자가 스스로 살길을 찾음.",
     "category": "처세",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "108",
@@ -885,7 +885,7 @@
     "reading": "천신만고",
     "meaning": "온갖 고생과 어려움을 겪음.",
     "category": "노력",
-    "grade": "5"
+    "grade": "jun3"
   },
   {
     "id": "112",
@@ -893,7 +893,7 @@
     "reading": "기승전결",
     "meaning": "글이나 이야기의 전개가 시작, 발전, 전환, 마무리로 짜임.",
     "category": "완성",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "113",
@@ -917,7 +917,7 @@
     "reading": "전가보도",
     "meaning": "늘 같은 수단을 마치 비장의 무기처럼 씀.",
     "category": "처세",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "116",
@@ -925,7 +925,7 @@
     "reading": "외유내강",
     "meaning": "겉은 부드러우나 속은 굳셈.",
     "category": "인물",
-    "grade": "7"
+    "grade": null
   },
   {
     "id": "117",
@@ -933,7 +933,7 @@
     "reading": "내유외강",
     "meaning": "겉은 강해 보이나 속은 부드러움.",
     "category": "인물",
-    "grade": "7"
+    "grade": null
   },
   {
     "id": "118",
@@ -949,7 +949,7 @@
     "reading": "다다익선",
     "meaning": "많으면 많을수록 더욱 좋음.",
     "category": "평가",
-    "grade": "6"
+    "grade": "jun3"
   },
   {
     "id": "120",
@@ -957,7 +957,7 @@
     "reading": "선우후락",
     "meaning": "남보다 먼저 걱정하고 뒤에 즐거움을 누림.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "121",
@@ -981,7 +981,7 @@
     "reading": "독불장군",
     "meaning": "혼자서는 장군이 될 수 없듯 남과 협력해야 함.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "124",
@@ -1013,7 +1013,7 @@
     "reading": "어두육미",
     "meaning": "생선은 머리, 고기는 꼬리 쪽이 맛있다는 말.",
     "category": "평가",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "128",
@@ -1021,7 +1021,7 @@
     "reading": "유구무언",
     "meaning": "입은 있어도 변명할 말이 없음.",
     "category": "태도",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "129",
@@ -1029,7 +1029,7 @@
     "reading": "백년하청",
     "meaning": "아무리 기다려도 일이 이루어지기 어려움.",
     "category": "인생",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "130",
@@ -1061,7 +1061,7 @@
     "reading": "이열치열",
     "meaning": "열은 열로 다스린다는 뜻으로 같은 방법으로 맞섬.",
     "category": "처세",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "134",
@@ -1077,7 +1077,7 @@
     "reading": "낭중지추",
     "meaning": "뛰어난 재능은 숨어 있어도 저절로 드러남.",
     "category": "인물",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "136",
@@ -1109,7 +1109,7 @@
     "reading": "조령모개",
     "meaning": "명령이나 결정이 자주 바뀌어 믿기 어려움.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "140",
@@ -1133,7 +1133,7 @@
     "reading": "목불인견",
     "meaning": "눈뜨고 차마 볼 수 없을 만큼 딱하거나 보기 흉함.",
     "category": "감정",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "143",
@@ -1141,7 +1141,7 @@
     "reading": "어불성설",
     "meaning": "말이 이치에 맞지 않아 도무지 말이 되지 않음.",
     "category": "태도",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "144",
@@ -1157,7 +1157,7 @@
     "reading": "결자해지",
     "meaning": "일을 만든 사람이 그 일을 해결해야 함.",
     "category": "인과",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "146",
@@ -1173,7 +1173,7 @@
     "reading": "중구난방",
     "meaning": "여러 사람의 말을 막기 어려워 의견이 어지러움.",
     "category": "관계",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "148",
@@ -1181,7 +1181,7 @@
     "reading": "지피지기",
     "meaning": "상대와 자신을 잘 알면 일을 유리하게 이끌 수 있음.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "149",
@@ -1189,7 +1189,7 @@
     "reading": "와신상담",
     "meaning": "원한이나 목표를 잊지 않고 고생을 견디며 준비함.",
     "category": "노력",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "150",
@@ -1205,7 +1205,7 @@
     "reading": "안빈낙도",
     "meaning": "가난한 생활 속에서도 편안한 마음으로 도리를 즐김.",
     "category": "태도",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "152",
@@ -1213,7 +1213,7 @@
     "reading": "금의환향",
     "meaning": "출세하여 고향으로 돌아감.",
     "category": "성장",
-    "grade": "5"
+    "grade": null
   },
   {
     "id": "153",
@@ -1221,7 +1221,7 @@
     "reading": "구우일모",
     "meaning": "아홉 마리 소의 털 하나처럼 매우 하찮고 적음.",
     "category": "평가",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "154",
@@ -1229,7 +1229,7 @@
     "reading": "견위수명",
     "meaning": "나라나 의리를 위해 위태로울 때 목숨을 바침.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "155",
@@ -1245,7 +1245,7 @@
     "reading": "경이원지",
     "meaning": "겉으로는 공경하지만 가까이하지 않고 멀리함.",
     "category": "관계",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "157",
@@ -1261,7 +1261,7 @@
     "reading": "골육상쟁",
     "meaning": "가족이나 가까운 혈육끼리 서로 다툼.",
     "category": "관계",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "159",
@@ -1285,7 +1285,7 @@
     "reading": "괄골요독",
     "meaning": "고통을 감수하고 병이나 문제의 근본을 치료함.",
     "category": "노력",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "162",
@@ -1301,7 +1301,7 @@
     "reading": "교학상장",
     "meaning": "가르치고 배우는 과정에서 서로 성장함.",
     "category": "학습",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "164",
@@ -1317,7 +1317,7 @@
     "reading": "권모술수",
     "meaning": "목적을 이루기 위해 쓰는 교묘한 꾀와 수단.",
     "category": "처세",
-    "grade": "4"
+    "grade": null
   },
   {
     "id": "166",
@@ -1325,7 +1325,7 @@
     "reading": "금지옥엽",
     "meaning": "매우 귀하게 여기며 아끼는 자식이나 사람.",
     "category": "관계",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "167",
@@ -1365,7 +1365,7 @@
     "reading": "노마지지",
     "meaning": "경험 많은 사람이 가진 지혜.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "172",
@@ -1373,7 +1373,7 @@
     "reading": "논공행상",
     "meaning": "공로의 크기를 따져 상을 줌.",
     "category": "평가",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "173",
@@ -1381,7 +1381,7 @@
     "reading": "다기망양",
     "meaning": "갈림길이 많아 목표나 본질을 잃기 쉬움.",
     "category": "지혜",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "174",
@@ -1389,7 +1389,7 @@
     "reading": "단도직입",
     "meaning": "빙빙 돌리지 않고 바로 핵심으로 들어감.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "175",
@@ -1397,7 +1397,7 @@
     "reading": "대동소이",
     "meaning": "큰 차이는 없고 조금만 다름.",
     "category": "평가",
-    "grade": "7"
+    "grade": "jun3"
   },
   {
     "id": "176",
@@ -1405,7 +1405,7 @@
     "reading": "대의명분",
     "meaning": "사람으로서 지켜야 할 큰 의리와 명분.",
     "category": "태도",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "177",
@@ -1429,7 +1429,7 @@
     "reading": "등하불명",
     "meaning": "가까이 있는 일을 오히려 잘 알지 못함.",
     "category": "지혜",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "180",
@@ -1437,7 +1437,7 @@
     "reading": "막상막하",
     "meaning": "서로 우열을 가리기 어려울 만큼 비슷함.",
     "category": "평가",
-    "grade": "6"
+    "grade": "jun3"
   },
   {
     "id": "181",
@@ -1461,7 +1461,7 @@
     "reading": "만고풍상",
     "meaning": "오랜 세월 겪어 온 온갖 고생.",
     "category": "인생",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "184",
@@ -1469,7 +1469,7 @@
     "reading": "맥수지탄",
     "meaning": "나라나 집안이 망한 것을 슬퍼하며 탄식함.",
     "category": "감정",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "185",
@@ -1485,7 +1485,7 @@
     "reading": "명약관화",
     "meaning": "불을 보듯이 아주 분명함.",
     "category": "평가",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "187",
@@ -1501,7 +1501,7 @@
     "reading": "무용지물",
     "meaning": "쓸모가 전혀 없는 물건이나 사람.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "189",
@@ -1509,7 +1509,7 @@
     "reading": "무위도식",
     "meaning": "하는 일 없이 놀고먹음.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "190",
@@ -1517,7 +1517,7 @@
     "reading": "문방사우",
     "meaning": "종이, 붓, 먹, 벼루를 이르는 말.",
     "category": "학습",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "191",
@@ -1525,7 +1525,7 @@
     "reading": "물심일여",
     "meaning": "몸과 마음, 사물과 정신이 하나처럼 어우러짐.",
     "category": "태도",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "192",
@@ -1533,7 +1533,7 @@
     "reading": "반신반의",
     "meaning": "반은 믿고 반은 의심함.",
     "category": "태도",
-    "grade": "6"
+    "grade": null
   },
   {
     "id": "193",
@@ -1541,7 +1541,7 @@
     "reading": "배은망덕",
     "meaning": "은혜를 저버리고 덕을 잊음.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "194",
@@ -1549,7 +1549,7 @@
     "reading": "백골난망",
     "meaning": "죽어서도 잊기 어려울 만큼 큰 은혜를 입음.",
     "category": "감정",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "195",
@@ -1573,7 +1573,7 @@
     "reading": "병가상사",
     "meaning": "전쟁에서 이기고 지는 일은 흔히 있는 일임.",
     "category": "인생",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "198",
@@ -1589,7 +1589,7 @@
     "reading": "부화뇌동",
     "meaning": "줏대 없이 남의 의견을 따라 움직임.",
     "category": "태도",
-    "grade": "6"
+    "grade": null
   },
   {
     "id": "200",
@@ -1597,7 +1597,7 @@
     "reading": "불가사의",
     "meaning": "상식으로는 생각하거나 설명하기 어려움.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "201",
@@ -1605,7 +1605,7 @@
     "reading": "불립문자",
     "meaning": "문자나 말에 의존하지 않고 마음으로 뜻을 전함.",
     "category": "학습",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "202",
@@ -1613,7 +1613,7 @@
     "reading": "불면불휴",
     "meaning": "자지도 쉬지도 않고 계속 힘씀.",
     "category": "노력",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "203",
@@ -1645,7 +1645,7 @@
     "reading": "사반공배",
     "meaning": "적은 노력으로 큰 성과를 거둠.",
     "category": "노력",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "207",
@@ -1653,7 +1653,7 @@
     "reading": "사인재위",
     "meaning": "일의 성패는 사람의 노력에 달려 있음.",
     "category": "노력",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "208",
@@ -1669,7 +1669,7 @@
     "reading": "살신성인",
     "meaning": "자기 몸을 희생하여 옳은 일을 이룸.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "210",
@@ -1677,7 +1677,7 @@
     "reading": "상전벽해",
     "meaning": "세상이 몰라볼 만큼 크게 변함.",
     "category": "인생",
-    "grade": "5"
+    "grade": null
   },
   {
     "id": "211",
@@ -1685,7 +1685,7 @@
     "reading": "생면부지",
     "meaning": "한 번도 만난 적이 없어 전혀 모름.",
     "category": "관계",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "212",
@@ -1701,7 +1701,7 @@
     "reading": "선공후사",
     "meaning": "공적인 일을 먼저 하고 사사로운 일은 뒤로 함.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "214",
@@ -1717,7 +1717,7 @@
     "reading": "세한삼우",
     "meaning": "추운 겨울에도 변치 않는 소나무, 대나무, 매화를 이름.",
     "category": "인물",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "216",
@@ -1733,7 +1733,7 @@
     "reading": "속전속결",
     "meaning": "싸움이나 일을 오래 끌지 않고 빨리 끝냄.",
     "category": "완성",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "218",
@@ -1741,7 +1741,7 @@
     "reading": "수어지교",
     "meaning": "물과 물고기처럼 매우 친밀한 사이.",
     "category": "관계",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "219",
@@ -1749,7 +1749,7 @@
     "reading": "수서양단",
     "meaning": "이쪽저쪽을 살피며 결정을 못 함.",
     "category": "태도",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "220",
@@ -1757,7 +1757,7 @@
     "reading": "시시비비",
     "meaning": "옳고 그름을 따져 밝힘.",
     "category": "평가",
-    "grade": "7"
+    "grade": "jun3"
   },
   {
     "id": "221",
@@ -1781,7 +1781,7 @@
     "reading": "식자우환",
     "meaning": "아는 것이 도리어 근심을 불러옴.",
     "category": "학습",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "224",
@@ -1789,7 +1789,7 @@
     "reading": "신상필벌",
     "meaning": "공이 있으면 상을 주고 죄가 있으면 반드시 벌함.",
     "category": "평가",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "225",
@@ -1797,7 +1797,7 @@
     "reading": "십년감수",
     "meaning": "몹시 놀라 수명이 줄어든 듯함.",
     "category": "감정",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "226",
@@ -1813,7 +1813,7 @@
     "reading": "아전인수",
     "meaning": "자기에게 이롭게만 해석하거나 행동함.",
     "category": "태도",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "228",
@@ -1821,7 +1821,7 @@
     "reading": "안거위사",
     "meaning": "편안할 때도 위험을 생각하여 대비함.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "229",
@@ -1845,7 +1845,7 @@
     "reading": "약방감초",
     "meaning": "어떤 일에나 빠짐없이 끼어드는 사람이나 물건.",
     "category": "인물",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "232",
@@ -1853,7 +1853,7 @@
     "reading": "약육강식",
     "meaning": "약한 자가 강한 자에게 먹히는 냉혹한 이치.",
     "category": "인생",
-    "grade": "4"
+    "grade": "5"
   },
   {
     "id": "233",
@@ -1877,7 +1877,7 @@
     "reading": "어불근리",
     "meaning": "말이 이치에 맞지 않음.",
     "category": "태도",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "236",
@@ -1885,7 +1885,7 @@
     "reading": "언행일치",
     "meaning": "말과 행동이 서로 같음.",
     "category": "태도",
-    "grade": "7"
+    "grade": "4"
   },
   {
     "id": "237",
@@ -1893,7 +1893,7 @@
     "reading": "역지사지",
     "meaning": "처지를 바꾸어 상대의 입장에서 생각함.",
     "category": "지혜",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "238",
@@ -1925,7 +1925,7 @@
     "reading": "오합지졸",
     "meaning": "까마귀 떼처럼 질서 없이 모인 무리.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "242",
@@ -1933,7 +1933,7 @@
     "reading": "외화내빈",
     "meaning": "겉은 화려하지만 속은 빈약함.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "243",
@@ -1957,7 +1957,7 @@
     "reading": "유명무실",
     "meaning": "이름만 있고 실속은 없음.",
     "category": "평가",
-    "grade": "5"
+    "grade": "jun4"
   },
   {
     "id": "246",
@@ -1965,7 +1965,7 @@
     "reading": "유종지미",
     "meaning": "끝까지 잘 마무리하는 아름다움.",
     "category": "완성",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "247",
@@ -1989,7 +1989,7 @@
     "reading": "이실직고",
     "meaning": "사실 그대로 솔직하게 말함.",
     "category": "태도",
-    "grade": null
+    "grade": "jun4"
   },
   {
     "id": "250",
@@ -2021,7 +2021,7 @@
     "reading": "일구이언",
     "meaning": "한 입으로 두 말을 하여 말을 바꿈.",
     "category": "태도",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "254",
@@ -2029,7 +2029,7 @@
     "reading": "일도양단",
     "meaning": "머뭇거리지 않고 단호하게 결단함.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "255",
@@ -2045,7 +2045,7 @@
     "reading": "일편단심",
     "meaning": "변하지 않는 한결같은 참된 마음.",
     "category": "감정",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "257",
@@ -2061,7 +2061,7 @@
     "reading": "일취월장",
     "meaning": "날마다 달마다 발전하여 크게 나아짐.",
     "category": "성장",
-    "grade": "6"
+    "grade": "3"
   },
   {
     "id": "259",
@@ -2085,7 +2085,7 @@
     "reading": "자수성가",
     "meaning": "물려받은 것 없이 스스로 힘으로 집안을 이룸.",
     "category": "성장",
-    "grade": "6"
+    "grade": "5"
   },
   {
     "id": "262",
@@ -2101,7 +2101,7 @@
     "reading": "자초지종",
     "meaning": "처음부터 끝까지의 자세한 사정.",
     "category": "완성",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "264",
@@ -2109,7 +2109,7 @@
     "reading": "장유유서",
     "meaning": "어른과 아이 사이에는 지켜야 할 차례와 질서가 있음.",
     "category": "관계",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "265",
@@ -2141,7 +2141,7 @@
     "reading": "전무후무",
     "meaning": "전에도 없고 앞으로도 없을 만큼 드묾.",
     "category": "평가",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "269",
@@ -2173,7 +2173,7 @@
     "reading": "조족지혈",
     "meaning": "새 발의 피처럼 아주 적은 분량.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "273",
@@ -2181,7 +2181,7 @@
     "reading": "좌정관천",
     "meaning": "우물 안에 앉아 하늘을 보듯 견문이 좁음.",
     "category": "태도",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "274",
@@ -2197,7 +2197,7 @@
     "reading": "주야장천",
     "meaning": "밤낮으로 쉬지 않고 계속됨.",
     "category": "노력",
-    "grade": null
+    "grade": "5"
   },
   {
     "id": "276",
@@ -2221,7 +2221,7 @@
     "reading": "지록위마",
     "meaning": "사슴을 가리켜 말이라 하듯 윗사람을 속여 권세를 휘두름.",
     "category": "처세",
-    "grade": "3"
+    "grade": null
   },
   {
     "id": "279",
@@ -2229,7 +2229,7 @@
     "reading": "지성감천",
     "meaning": "지극한 정성은 하늘도 감동시킴.",
     "category": "노력",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "280",
@@ -2237,7 +2237,7 @@
     "reading": "진퇴양난",
     "meaning": "나아갈 수도 물러설 수도 없는 어려운 처지.",
     "category": "위기",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "281",
@@ -2261,7 +2261,7 @@
     "reading": "천편일률",
     "meaning": "여럿이 모두 비슷비슷하여 변화가 없음.",
     "category": "평가",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "284",
@@ -2277,7 +2277,7 @@
     "reading": "추풍낙엽",
     "meaning": "가을바람에 떨어지는 잎처럼 세력이 쉽게 쇠함.",
     "category": "인생",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "286",
@@ -2293,7 +2293,7 @@
     "reading": "충언역이",
     "meaning": "진심 어린 충고는 귀에 거슬리기 쉬움.",
     "category": "지혜",
-    "grade": null
+    "grade": "jun3"
   },
   {
     "id": "288",
@@ -2309,7 +2309,7 @@
     "reading": "태산북두",
     "meaning": "어떤 분야에서 가장 존경받는 뛰어난 사람.",
     "category": "인물",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "290",
@@ -2317,7 +2317,7 @@
     "reading": "파안대소",
     "meaning": "얼굴을 활짝 펴고 크게 웃음.",
     "category": "감정",
-    "grade": null
+    "grade": "3"
   },
   {
     "id": "291",
@@ -2325,7 +2325,7 @@
     "reading": "평지풍파",
     "meaning": "평온한 곳에 갑자기 일어난 소란이나 분쟁.",
     "category": "위기",
-    "grade": null
+    "grade": "4"
   },
   {
     "id": "292",
@@ -2397,6 +2397,102 @@
     "reading": "호연지기",
     "meaning": "세상에 거리낌 없는 넓고 큰 기개.",
     "category": "인물",
+    "grade": null
+  },
+  {
+    "id": "301",
+    "idiom": "正正堂堂",
+    "reading": "정정당당",
+    "meaning": "태도나 처지가 바르고 떳떳함.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "302",
+    "idiom": "聞一知十",
+    "reading": "문일지십",
+    "meaning": "하나를 들으면 열을 앎, 매우 총명함.",
+    "category": "지혜",
+    "grade": "jun4"
+  },
+  {
+    "id": "303",
+    "idiom": "靑山流水",
+    "reading": "청산유수",
+    "meaning": "막힘없이 썩 잘하는 말을 비유적으로 이르는 말.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "304",
+    "idiom": "耳目口鼻",
+    "reading": "이목구비",
+    "meaning": "귀, 눈, 입, 코를 아울러 이르는 말, 또는 그것들로 이루어진 얼굴 생김새.",
+    "category": "인물",
     "grade": "4"
+  },
+  {
+    "id": "305",
+    "idiom": "大書特筆",
+    "reading": "대서특필",
+    "meaning": "누구나 알게 크게 여러 사람의 눈에 띄게 씀.",
+    "category": "평가",
+    "grade": "4"
+  },
+  {
+    "id": "306",
+    "idiom": "不事二君",
+    "reading": "불사이군",
+    "meaning": "두 임금을 섬기지 않음.",
+    "category": "처세",
+    "grade": "4"
+  },
+  {
+    "id": "307",
+    "idiom": "多情多感",
+    "reading": "다정다감",
+    "meaning": "정이 많고 감정이 풍부함.",
+    "category": "감정",
+    "grade": "4"
+  },
+  {
+    "id": "308",
+    "idiom": "陽春佳節",
+    "reading": "양춘가절",
+    "meaning": "따뜻하고 좋은 봄철.",
+    "category": "상황",
+    "grade": "jun3"
+  },
+  {
+    "id": "309",
+    "idiom": "自强不息",
+    "reading": "자강불식",
+    "meaning": "스스로 힘써 몸과 마음을 가다듬어 쉬지 않음.",
+    "category": "노력",
+    "grade": "jun3"
+  },
+  {
+    "id": "310",
+    "idiom": "異口同聲",
+    "reading": "이구동성",
+    "meaning": "여러 사람의 말이 한결같음.",
+    "category": "관계",
+    "grade": "jun3"
+  },
+  {
+    "id": "311",
+    "idiom": "一長一短",
+    "reading": "일장일단",
+    "meaning": "장점도 있고 단점도 있음.",
+    "category": "평가",
+    "grade": "5"
+  },
+  {
+    "id": "312",
+    "idiom": "皮骨相接",
+    "reading": "피골상접",
+    "meaning": "살가죽과 뼈가 맞닿을 정도로 몹시 여윔.",
+    "category": "상황",
+    "grade": "3"
   }
 ]

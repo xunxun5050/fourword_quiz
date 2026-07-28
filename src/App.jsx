@@ -41,15 +41,19 @@ const DIFFICULTIES = {
   hard: { label: "어려움", seconds: 7 },
 };
 const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
-const GRADE_KEYS = ["8", "7", "6", "5", "4", "3"];
+const GRADE_KEYS = ["8", "7", "6", "jun5", "5", "jun4", "4", "jun3", "3"];
 const GRADE_LABELS = {
   8: "8급",
   7: "7급",
   6: "6급",
+  jun5: "준5급",
   5: "5급",
+  jun4: "준4급",
   4: "4급",
+  jun3: "준3급",
   3: "3급",
 };
+const IDIOM_ENABLED_GRADES = new Set(["5", "jun4", "4", "jun3", "3"]);
 const SUB_MODE_LABELS = {
   idiom: "사자성어",
   word: "단어",
@@ -1082,12 +1086,14 @@ function reducer(state, action) {
     case "SET_GRADE": {
       if (state.phase !== "home") return state;
       const nextSubMode =
-        action.grade === "8" && state.subMode === "idiom" ? "word" : state.subMode;
+        !IDIOM_ENABLED_GRADES.has(action.grade) && state.subMode === "idiom"
+          ? "word"
+          : state.subMode;
       return { ...state, grade: action.grade, subMode: nextSubMode };
     }
     case "SET_SUBMODE": {
       if (state.phase !== "home") return state;
-      if (action.subMode === "idiom" && state.grade === "8") return state;
+      if (action.subMode === "idiom" && !IDIOM_ENABLED_GRADES.has(state.grade)) return state;
       return { ...state, subMode: action.subMode };
     }
     case "SHOW_LEADERBOARD":
@@ -1785,7 +1791,7 @@ function HomeView({
   const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
   const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
   const isGradeMode = mode === "grade";
-  const idiomDisabled = grade === "8";
+  const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
   return (
     <section className="home-view">
@@ -1859,7 +1865,9 @@ function HomeView({
                     className={`difficulty-button ${subMode === "idiom" ? "is-active" : ""}`}
                     disabled={idiomDisabled}
                     onClick={() => onSubModeChange("idiom")}
-                    title={idiomDisabled ? "8급은 사자성어 문제가 없어요" : undefined}
+                    title={
+                      idiomDisabled ? "5급부터 사자성어 문제가 나와요" : undefined
+                    }
                     type="button"
                   >
                     사자성어
