@@ -8,6 +8,7 @@ import {
   FaFileAlt,
   FaHome,
   FaImage,
+  FaInfoCircle,
   FaMedal,
   FaPalette,
   FaPlay,
@@ -1260,6 +1261,7 @@ function App() {
   const [playerProfile] = useState(loadPlayerProfile);
   const [infoPath, setInfoPath] = useState(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showGameInfo, setShowGameInfo] = useState(false);
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1586,6 +1588,7 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
+            onShowGameInfo={() => setShowGameInfo(true)}
             onSoundToggle={toggleSoundMuted}
             onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
             onThemeToggle={toggleGameTheme}
@@ -1654,6 +1657,8 @@ function App() {
       {showExitConfirm && (
         <ExitConfirmModal onCancel={cancelExitHome} onConfirm={confirmExitHome} />
       )}
+
+      {showGameInfo && <GameInfoModal onClose={() => setShowGameInfo(false)} />}
     </main>
   );
 }
@@ -1804,6 +1809,7 @@ function HomeView({
   onGradeChange,
   onModeChange,
   onNavigateInfo,
+  onShowGameInfo,
   onSoundToggle,
   onStart,
   onSubModeChange,
@@ -1841,12 +1847,22 @@ function HomeView({
           {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
           <span>{soundMuted ? "무음" : "소리"}</span>
         </button>
+
+        <button
+          aria-label="게임 설명 보기"
+          className="theme-toggle"
+          onClick={onShowGameInfo}
+          title="게임 설명"
+          type="button"
+        >
+          <FaInfoCircle aria-hidden="true" />
+          <span>설명</span>
+        </button>
       </div>
 
       <div className="home-hero">
         <div className="landing-panel">
           <div className="landing-copy">
-            <strong className="landing-title">사자성어 퀴즈</strong>
             <span className="landing-mark" aria-hidden="true">四字</span>
             <p className="landing-lead">
               {isGradeMode ? "한자급수 대비 스프린트" : "60초 사자성어 스프린트"}
@@ -1862,7 +1878,7 @@ function HomeView({
                 onClick={() => onModeChange("casual")}
                 type="button"
               >
-                캐주얼 모드
+                캐주얼
               </button>
               <button
                 aria-pressed={isGradeMode}
@@ -1870,7 +1886,7 @@ function HomeView({
                 onClick={() => onModeChange("grade")}
                 type="button"
               >
-                급수 대비 모드
+                급수 대비
               </button>
             </div>
           </div>
@@ -1946,59 +1962,6 @@ function HomeView({
         </div>
       </div>
 
-      <div className="home-content" aria-label="사자성어 학습 콘텐츠">
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>미리 보기</span>
-            <h2>오늘의 예시 성어</h2>
-            <p>
-              한자 모양과 한글 독음, 뜻을 함께 보면 빈칸 문제와 뜻풀이 문제를
-              더 자연스럽게 풀 수 있습니다.
-            </p>
-          </div>
-          <ul className="idiom-preview-list">
-            {HOME_PREVIEW_IDIOMS.map((item) => (
-              <li key={item.id}>
-                <strong>{item.idiom}</strong>
-                <span>{item.reading}</span>
-                <p>{item.meaning}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>게임 설명</span>
-            <h2>뜻과 한자를 번갈아 익혀요</h2>
-            <p>
-              사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
-              학습형 게임입니다.
-            </p>
-          </div>
-          <div className="home-guide-grid">
-            {HOME_GAME_GUIDE.map((item) => (
-              <article className="home-guide-item" key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>수록 데이터 안내</span>
-            <h2>한자, 독음, 뜻을 함께 정리했습니다</h2>
-          </div>
-          <ul className="home-data-list">
-            {HOME_DATA_NOTES.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
       <nav className="home-footer-links" aria-label="사이트 안내">
         <div>
           {INFO_PAGE_LINKS.slice(0, 3).map((link, index) => (
@@ -2055,6 +2018,82 @@ function ExitConfirmModal({ onCancel, onConfirm }) {
           <button className="primary-action" onClick={onConfirm} type="button">
             나가기
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GameInfoModal({ onClose }) {
+  return (
+    <div className="info-modal-overlay" role="presentation" onClick={onClose}>
+      <div
+        className="info-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-info-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="info-modal-header">
+          <h2 id="game-info-title">게임 설명</h2>
+          <button aria-label="닫기" className="info-modal-close" onClick={onClose} type="button">
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="info-modal-body">
+          <div className="home-content" aria-label="사자성어 학습 콘텐츠">
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>미리 보기</span>
+                <h2>오늘의 예시 성어</h2>
+                <p>
+                  한자 모양과 한글 독음, 뜻을 함께 보면 빈칸 문제와 뜻풀이 문제를
+                  더 자연스럽게 풀 수 있습니다.
+                </p>
+              </div>
+              <ul className="idiom-preview-list">
+                {HOME_PREVIEW_IDIOMS.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.idiom}</strong>
+                    <span>{item.reading}</span>
+                    <p>{item.meaning}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>게임 방식</span>
+                <h2>뜻과 한자를 번갈아 익혀요</h2>
+                <p>
+                  사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
+                  학습형 게임입니다.
+                </p>
+              </div>
+              <div className="home-guide-grid">
+                {HOME_GAME_GUIDE.map((item) => (
+                  <article className="home-guide-item" key={item.title}>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>수록 데이터 안내</span>
+                <h2>한자, 독음, 뜻을 함께 정리했습니다</h2>
+              </div>
+              <ul className="home-data-list">
+                {HOME_DATA_NOTES.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
         </div>
       </div>
     </div>

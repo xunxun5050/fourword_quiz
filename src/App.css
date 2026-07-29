@@ -1009,6 +1009,62 @@ button:focus-visible {
   margin-top: 8px;
 }
 
+.info-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 4vw, 32px);
+  background: rgba(15, 25, 32, 0.55);
+}
+
+.info-modal-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: min(680px, 100%);
+  max-height: min(88vh, 860px);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.info-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px clamp(16px, 3vw, 26px);
+  border-bottom: 2px solid var(--line);
+  background: rgba(255, 253, 246, 0.98);
+}
+
+.info-modal-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.info-modal-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.info-modal-body {
+  overflow-y: auto;
+  padding: clamp(16px, 3vw, 26px);
+}
+
 .result-summary,
 .history-panel {
   padding: clamp(14px, 2.1vw, 26px);
