@@ -15,6 +15,8 @@ import {
   FaStopwatch,
   FaTimes,
   FaTrophy,
+  FaVolumeMute,
+  FaVolumeUp,
 } from "react-icons/fa";
 import idioms from "./data/idioms.json";
 import hanjaChars from "./data/hanjaChars.json";
@@ -31,8 +33,8 @@ const STORAGE_KEYS = {
   gameTheme: "sjse_game_theme",
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
+  soundMuted: "sjse_sound_muted",
 };
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
 const MAX_LEADERBOARD_ENTRIES = 5;
 
 const DIFFICULTIES = {
@@ -70,12 +72,9 @@ const GAME_THEMES = {
   hanji: { label: "한지", description: "한지 보드", next: "notebook" },
   notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
 };
-const GITHUB_REPOSITORY_URL = "https://github.com/xunxun5050/fourword_quiz";
 const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
   "사자성어 퀴즈 건의",
-)}&body=${encodeURIComponent(
-  `건의 내용을 적어주세요.\n\n관련 저장소: ${GITHUB_REPOSITORY_URL}`,
-)}`;
+)}&body=${encodeURIComponent("건의 내용을 적어주세요.")}`;
 const INFO_PAGE_LINKS = [
   { label: "건의하기", path: "/ko/feedback" },
   { label: "게임 방법", path: "/ko/how-to-play" },
@@ -102,7 +101,6 @@ const INFO_PAGES = {
         body: [
           "사용한 기기와 브라우저, 발생한 화면, 재현 방법을 적어주세요.",
           "리더보드나 결과 저장 관련 문제라면 닉네임과 대략적인 플레이 시간을 함께 알려주세요.",
-          `관련 저장소: ${GITHUB_REPOSITORY_URL}`,
         ],
       },
     ],
@@ -213,13 +211,6 @@ const INFO_PAGES = {
         body: [
           "저장 정보는 게임 기록 유지, 하루 단위 리더보드 표시, 결과 복기를 위해 사용됩니다.",
           "민감한 개인정보나 결제 정보는 게임 기능을 위해 요구하지 않습니다.",
-        ],
-      },
-      {
-        heading: "광고와 외부 서비스",
-        body: [
-          "Google AdSense가 활성화된 경우 광고 제공을 위해 쿠키 또는 유사 기술이 사용될 수 있습니다.",
-          "광고 개인화와 관련한 자세한 내용은 Google의 광고 및 개인정보 안내를 확인해 주세요.",
         ],
       },
     ],
@@ -598,17 +589,6 @@ function formatClock(value) {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function normalizeInfoPath(pathname) {
-  const normalizedPath =
-    pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
-  return INFO_PAGES[normalizedPath] ? normalizedPath : null;
-}
-
-function getInitialInfoPath() {
-  if (typeof window === "undefined") return null;
-  return normalizeInfoPath(window.location.pathname);
-}
-
 function loadStats() {
   if (typeof window === "undefined") return INITIAL_STATS;
 
@@ -749,6 +729,58 @@ function loadGameTheme() {
 
   const savedTheme = localStorage.getItem(STORAGE_KEYS.gameTheme);
   return GAME_THEMES[savedTheme] ? savedTheme : "hanji";
+}
+
+function loadSoundMuted() {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(STORAGE_KEYS.soundMuted) === "1";
+}
+
+let sharedAudioContext = null;
+
+function getAudioContext() {
+  if (typeof window === "undefined") return null;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  if (!sharedAudioContext) {
+    sharedAudioContext = new AudioContextClass();
+  }
+  if (sharedAudioContext.state === "suspended") {
+    sharedAudioContext.resume();
+  }
+  return sharedAudioContext;
+}
+
+function playTone(frequencies, { duration = 0.12, type = "sine" } = {}) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  frequencies.forEach((frequency, index) => {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const startAt = now + index * duration;
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.2, startAt + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration);
+  });
+}
+
+function playCorrectSound() {
+  playTone([880, 1175], { duration: 0.1 });
+}
+
+function playWrongSound() {
+  playTone([220, 165], { duration: 0.14, type: "triangle" });
 }
 
 async function parseJsonResponse(response) {
@@ -1224,8 +1256,10 @@ function App() {
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
   const [gameTheme, setGameTheme] = useState(loadGameTheme);
+  const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
   const [playerProfile] = useState(loadPlayerProfile);
-  const [infoPath, setInfoPath] = useState(getInitialInfoPath);
+  const [infoPath, setInfoPath] = useState(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1242,21 +1276,16 @@ function App() {
   const accuracy = getAccuracy(state.score, state.attempted);
 
   useEffect(() => {
-    function handlePopState() {
-      setInfoPath(getInitialInfoPath());
-    }
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
     document.title = infoPage ? `${infoPage.title} | 사자성어 퀴즈` : "사자성어 퀴즈";
   }, [infoPage]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.gameTheme, gameTheme);
   }, [gameTheme]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
+  }, [soundMuted]);
 
   useEffect(() => {
     if (
@@ -1424,18 +1453,29 @@ function App() {
     }
 
     event?.preventDefault();
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, "", path);
-    }
     setInfoPath(path);
   }
 
   function navigateHomeRoute() {
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
     setInfoPath(null);
     dispatch({ type: "HOME" });
+  }
+
+  function requestHome() {
+    if (state.phase === "playing" || state.phase === "feedback") {
+      setShowExitConfirm(true);
+      return;
+    }
+    dispatch({ type: "HOME" });
+  }
+
+  function confirmExitHome() {
+    setShowExitConfirm(false);
+    dispatch({ type: "HOME" });
+  }
+
+  function cancelExitHome() {
+    setShowExitConfirm(false);
   }
 
   function showLeaderboardPreview() {
@@ -1459,11 +1499,18 @@ function App() {
     setGameTheme((currentTheme) => GAME_THEMES[currentTheme]?.next || "hanji");
   }
 
+  function toggleSoundMuted() {
+    setSoundMuted((currentMuted) => !currentMuted);
+  }
+
   function submitAnswer(answer) {
     if (state.phase !== "playing") return;
     const correct = answer === state.currentQuestion.answer;
     if (navigator.vibrate) {
       navigator.vibrate(correct ? 30 : [25, 25, 25]);
+    }
+    if (!soundMuted) {
+      correct ? playCorrectSound() : playWrongSound();
     }
     dispatch({ type: "ANSWER", answer, now: Date.now() });
   }
@@ -1505,7 +1552,6 @@ function App() {
 
   return (
     <main className={`app-shell is-${state.phase}-phase theme-${gameTheme}`}>
-      <AdSenseAuto enabled={state.phase === "home"} />
       <div className="arcade-stage">
         {state.phase !== "countdown" &&
           state.phase !== "leaderboard" &&
@@ -1519,7 +1565,7 @@ function App() {
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onHome={() => dispatch({ type: "HOME" })}
+            onHome={requestHome}
             questionNumber={state.questionNumber}
             score={state.score}
             totalLeft={totalLeft}
@@ -1540,8 +1586,10 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
+            onSoundToggle={toggleSoundMuted}
             onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
             onThemeToggle={toggleGameTheme}
+            soundMuted={soundMuted}
           />
         )}
 
@@ -1563,7 +1611,7 @@ function App() {
             lastResult={state.lastResult}
             onAnswer={submitAnswer}
             onFinish={() => dispatch({ type: "END" })}
-            onHome={() => dispatch({ type: "HOME" })}
+            onHome={requestHome}
             questionLeft={questionLeft}
             questionProgress={questionProgress}
             resultLabel={resultLabel}
@@ -1602,39 +1650,12 @@ function App() {
               )}초, 현재 점수 ${state.score}점`}
         </p>
       </div>
+
+      {showExitConfirm && (
+        <ExitConfirmModal onCancel={cancelExitHome} onConfirm={confirmExitHome} />
+      )}
     </main>
   );
-}
-
-function AdSenseAuto({ enabled }) {
-  useEffect(() => {
-    if (!enabled || !ADSENSE_CLIENT || ADSENSE_CLIENT === "ca-pub-0000000000000000") {
-      return undefined;
-    }
-
-    const scriptId = "adsense-auto-ads";
-    if (document.getElementById(scriptId)) {
-      return undefined;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
-      ADSENSE_CLIENT,
-    )}`;
-    document.head.appendChild(script);
-
-    return () => {
-      script.remove();
-      document
-        .querySelectorAll(".google-auto-placed, ins.adsbygoogle")
-        .forEach((element) => element.remove());
-    };
-  }, [enabled]);
-
-  return null;
 }
 
 function InfoPage({ onHome, page }) {
@@ -1783,9 +1804,11 @@ function HomeView({
   onGradeChange,
   onModeChange,
   onNavigateInfo,
+  onSoundToggle,
   onStart,
   onSubModeChange,
   onThemeToggle,
+  soundMuted,
   subMode,
 }) {
   const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
@@ -1795,16 +1818,30 @@ function HomeView({
 
   return (
     <section className="home-view">
-      <button
-        aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
-        className="theme-toggle"
-        onClick={onThemeToggle}
-        title={`${currentTheme.description} 테마`}
-        type="button"
-      >
-        <FaPalette aria-hidden="true" />
-        <span>{currentTheme.label}</span>
-      </button>
+      <div className="home-toggle-row">
+        <button
+          aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
+          className="theme-toggle"
+          onClick={onThemeToggle}
+          title={`${currentTheme.description} 테마`}
+          type="button"
+        >
+          <FaPalette aria-hidden="true" />
+          <span>{currentTheme.label}</span>
+        </button>
+
+        <button
+          aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
+          aria-pressed={soundMuted}
+          className="theme-toggle"
+          onClick={onSoundToggle}
+          title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
+          type="button"
+        >
+          {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
+          <span>{soundMuted ? "무음" : "소리"}</span>
+        </button>
+      </div>
 
       <div className="home-hero">
         <div className="landing-panel">
@@ -1996,6 +2033,31 @@ function CountdownView({ count }) {
         <strong key={count}>{count}</strong>
       </div>
     </section>
+  );
+}
+
+function ExitConfirmModal({ onCancel, onConfirm }) {
+  return (
+    <div className="exit-confirm-overlay" role="presentation" onClick={onCancel}>
+      <div
+        className="exit-confirm-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="exit-confirm-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="exit-confirm-title">게임을 종료할까요?</h2>
+        <p>지금 나가면 진행 중인 기록은 저장되지 않아요.</p>
+        <div className="exit-confirm-actions">
+          <button className="secondary-action" onClick={onCancel} type="button">
+            계속하기
+          </button>
+          <button className="primary-action" onClick={onConfirm} type="button">
+            나가기
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

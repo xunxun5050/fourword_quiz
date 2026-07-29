@@ -123,15 +123,13 @@ npm run fetch:idioms -- --source=opendict --dry-run --limit=20
 
 스크립트는 한자 4글자, 훈음, 뜻풀이가 있는 항목만 게임 데이터 형식으로 변환하고, 기존 사자성어와 중복되는 항목은 건너뜁니다.
 
-## 배포와 광고
+## 배포
 
-Vercel에 배포할 수 있는 정적 Vite 앱입니다. Google AdSense 자동 광고를 사용할 경우 Vercel 프로젝트 환경변수에 아래 값을 설정합니다.
+Vercel에 배포할 수 있는 정적 Vite 앱입니다.
 
-```bash
-VITE_ADSENSE_CLIENT=ca-pub-0000000000000000
-```
-
-이 값이 없으면 광고 스크립트는 로드되지 않습니다. AdSense 승인 후 계정에서 Auto ads 코드를 확인하고, 필요한 경우 `public/ads.txt`에 AdSense가 안내하는 publisher ID 행을 추가합니다.
+앱인토스(App in Toss) 미니앱 정책상 외부 광고 네트워크 연동이 금지되어 있어, 앱 코드에서
+Google AdSense 연동을 제거했습니다(`VITE_ADSENSE_CLIENT` 환경변수는 더 이상 읽지 않습니다).
+기존 웹 배포에서 광고 수익을 계속 운영하려면 별도 브랜치/빌드로 분리하는 것을 검토하세요.
 
 ## 프로젝트 구조
 

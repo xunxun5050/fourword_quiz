@@ -406,11 +406,16 @@ button:focus-visible {
   padding: clamp(24px, 6vh, 62px) 0 clamp(28px, 7vh, 72px);
 }
 
-.theme-toggle {
+.home-toggle-row {
   position: absolute;
   top: clamp(14px, 2.5vw, 26px);
   right: clamp(14px, 2.5vw, 26px);
   z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.theme-toggle {
   display: inline-flex;
   gap: 6px;
   align-items: center;
@@ -960,6 +965,48 @@ button:focus-visible {
   line-height: 0.9;
   text-shadow: 0 6px 0 rgba(22, 32, 39, 0.14);
   animation: countdown-pop 0.32s ease;
+}
+
+.exit-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 25, 32, 0.55);
+}
+
+.exit-confirm-card {
+  display: grid;
+  gap: 14px;
+  max-width: 360px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.exit-confirm-card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.exit-confirm-card p {
+  margin: 0;
+  color: rgba(22, 32, 39, 0.75);
+  font-size: 0.95rem;
+}
+
+.exit-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .result-summary,
