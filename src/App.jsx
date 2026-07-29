@@ -13,6 +13,7 @@ import {
   FaPalette,
   FaPlay,
   FaRedoAlt,
+  FaStar,
   FaStopwatch,
   FaTimes,
   FaTrophy,
@@ -35,6 +36,7 @@ const STORAGE_KEYS = {
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
   soundMuted: "sjse_sound_muted",
+  savedWords: "sjse_saved_words",
 };
 const MAX_LEADERBOARD_ENTRIES = 5;
 
@@ -606,6 +608,21 @@ function saveStats(stats) {
   localStorage.setItem(STORAGE_KEYS.playCount, String(stats.playCount));
 }
 
+function loadSavedWords() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.savedWords) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedWords(savedWords) {
+  localStorage.setItem(STORAGE_KEYS.savedWords, JSON.stringify(savedWords));
+}
+
 function getTodayKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",
@@ -1110,6 +1127,108 @@ function buildResultImageBlob({ accuracy, difficulty, history, score }) {
   });
 }
 
+function buildSavedWordsExportText(savedWords) {
+  const lines = ["No\t표기 (독음)\t뜻"];
+
+  savedWords.forEach((item, index) => {
+    lines.push(`${index + 1}\t${item.idiom} (${item.reading})\t${item.meaning}`);
+  });
+
+  return lines.join("\n");
+}
+
+function buildSavedWordsImageBlob(savedWords) {
+  return new Promise((resolve, reject) => {
+    const width = 1200;
+    const rowBaseHeight = 170;
+    const height = Math.max(500, 260 + Math.max(1, savedWords.length) * rowBaseHeight);
+    const canvas = document.createElement("canvas");
+    const scale = window.devicePixelRatio || 1;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      reject(new Error("이미지 생성에 실패했습니다."));
+      return;
+    }
+
+    context.scale(scale, scale);
+    context.fillStyle = "#fffdf6";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#f25a48";
+    context.fillRect(0, 0, 18, height);
+    context.fillStyle = "#09878f";
+    context.fillRect(width - 18, 0, 18, height);
+
+    context.fillStyle = "#162027";
+    context.font = "900 54px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText("저장한 단어", 64, 84);
+    context.fillStyle = "rgba(22, 32, 39, 0.62)";
+    context.font = "700 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText(
+      `총 ${savedWords.length}개 · 저장일시 ${new Date().toLocaleString("ko-KR")}`,
+      64,
+      128,
+    );
+
+    context.strokeStyle = "rgba(9, 135, 143, 0.55)";
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(64, 160);
+    context.lineTo(width - 64, 160);
+    context.stroke();
+
+    let y = 220;
+    if (savedWords.length === 0) {
+      context.fillStyle = "rgba(22, 32, 39, 0.7)";
+      context.font = "800 30px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText("저장한 단어가 없습니다.", 64, y);
+    }
+
+    savedWords.forEach((item, index) => {
+      context.fillStyle = "#162027";
+      context.font = "900 38px Songti SC, AppleMyungjo, serif";
+      context.fillText(`${index + 1}. ${item.idiom}`, 64, y);
+
+      context.fillStyle = "rgba(22, 32, 39, 0.72)";
+      context.font = "800 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText(item.reading, 64, y + 34);
+
+      context.fillStyle = "#162027";
+      context.font = "700 24px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      const meaningHeight = drawWrappedText(
+        context,
+        `뜻: ${item.meaning}`,
+        64,
+        y + 72,
+        width - 128,
+        32,
+      );
+
+      const separatorY = Math.max(y + rowBaseHeight - 34, y + 72 + meaningHeight + 10);
+      context.strokeStyle = "rgba(15, 35, 42, 0.16)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(64, separatorY);
+      context.lineTo(width - 64, separatorY);
+      context.stroke();
+
+      y = separatorY + 46;
+    });
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("이미지 저장 파일을 만들 수 없습니다."));
+      }
+    }, "image/png");
+  });
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case "SET_DIFFICULTY":
@@ -1262,6 +1381,9 @@ function App() {
   const [infoPath, setInfoPath] = useState(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showGameInfo, setShowGameInfo] = useState(false);
+  const [savedWords, setSavedWords] = useState(loadSavedWords);
+  const [showSavedWords, setShowSavedWords] = useState(false);
+  const [savedWordsExportState, setSavedWordsExportState] = useState("idle");
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1288,6 +1410,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
   }, [soundMuted]);
+
+  useEffect(() => {
+    saveSavedWords(savedWords);
+  }, [savedWords]);
 
   useEffect(() => {
     if (
@@ -1548,8 +1674,59 @@ function App() {
     }
   }
 
+  function toggleSavedWord(entry) {
+    setSavedWords((current) => {
+      const exists = current.some((item) => item.id === entry.id);
+      if (exists) {
+        return current.filter((item) => item.id !== entry.id);
+      }
+      return [{ ...entry, savedAt: new Date().toISOString() }, ...current];
+    });
+  }
+
+  function removeSavedWord(id) {
+    setSavedWords((current) => current.filter((item) => item.id !== id));
+  }
+
+  function exportSavedWordsText() {
+    if (savedWords.length === 0) return;
+    const text = buildSavedWordsExportText(savedWords);
+    const filename = `sajaseongeo-saved-${getExportTimestamp()}.txt`;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+
+    downloadBlob(blob, filename);
+    setSavedWordsExportState("text");
+    window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+  }
+
+  async function exportSavedWordsImage() {
+    if (savedWords.length === 0) return;
+    try {
+      const blob = await buildSavedWordsImageBlob(savedWords);
+      downloadBlob(blob, `sajaseongeo-saved-${getExportTimestamp()}.png`);
+      setSavedWordsExportState("image");
+      window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+    } catch {
+      setSavedWordsExportState("failed");
+      window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+    }
+  }
+
   if (infoPage) {
     return <InfoPage page={infoPage} onHome={navigateHomeRoute} />;
+  }
+
+  if (showSavedWords) {
+    return (
+      <SavedWordsView
+        exportState={savedWordsExportState}
+        onExportImage={exportSavedWordsImage}
+        onExportText={exportSavedWordsText}
+        onHome={() => setShowSavedWords(false)}
+        onRemove={removeSavedWord}
+        savedWords={savedWords}
+      />
+    );
   }
 
   return (
@@ -1637,7 +1814,10 @@ function App() {
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
             onRestart={startGame}
+            onShowSavedWords={() => setShowSavedWords(true)}
+            onToggleSaveWord={toggleSavedWord}
             playerProfile={playerProfile}
+            savedWords={savedWords}
             score={state.score}
             stats={stats}
           />
@@ -1697,6 +1877,70 @@ function InfoPage({ onHome, page }) {
             ))}
           </div>
         )}
+      </article>
+    </main>
+  );
+}
+
+function SavedWordsView({ exportState, onExportImage, onExportText, onHome, onRemove, savedWords }) {
+  return (
+    <main className="app-shell is-info-phase">
+      <article className="info-stage">
+        <button className="info-home-button" onClick={onHome} type="button">
+          <FaHome /> 게임으로 돌아가기
+        </button>
+
+        <header className="info-header">
+          <span>사자성어 퀴즈</span>
+          <h1>저장한 단어</h1>
+          <p>결과 화면에서 별표를 눌러 저장한 성어와 단어를 모아볼 수 있어요.</p>
+        </header>
+
+        <div className="saved-words-actions">
+          <button
+            className="secondary-action"
+            disabled={savedWords.length === 0}
+            onClick={onExportText}
+            type="button"
+          >
+            <FaFileAlt /> {exportState === "text" ? "텍스트 저장됨" : "텍스트 저장"}
+          </button>
+          <button
+            className="secondary-action"
+            disabled={savedWords.length === 0}
+            onClick={onExportImage}
+            type="button"
+          >
+            <FaImage /> {exportState === "image" ? "이미지 저장됨" : "이미지 저장"}
+          </button>
+        </div>
+
+        <div className="saved-words-list">
+          {savedWords.length === 0 ? (
+            <p className="empty-history">
+              아직 저장한 단어가 없어요. 결과 화면의 문제 복기 목록에서 별표를 눌러보세요.
+            </p>
+          ) : (
+            savedWords.map((item) => (
+              <article className="saved-word-item" key={item.id}>
+                <div>
+                  <strong>{item.idiom}</strong>
+                  <small>
+                    {item.reading} · {item.meaning}
+                  </small>
+                </div>
+                <button
+                  aria-label="저장 취소"
+                  className="saved-word-remove"
+                  onClick={() => onRemove(item.id)}
+                  type="button"
+                >
+                  <FaTimes />
+                </button>
+              </article>
+            ))
+          )}
+        </div>
       </article>
     </main>
   );
@@ -2270,7 +2514,10 @@ function ResultView({
   onExportText,
   onHome,
   onRestart,
+  onShowSavedWords,
+  onToggleSaveWord,
   playerProfile,
+  savedWords,
   score,
   stats,
   subMode,
@@ -2322,25 +2569,38 @@ function ResultView({
           {history.length === 0 ? (
             <p className="empty-history">아직 기록된 문제가 없어요. 바로 다시 도전해보세요.</p>
           ) : (
-            history.map((record, index) => (
-              <article className="history-item" key={`${record.sourceId}-${index}`}>
-                <span className={`result-mark ${record.correct ? "is-right" : "is-miss"}`}>
-                  {record.correct ? <FaCheck /> : <FaTimes />}
-                </span>
-                <div>
-                  <strong>{record.source.idiom}</strong>
-                  <small>
-                    {record.source.reading} · {record.source.meaning}
-                  </small>
-                  {!record.correct && (
-                    <em>
-                      내 답: {record.userAnswer ?? "시간 초과"} · 정답: {record.answer}
-                    </em>
-                  )}
-                </div>
-                <time>{record.timeSpent.toFixed(1)}초</time>
-              </article>
-            ))
+            history.map((record, index) => {
+              const isSaved = savedWords.some((item) => item.id === record.source.id);
+
+              return (
+                <article className="history-item" key={`${record.sourceId}-${index}`}>
+                  <span className={`result-mark ${record.correct ? "is-right" : "is-miss"}`}>
+                    {record.correct ? <FaCheck /> : <FaTimes />}
+                  </span>
+                  <div>
+                    <strong>{record.source.idiom}</strong>
+                    <small>
+                      {record.source.reading} · {record.source.meaning}
+                    </small>
+                    {!record.correct && (
+                      <em>
+                        내 답: {record.userAnswer ?? "시간 초과"} · 정답: {record.answer}
+                      </em>
+                    )}
+                  </div>
+                  <time>{record.timeSpent.toFixed(1)}초</time>
+                  <button
+                    aria-label={isSaved ? "저장 취소" : "단어 저장"}
+                    aria-pressed={isSaved}
+                    className={`history-save-button ${isSaved ? "is-saved" : ""}`}
+                    onClick={() => onToggleSaveWord(record.source)}
+                    type="button"
+                  >
+                    <FaStar />
+                  </button>
+                </article>
+              );
+            })
           )}
         </div>
       </div>
@@ -2364,6 +2624,9 @@ function ResultView({
           type="button"
         >
           <FaImage /> {exportState === "image" ? "이미지 저장됨" : "이미지 저장"}
+        </button>
+        <button className="secondary-action" onClick={onShowSavedWords} type="button">
+          <FaStar /> 저장한 단어 ({savedWords.length})
         </button>
         <button className="primary-action" onClick={onRestart} type="button">
           <FaRedoAlt /> 다시 하기

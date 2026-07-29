@@ -839,6 +839,64 @@ button:focus-visible {
   text-decoration: none;
 }
 
+.saved-words-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.saved-words-actions .secondary-action {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+.saved-words-list {
+  display: grid;
+  gap: 12px;
+}
+
+.saved-word-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.7);
+}
+
+.saved-word-item strong {
+  display: block;
+  color: var(--ink);
+  font-family:
+    "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
+  font-size: 1.16rem;
+  line-height: 1.1;
+}
+
+.saved-word-item small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(22, 32, 39, 0.74);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.saved-word-remove {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: rgba(22, 32, 39, 0.6);
+}
+
 .kicker {
   display: inline-flex;
   gap: 10px;
@@ -1626,11 +1684,29 @@ button:focus-visible {
 
 .history-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 12px;
   align-items: start;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.history-save-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: rgba(22, 32, 39, 0.3);
+  font-size: 1rem;
+}
+
+.history-save-button.is-saved {
+  border-color: var(--yellow);
+  background: rgba(255, 201, 40, 0.16);
+  color: #c98a00;
 }
 
 .history-item strong {
@@ -2373,6 +2449,11 @@ button:focus-visible {
 
   .history-item time {
     grid-column: 2;
+  }
+
+  .history-save-button {
+    grid-column: 2;
+    justify-self: end;
   }
 
   .result-actions {
