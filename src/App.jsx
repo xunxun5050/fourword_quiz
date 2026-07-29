@@ -8,15 +8,21 @@ import {
   FaFileAlt,
   FaHome,
   FaImage,
+  FaInfoCircle,
   FaMedal,
   FaPalette,
   FaPlay,
   FaRedoAlt,
+  FaStar,
   FaStopwatch,
   FaTimes,
   FaTrophy,
+  FaVolumeMute,
+  FaVolumeUp,
 } from "react-icons/fa";
 import idioms from "./data/idioms.json";
+import hanjaChars from "./data/hanjaChars.json";
+import hanjaWords from "./data/hanjaWords.json";
 
 const TOTAL_SECONDS = 60;
 const COUNTDOWN_SECONDS = 3;
@@ -29,8 +35,9 @@ const STORAGE_KEYS = {
   gameTheme: "sjse_game_theme",
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
+  soundMuted: "sjse_sound_muted",
+  savedWords: "sjse_saved_words",
 };
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT?.trim();
 const MAX_LEADERBOARD_ENTRIES = 5;
 
 const DIFFICULTIES = {
@@ -39,16 +46,38 @@ const DIFFICULTIES = {
   hard: { label: "어려움", seconds: 7 },
 };
 const DIFFICULTY_KEYS = Object.keys(DIFFICULTIES);
+const GRADE_KEYS = ["8", "7", "6", "jun5", "5", "jun4", "4", "jun3", "3"];
+const GRADE_LABELS = {
+  8: "8급",
+  7: "7급",
+  6: "6급",
+  jun5: "준5급",
+  5: "5급",
+  jun4: "준4급",
+  4: "4급",
+  jun3: "준3급",
+  3: "3급",
+};
+const IDIOM_ENABLED_GRADES = new Set(["5", "jun4", "4", "jun3", "3"]);
+const SUB_MODE_LABELS = {
+  idiom: "사자성어",
+  word: "단어",
+};
+const QUESTION_TYPE_LABELS = {
+  A: "빈칸 한자",
+  B: "뜻 보고 맞히기",
+  HE: "훈음 맞히기",
+  WM: "한자어 뜻풀이",
+  WB: "빈칸 한자 채우기",
+};
+const BLANK_PROMPT_TYPES = ["A", "WB", "HE"];
 const GAME_THEMES = {
   hanji: { label: "한지", description: "한지 보드", next: "notebook" },
   notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
 };
-const GITHUB_REPOSITORY_URL = "https://github.com/xunxun5050/fourword_quiz";
 const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
   "사자성어 퀴즈 건의",
-)}&body=${encodeURIComponent(
-  `건의 내용을 적어주세요.\n\n관련 저장소: ${GITHUB_REPOSITORY_URL}`,
-)}`;
+)}&body=${encodeURIComponent("건의 내용을 적어주세요.")}`;
 const INFO_PAGE_LINKS = [
   { label: "건의하기", path: "/ko/feedback" },
   { label: "게임 방법", path: "/ko/how-to-play" },
@@ -75,7 +104,6 @@ const INFO_PAGES = {
         body: [
           "사용한 기기와 브라우저, 발생한 화면, 재현 방법을 적어주세요.",
           "리더보드나 결과 저장 관련 문제라면 닉네임과 대략적인 플레이 시간을 함께 알려주세요.",
-          `관련 저장소: ${GITHUB_REPOSITORY_URL}`,
         ],
       },
     ],
@@ -188,13 +216,6 @@ const INFO_PAGES = {
           "민감한 개인정보나 결제 정보는 게임 기능을 위해 요구하지 않습니다.",
         ],
       },
-      {
-        heading: "광고와 외부 서비스",
-        body: [
-          "Google AdSense가 활성화된 경우 광고 제공을 위해 쿠키 또는 유사 기술이 사용될 수 있습니다.",
-          "광고 개인화와 관련한 자세한 내용은 Google의 광고 및 개인정보 안내를 확인해 주세요.",
-        ],
-      },
     ],
   },
   "/ko/rules": {
@@ -284,6 +305,9 @@ const INITIAL_LEADERBOARD = {
 
 const initialState = {
   phase: "home",
+  mode: "casual",
+  grade: "8",
+  subMode: "word",
   difficulty: "normal",
   currentQuestion: null,
   questionNumber: 0,
@@ -369,7 +393,7 @@ function makeTypeAQuestion(item, allItems) {
 
   return {
     type: "A",
-    idiomId: item.id,
+    sourceId: item.id,
     answer,
     blankIndex,
     prompt: chars.map((char, index) => (index === blankIndex ? "?" : char)).join(""),
@@ -394,7 +418,7 @@ function makeTypeBQuestion(item, allItems) {
 
   return {
     type: "B",
-    idiomId: item.id,
+    sourceId: item.id,
     answer: item.idiom,
     prompt: item.meaning,
     choices,
@@ -425,6 +449,133 @@ function makeQuestion(usedIds) {
   };
 }
 
+function makeGradeIdiomQuestion(usedIds, grade) {
+  const pool = idioms.filter((item) => item.grade === grade);
+  const remaining = pool.filter((item) => !usedIds.includes(item.id));
+  if (remaining.length === 0) {
+    return { question: null, usedIds };
+  }
+
+  const item = sample(remaining);
+  const type = Math.random() < 0.5 ? "A" : "B";
+  const question = type === "A" ? makeTypeAQuestion(item, pool) : makeTypeBQuestion(item, pool);
+
+  return {
+    question,
+    usedIds: [...usedIds, item.id],
+  };
+}
+
+function makeHunEumQuestion(item, gradePool) {
+  const answer = `${item.hun} ${item.eum}`;
+  const sameGrade = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => `${candidate.hun} ${candidate.eum}`);
+  const allOther = hanjaChars
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => `${candidate.hun} ${candidate.eum}`);
+  const distractors = fillChoices([sameGrade, allOther], answer, 3);
+  const choices = shuffle([answer, ...distractors]);
+
+  return {
+    type: "HE",
+    sourceId: item.id,
+    answer,
+    prompt: item.char,
+    choices,
+    source: {
+      id: item.id,
+      idiom: item.char,
+      reading: item.eum,
+      meaning: `훈음: ${item.hun} ${item.eum}`,
+    },
+  };
+}
+
+function makeWordMeaningQuestion(item, gradePool) {
+  const sameGrade = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => candidate.word);
+  const allOther = hanjaWords
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => candidate.word);
+  const distractors = fillChoices([sameGrade, allOther], item.word, 3);
+  const choices = shuffle([item.word, ...distractors]);
+
+  return {
+    type: "WM",
+    sourceId: item.id,
+    answer: item.word,
+    prompt: item.meaning,
+    choices,
+    source: { id: item.id, idiom: item.word, reading: item.reading, meaning: item.meaning },
+  };
+}
+
+function makeWordBlankQuestion(item, gradePool) {
+  const chars = [...item.word];
+  const blankIndex = Math.floor(Math.random() * chars.length);
+  const answer = chars[blankIndex];
+  const sameGradeWordChars = gradePool
+    .filter((candidate) => candidate.id !== item.id)
+    .map((candidate) => [...candidate.word][blankIndex]);
+  const sameGradeHanjaChars = hanjaChars
+    .filter((candidate) => candidate.grade === item.grade)
+    .map((candidate) => candidate.char);
+  const allOtherWordChars = hanjaWords.flatMap((candidate) => [...candidate.word]);
+  const distractors = fillChoices(
+    [sameGradeWordChars, sameGradeHanjaChars, allOtherWordChars],
+    answer,
+    3,
+  );
+  const choices = shuffle([answer, ...distractors]);
+
+  return {
+    type: "WB",
+    sourceId: item.id,
+    answer,
+    prompt: chars.map((char, index) => (index === blankIndex ? "?" : char)).join(""),
+    choices,
+    source: { id: item.id, idiom: item.word, reading: item.reading, meaning: item.meaning },
+  };
+}
+
+function makeWordQuestion(usedIds, grade) {
+  const charPool = hanjaChars.filter((item) => item.grade === grade);
+  const wordPool = hanjaWords.filter((item) => item.grade === grade);
+  const remainingChars = charPool.filter((item) => !usedIds.includes(item.id));
+  const remainingWords = wordPool.filter((item) => !usedIds.includes(item.id));
+
+  const availableTypes = [];
+  if (remainingChars.length > 0) availableTypes.push("HE");
+  if (remainingWords.length > 0) availableTypes.push("WM", "WB");
+  if (availableTypes.length === 0) {
+    return { question: null, usedIds };
+  }
+
+  const type = sample(availableTypes);
+  if (type === "HE") {
+    const item = sample(remainingChars);
+    return { question: makeHunEumQuestion(item, charPool), usedIds: [...usedIds, item.id] };
+  }
+
+  const item = sample(remainingWords);
+  const question =
+    type === "WM" ? makeWordMeaningQuestion(item, wordPool) : makeWordBlankQuestion(item, wordPool);
+
+  return { question, usedIds: [...usedIds, item.id] };
+}
+
+function buildNextQuestion(usedIds, { mode, grade, subMode }) {
+  if (mode === "grade") {
+    return subMode === "word"
+      ? makeWordQuestion(usedIds, grade)
+      : makeGradeIdiomQuestion(usedIds, grade);
+  }
+
+  return makeQuestion(usedIds);
+}
+
 function secondsLeft(startedAt, duration, now) {
   if (!startedAt) return duration;
   return Math.max(0, duration - (now - startedAt) / 1000);
@@ -441,17 +592,6 @@ function formatClock(value) {
   return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function normalizeInfoPath(pathname) {
-  const normalizedPath =
-    pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
-  return INFO_PAGES[normalizedPath] ? normalizedPath : null;
-}
-
-function getInitialInfoPath() {
-  if (typeof window === "undefined") return null;
-  return normalizeInfoPath(window.location.pathname);
-}
-
 function loadStats() {
   if (typeof window === "undefined") return INITIAL_STATS;
 
@@ -466,6 +606,21 @@ function saveStats(stats) {
   localStorage.setItem(STORAGE_KEYS.bestScore, String(stats.bestScore));
   localStorage.setItem(STORAGE_KEYS.bestAccuracy, String(stats.bestAccuracy));
   localStorage.setItem(STORAGE_KEYS.playCount, String(stats.playCount));
+}
+
+function loadSavedWords() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.savedWords) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSavedWords(savedWords) {
+  localStorage.setItem(STORAGE_KEYS.savedWords, JSON.stringify(savedWords));
 }
 
 function getTodayKey(date = new Date()) {
@@ -594,6 +749,58 @@ function loadGameTheme() {
   return GAME_THEMES[savedTheme] ? savedTheme : "hanji";
 }
 
+function loadSoundMuted() {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(STORAGE_KEYS.soundMuted) === "1";
+}
+
+let sharedAudioContext = null;
+
+function getAudioContext() {
+  if (typeof window === "undefined") return null;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  if (!sharedAudioContext) {
+    sharedAudioContext = new AudioContextClass();
+  }
+  if (sharedAudioContext.state === "suspended") {
+    sharedAudioContext.resume();
+  }
+  return sharedAudioContext;
+}
+
+function playTone(frequencies, { duration = 0.12, type = "sine" } = {}) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  frequencies.forEach((frequency, index) => {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const startAt = now + index * duration;
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.2, startAt + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration);
+  });
+}
+
+function playCorrectSound() {
+  playTone([880, 1175], { duration: 0.1 });
+}
+
+function playWrongSound() {
+  playTone([220, 165], { duration: 0.14, type: "triangle" });
+}
+
 async function parseJsonResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   if (!response.ok || !contentType.includes("application/json")) {
@@ -706,11 +913,12 @@ function getAccuracy(score, attempted) {
   return Math.round((score / attempted) * 100);
 }
 
-function getGrade(accuracy) {
-  if (accuracy >= 90) return "사자성어 마스터";
-  if (accuracy >= 70) return "사자성어 고수";
-  if (accuracy >= 50) return "사자성어 중급";
-  if (accuracy >= 30) return "사자성어 입문";
+function getResultTitle(accuracy, mode, subMode) {
+  const domain = mode === "grade" && subMode === "word" ? "한자" : "사자성어";
+  if (accuracy >= 90) return `${domain} 마스터`;
+  if (accuracy >= 70) return `${domain} 고수`;
+  if (accuracy >= 50) return `${domain} 중급`;
+  if (accuracy >= 30) return `${domain} 입문`;
   return "다시 도전";
 }
 
@@ -919,30 +1127,158 @@ function buildResultImageBlob({ accuracy, difficulty, history, score }) {
   });
 }
 
+function buildSavedWordsExportText(savedWords) {
+  const lines = ["No\t표기 (독음)\t뜻"];
+
+  savedWords.forEach((item, index) => {
+    lines.push(`${index + 1}\t${item.idiom} (${item.reading})\t${item.meaning}`);
+  });
+
+  return lines.join("\n");
+}
+
+function buildSavedWordsImageBlob(savedWords) {
+  return new Promise((resolve, reject) => {
+    const width = 1200;
+    const rowBaseHeight = 170;
+    const height = Math.max(500, 260 + Math.max(1, savedWords.length) * rowBaseHeight);
+    const canvas = document.createElement("canvas");
+    const scale = window.devicePixelRatio || 1;
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      reject(new Error("이미지 생성에 실패했습니다."));
+      return;
+    }
+
+    context.scale(scale, scale);
+    context.fillStyle = "#fffdf6";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#f25a48";
+    context.fillRect(0, 0, 18, height);
+    context.fillStyle = "#09878f";
+    context.fillRect(width - 18, 0, 18, height);
+
+    context.fillStyle = "#162027";
+    context.font = "900 54px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText("저장한 단어", 64, 84);
+    context.fillStyle = "rgba(22, 32, 39, 0.62)";
+    context.font = "700 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+    context.fillText(
+      `총 ${savedWords.length}개 · 저장일시 ${new Date().toLocaleString("ko-KR")}`,
+      64,
+      128,
+    );
+
+    context.strokeStyle = "rgba(9, 135, 143, 0.55)";
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(64, 160);
+    context.lineTo(width - 64, 160);
+    context.stroke();
+
+    let y = 220;
+    if (savedWords.length === 0) {
+      context.fillStyle = "rgba(22, 32, 39, 0.7)";
+      context.font = "800 30px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText("저장한 단어가 없습니다.", 64, y);
+    }
+
+    savedWords.forEach((item, index) => {
+      context.fillStyle = "#162027";
+      context.font = "900 38px Songti SC, AppleMyungjo, serif";
+      context.fillText(`${index + 1}. ${item.idiom}`, 64, y);
+
+      context.fillStyle = "rgba(22, 32, 39, 0.72)";
+      context.font = "800 22px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      context.fillText(item.reading, 64, y + 34);
+
+      context.fillStyle = "#162027";
+      context.font = "700 24px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
+      const meaningHeight = drawWrappedText(
+        context,
+        `뜻: ${item.meaning}`,
+        64,
+        y + 72,
+        width - 128,
+        32,
+      );
+
+      const separatorY = Math.max(y + rowBaseHeight - 34, y + 72 + meaningHeight + 10);
+      context.strokeStyle = "rgba(15, 35, 42, 0.16)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(64, separatorY);
+      context.lineTo(width - 64, separatorY);
+      context.stroke();
+
+      y = separatorY + 46;
+    });
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("이미지 저장 파일을 만들 수 없습니다."));
+      }
+    }, "image/png");
+  });
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case "SET_DIFFICULTY":
       return state.phase === "home" ? { ...state, difficulty: action.difficulty } : state;
+    case "SET_MODE":
+      return state.phase === "home" ? { ...state, mode: action.mode } : state;
+    case "SET_GRADE": {
+      if (state.phase !== "home") return state;
+      const nextSubMode =
+        !IDIOM_ENABLED_GRADES.has(action.grade) && state.subMode === "idiom"
+          ? "word"
+          : state.subMode;
+      return { ...state, grade: action.grade, subMode: nextSubMode };
+    }
+    case "SET_SUBMODE": {
+      if (state.phase !== "home") return state;
+      if (action.subMode === "idiom" && !IDIOM_ENABLED_GRADES.has(state.grade)) return state;
+      return { ...state, subMode: action.subMode };
+    }
     case "SHOW_LEADERBOARD":
       return {
         ...initialState,
         phase: "leaderboard",
         difficulty: action.difficulty,
+        mode: "casual",
       };
     case "COUNTDOWN":
       return {
         ...initialState,
         phase: "countdown",
         difficulty: action.difficulty,
+        mode: action.mode,
+        grade: action.grade,
+        subMode: action.subMode,
         countdownStartedAt: action.now,
       };
     case "START": {
       const now = action.now;
-      const { question, usedIds } = makeQuestion([]);
+      const { question, usedIds } = buildNextQuestion([], {
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      });
       return {
         ...initialState,
         phase: "playing",
         difficulty: action.difficulty,
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
         currentQuestion: question,
         questionNumber: 1,
         usedIds,
@@ -964,7 +1300,7 @@ function reducer(state, action) {
         Math.max(0, (now - state.questionStartedAt) / 1000),
       );
       const record = {
-        idiomId: state.currentQuestion.idiomId,
+        sourceId: state.currentQuestion.sourceId,
         type: state.currentQuestion.type,
         prompt: state.currentQuestion.prompt,
         answer: state.currentQuestion.answer,
@@ -987,7 +1323,11 @@ function reducer(state, action) {
     }
     case "NEXT": {
       if (state.phase !== "feedback") return state;
-      const { question, usedIds } = makeQuestion(state.usedIds);
+      const { question, usedIds } = buildNextQuestion(state.usedIds, {
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      });
       if (!question) {
         return { ...state, phase: "result", currentQuestion: null, resultSaved: false };
       }
@@ -1015,7 +1355,13 @@ function reducer(state, action) {
         resultSaved: false,
       };
     case "HOME":
-      return { ...initialState, difficulty: state.difficulty };
+      return {
+        ...initialState,
+        difficulty: state.difficulty,
+        mode: state.mode,
+        grade: state.grade,
+        subMode: state.subMode,
+      };
     case "MARK_SAVED":
       return { ...state, resultSaved: true };
     default:
@@ -1030,8 +1376,14 @@ function App() {
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
   const [gameTheme, setGameTheme] = useState(loadGameTheme);
+  const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
   const [playerProfile] = useState(loadPlayerProfile);
-  const [infoPath, setInfoPath] = useState(getInitialInfoPath);
+  const [infoPath, setInfoPath] = useState(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showGameInfo, setShowGameInfo] = useState(false);
+  const [savedWords, setSavedWords] = useState(loadSavedWords);
+  const [showSavedWords, setShowSavedWords] = useState(false);
+  const [savedWordsExportState, setSavedWordsExportState] = useState("idle");
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1048,21 +1400,20 @@ function App() {
   const accuracy = getAccuracy(state.score, state.attempted);
 
   useEffect(() => {
-    function handlePopState() {
-      setInfoPath(getInitialInfoPath());
-    }
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
     document.title = infoPage ? `${infoPage.title} | 사자성어 퀴즈` : "사자성어 퀴즈";
   }, [infoPage]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.gameTheme, gameTheme);
   }, [gameTheme]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
+  }, [soundMuted]);
+
+  useEffect(() => {
+    saveSavedWords(savedWords);
+  }, [savedWords]);
 
   useEffect(() => {
     if (
@@ -1148,7 +1499,7 @@ function App() {
     if (state.phase !== "result" || state.resultSaved) return;
 
     const leaderboardEntry =
-      state.attempted > 0
+      state.mode === "casual" && state.attempted > 0
         ? buildLeaderboardEntry({
             accuracy,
             difficulty: state.difficulty,
@@ -1186,6 +1537,7 @@ function App() {
     state.attempted,
     state.difficulty,
     state.history,
+    state.mode,
     state.phase,
     state.resultSaved,
     state.score,
@@ -1229,18 +1581,29 @@ function App() {
     }
 
     event?.preventDefault();
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, "", path);
-    }
     setInfoPath(path);
   }
 
   function navigateHomeRoute() {
-    if (window.location.pathname !== "/") {
-      window.history.pushState({}, "", "/");
-    }
     setInfoPath(null);
     dispatch({ type: "HOME" });
+  }
+
+  function requestHome() {
+    if (state.phase === "playing" || state.phase === "feedback") {
+      setShowExitConfirm(true);
+      return;
+    }
+    dispatch({ type: "HOME" });
+  }
+
+  function confirmExitHome() {
+    setShowExitConfirm(false);
+    dispatch({ type: "HOME" });
+  }
+
+  function cancelExitHome() {
+    setShowExitConfirm(false);
   }
 
   function showLeaderboardPreview() {
@@ -1250,11 +1613,22 @@ function App() {
   function startGame() {
     const startedAt = Date.now();
     setNow(startedAt);
-    dispatch({ type: "COUNTDOWN", difficulty: state.difficulty, now: startedAt });
+    dispatch({
+      type: "COUNTDOWN",
+      difficulty: state.difficulty,
+      mode: state.mode,
+      grade: state.grade,
+      subMode: state.subMode,
+      now: startedAt,
+    });
   }
 
   function toggleGameTheme() {
     setGameTheme((currentTheme) => GAME_THEMES[currentTheme]?.next || "hanji");
+  }
+
+  function toggleSoundMuted() {
+    setSoundMuted((currentMuted) => !currentMuted);
   }
 
   function submitAnswer(answer) {
@@ -1262,6 +1636,9 @@ function App() {
     const correct = answer === state.currentQuestion.answer;
     if (navigator.vibrate) {
       navigator.vibrate(correct ? 30 : [25, 25, 25]);
+    }
+    if (!soundMuted) {
+      correct ? playCorrectSound() : playWrongSound();
     }
     dispatch({ type: "ANSWER", answer, now: Date.now() });
   }
@@ -1297,13 +1674,63 @@ function App() {
     }
   }
 
+  function toggleSavedWord(entry) {
+    setSavedWords((current) => {
+      const exists = current.some((item) => item.id === entry.id);
+      if (exists) {
+        return current.filter((item) => item.id !== entry.id);
+      }
+      return [{ ...entry, savedAt: new Date().toISOString() }, ...current];
+    });
+  }
+
+  function removeSavedWord(id) {
+    setSavedWords((current) => current.filter((item) => item.id !== id));
+  }
+
+  function exportSavedWordsText() {
+    if (savedWords.length === 0) return;
+    const text = buildSavedWordsExportText(savedWords);
+    const filename = `sajaseongeo-saved-${getExportTimestamp()}.txt`;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+
+    downloadBlob(blob, filename);
+    setSavedWordsExportState("text");
+    window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+  }
+
+  async function exportSavedWordsImage() {
+    if (savedWords.length === 0) return;
+    try {
+      const blob = await buildSavedWordsImageBlob(savedWords);
+      downloadBlob(blob, `sajaseongeo-saved-${getExportTimestamp()}.png`);
+      setSavedWordsExportState("image");
+      window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+    } catch {
+      setSavedWordsExportState("failed");
+      window.setTimeout(() => setSavedWordsExportState("idle"), 1600);
+    }
+  }
+
   if (infoPage) {
     return <InfoPage page={infoPage} onHome={navigateHomeRoute} />;
   }
 
+  if (showSavedWords) {
+    return (
+      <SavedWordsView
+        exportState={savedWordsExportState}
+        onExportImage={exportSavedWordsImage}
+        onExportText={exportSavedWordsText}
+        onHome={() => setShowSavedWords(false)}
+        onRemove={removeSavedWord}
+        savedWords={savedWords}
+      />
+    );
+  }
+
   return (
     <main className={`app-shell is-${state.phase}-phase theme-${gameTheme}`}>
-      <AdSenseAuto enabled={state.phase === "home"} />
       <div className="arcade-stage">
         {state.phase !== "countdown" &&
           state.phase !== "leaderboard" &&
@@ -1311,10 +1738,13 @@ function App() {
           <Hud
             phase={state.phase}
             difficulty={state.difficulty}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onHome={() => dispatch({ type: "HOME" })}
+            onHome={requestHome}
             questionNumber={state.questionNumber}
             score={state.score}
             totalLeft={totalLeft}
@@ -1325,12 +1755,21 @@ function App() {
           <HomeView
             difficulty={state.difficulty}
             gameTheme={gameTheme}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
+            onModeChange={(mode) => dispatch({ type: "SET_MODE", mode })}
+            onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
+            onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
-            onStart={showLeaderboardPreview}
+            onShowGameInfo={() => setShowGameInfo(true)}
+            onSoundToggle={toggleSoundMuted}
+            onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
             onThemeToggle={toggleGameTheme}
+            soundMuted={soundMuted}
           />
         )}
 
@@ -1352,7 +1791,7 @@ function App() {
             lastResult={state.lastResult}
             onAnswer={submitAnswer}
             onFinish={() => dispatch({ type: "END" })}
-            onHome={() => dispatch({ type: "HOME" })}
+            onHome={requestHome}
             questionLeft={questionLeft}
             questionProgress={questionProgress}
             resultLabel={resultLabel}
@@ -1365,6 +1804,9 @@ function App() {
           <ResultView
             accuracy={accuracy}
             difficulty={state.difficulty}
+            mode={state.mode}
+            grade={state.grade}
+            subMode={state.subMode}
             history={state.history}
             dailyLeaderboard={dailyLeaderboard}
             exportState={exportState}
@@ -1372,7 +1814,10 @@ function App() {
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
             onRestart={startGame}
+            onShowSavedWords={() => setShowSavedWords(true)}
+            onToggleSaveWord={toggleSavedWord}
             playerProfile={playerProfile}
+            savedWords={savedWords}
             score={state.score}
             stats={stats}
           />
@@ -1388,39 +1833,14 @@ function App() {
               )}초, 현재 점수 ${state.score}점`}
         </p>
       </div>
+
+      {showExitConfirm && (
+        <ExitConfirmModal onCancel={cancelExitHome} onConfirm={confirmExitHome} />
+      )}
+
+      {showGameInfo && <GameInfoModal onClose={() => setShowGameInfo(false)} />}
     </main>
   );
-}
-
-function AdSenseAuto({ enabled }) {
-  useEffect(() => {
-    if (!enabled || !ADSENSE_CLIENT || ADSENSE_CLIENT === "ca-pub-0000000000000000") {
-      return undefined;
-    }
-
-    const scriptId = "adsense-auto-ads";
-    if (document.getElementById(scriptId)) {
-      return undefined;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(
-      ADSENSE_CLIENT,
-    )}`;
-    document.head.appendChild(script);
-
-    return () => {
-      script.remove();
-      document
-        .querySelectorAll(".google-auto-placed, ins.adsbygoogle")
-        .forEach((element) => element.remove());
-    };
-  }, [enabled]);
-
-  return null;
 }
 
 function InfoPage({ onHome, page }) {
@@ -1462,17 +1882,85 @@ function InfoPage({ onHome, page }) {
   );
 }
 
+function SavedWordsView({ exportState, onExportImage, onExportText, onHome, onRemove, savedWords }) {
+  return (
+    <main className="app-shell is-info-phase">
+      <article className="info-stage">
+        <button className="info-home-button" onClick={onHome} type="button">
+          <FaHome /> 게임으로 돌아가기
+        </button>
+
+        <header className="info-header">
+          <span>사자성어 퀴즈</span>
+          <h1>저장한 단어</h1>
+          <p>결과 화면에서 별표를 눌러 저장한 성어와 단어를 모아볼 수 있어요.</p>
+        </header>
+
+        <div className="saved-words-actions">
+          <button
+            className="secondary-action"
+            disabled={savedWords.length === 0}
+            onClick={onExportText}
+            type="button"
+          >
+            <FaFileAlt /> {exportState === "text" ? "텍스트 저장됨" : "텍스트 저장"}
+          </button>
+          <button
+            className="secondary-action"
+            disabled={savedWords.length === 0}
+            onClick={onExportImage}
+            type="button"
+          >
+            <FaImage /> {exportState === "image" ? "이미지 저장됨" : "이미지 저장"}
+          </button>
+        </div>
+
+        <div className="saved-words-list">
+          {savedWords.length === 0 ? (
+            <p className="empty-history">
+              아직 저장한 단어가 없어요. 결과 화면의 문제 복기 목록에서 별표를 눌러보세요.
+            </p>
+          ) : (
+            savedWords.map((item) => (
+              <article className="saved-word-item" key={item.id}>
+                <div>
+                  <strong>{item.idiom}</strong>
+                  <small>
+                    {item.reading} · {item.meaning}
+                  </small>
+                </div>
+                <button
+                  aria-label="저장 취소"
+                  className="saved-word-remove"
+                  onClick={() => onRemove(item.id)}
+                  type="button"
+                >
+                  <FaTimes />
+                </button>
+              </article>
+            ))
+          )}
+        </div>
+      </article>
+    </main>
+  );
+}
+
 function Hud({
   difficulty,
+  grade,
+  mode,
   onDifficultyChange,
   onHome,
   phase,
   questionNumber,
   score,
+  subMode,
   totalLeft,
 }) {
   const homeDisabled = phase === "home";
   const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
+  const isGradeMode = mode === "grade";
 
   return (
     <header className="hud">
@@ -1518,6 +2006,18 @@ function Hud({
         </div>
       )}
 
+      {phase !== "home" && isGradeMode && (
+        <div
+          aria-label={`현재 급수 ${GRADE_LABELS[grade]}, ${SUB_MODE_LABELS[subMode]} 모드`}
+          className="difficulty-chip"
+        >
+          <span>급수</span>
+          <strong>
+            {GRADE_LABELS[grade]} · {SUB_MODE_LABELS[subMode]}
+          </strong>
+        </div>
+      )}
+
       <button
         aria-label="홈으로"
         className="icon-home"
@@ -1547,34 +2047,141 @@ function Metric({ danger = false, icon, label, value }) {
 function HomeView({
   difficulty,
   gameTheme,
+  grade,
+  mode,
   onDifficultyChange,
+  onGradeChange,
+  onModeChange,
   onNavigateInfo,
+  onShowGameInfo,
+  onSoundToggle,
   onStart,
+  onSubModeChange,
   onThemeToggle,
+  soundMuted,
+  subMode,
 }) {
   const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
   const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
+  const isGradeMode = mode === "grade";
+  const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
   return (
     <section className="home-view">
-      <button
-        aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
-        className="theme-toggle"
-        onClick={onThemeToggle}
-        title={`${currentTheme.description} 테마`}
-        type="button"
-      >
-        <FaPalette aria-hidden="true" />
-        <span>{currentTheme.label}</span>
-      </button>
+      <div className="home-toggle-row">
+        <button
+          aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
+          className="theme-toggle"
+          onClick={onThemeToggle}
+          title={`${currentTheme.description} 테마`}
+          type="button"
+        >
+          <FaPalette aria-hidden="true" />
+          <span>{currentTheme.label}</span>
+        </button>
+
+        <button
+          aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
+          aria-pressed={soundMuted}
+          className="theme-toggle"
+          onClick={onSoundToggle}
+          title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
+          type="button"
+        >
+          {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
+          <span>{soundMuted ? "무음" : "소리"}</span>
+        </button>
+
+        <button
+          aria-label="게임 설명 보기"
+          className="theme-toggle"
+          onClick={onShowGameInfo}
+          title="게임 설명"
+          type="button"
+        >
+          <FaInfoCircle aria-hidden="true" />
+          <span>설명</span>
+        </button>
+      </div>
 
       <div className="home-hero">
         <div className="landing-panel">
           <div className="landing-copy">
-            <strong className="landing-title">사자성어 퀴즈</strong>
             <span className="landing-mark" aria-hidden="true">四字</span>
-            <p className="landing-lead">60초 사자성어 스프린트</p>
+            <p className="landing-lead">
+              {isGradeMode ? "한자급수 대비 스프린트" : "60초 사자성어 스프린트"}
+            </p>
           </div>
+
+          <div className="difficulty-picker">
+            <span>모드 선택</span>
+            <div className="difficulty-group" aria-label="모드">
+              <button
+                aria-pressed={mode === "casual"}
+                className={`difficulty-button ${mode === "casual" ? "is-active" : ""}`}
+                onClick={() => onModeChange("casual")}
+                type="button"
+              >
+                캐주얼
+              </button>
+              <button
+                aria-pressed={isGradeMode}
+                className={`difficulty-button ${isGradeMode ? "is-active" : ""}`}
+                onClick={() => onModeChange("grade")}
+                type="button"
+              >
+                급수 대비
+              </button>
+            </div>
+          </div>
+
+          {isGradeMode && (
+            <>
+              <div className="difficulty-picker">
+                <span>급수 선택</span>
+                <div className="difficulty-group is-large" aria-label="급수">
+                  {GRADE_KEYS.map((key) => (
+                    <button
+                      aria-pressed={grade === key}
+                      className={`difficulty-button ${grade === key ? "is-active" : ""}`}
+                      key={key}
+                      onClick={() => onGradeChange(key)}
+                      type="button"
+                    >
+                      {GRADE_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="difficulty-picker">
+                <span>유형 선택</span>
+                <div className="difficulty-group" aria-label="문제 유형">
+                  <button
+                    aria-pressed={subMode === "idiom"}
+                    className={`difficulty-button ${subMode === "idiom" ? "is-active" : ""}`}
+                    disabled={idiomDisabled}
+                    onClick={() => onSubModeChange("idiom")}
+                    title={
+                      idiomDisabled ? "5급부터 사자성어 문제가 나와요" : undefined
+                    }
+                    type="button"
+                  >
+                    사자성어
+                  </button>
+                  <button
+                    aria-pressed={subMode === "word"}
+                    className={`difficulty-button ${subMode === "word" ? "is-active" : ""}`}
+                    onClick={() => onSubModeChange("word")}
+                    type="button"
+                  >
+                    단어
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="difficulty-picker">
             <span>난이도 선택</span>
             <div className="difficulty-group is-large">
@@ -1597,59 +2204,6 @@ function HomeView({
             <FaPlay /> 게임 시작
           </button>
         </div>
-      </div>
-
-      <div className="home-content" aria-label="사자성어 학습 콘텐츠">
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>미리 보기</span>
-            <h2>오늘의 예시 성어</h2>
-            <p>
-              한자 모양과 한글 독음, 뜻을 함께 보면 빈칸 문제와 뜻풀이 문제를
-              더 자연스럽게 풀 수 있습니다.
-            </p>
-          </div>
-          <ul className="idiom-preview-list">
-            {HOME_PREVIEW_IDIOMS.map((item) => (
-              <li key={item.id}>
-                <strong>{item.idiom}</strong>
-                <span>{item.reading}</span>
-                <p>{item.meaning}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>게임 설명</span>
-            <h2>뜻과 한자를 번갈아 익혀요</h2>
-            <p>
-              사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
-              학습형 게임입니다.
-            </p>
-          </div>
-          <div className="home-guide-grid">
-            {HOME_GAME_GUIDE.map((item) => (
-              <article className="home-guide-item" key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-content-section">
-          <div className="home-section-heading">
-            <span>수록 데이터 안내</span>
-            <h2>한자, 독음, 뜻을 함께 정리했습니다</h2>
-          </div>
-          <ul className="home-data-list">
-            {HOME_DATA_NOTES.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </section>
       </div>
 
       <nav className="home-footer-links" aria-label="사이트 안내">
@@ -1686,6 +2240,107 @@ function CountdownView({ count }) {
         <strong key={count}>{count}</strong>
       </div>
     </section>
+  );
+}
+
+function ExitConfirmModal({ onCancel, onConfirm }) {
+  return (
+    <div className="exit-confirm-overlay" role="presentation" onClick={onCancel}>
+      <div
+        className="exit-confirm-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="exit-confirm-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="exit-confirm-title">게임을 종료할까요?</h2>
+        <p>지금 나가면 진행 중인 기록은 저장되지 않아요.</p>
+        <div className="exit-confirm-actions">
+          <button className="secondary-action" onClick={onCancel} type="button">
+            계속하기
+          </button>
+          <button className="primary-action" onClick={onConfirm} type="button">
+            나가기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GameInfoModal({ onClose }) {
+  return (
+    <div className="info-modal-overlay" role="presentation" onClick={onClose}>
+      <div
+        className="info-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="game-info-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="info-modal-header">
+          <h2 id="game-info-title">게임 설명</h2>
+          <button aria-label="닫기" className="info-modal-close" onClick={onClose} type="button">
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="info-modal-body">
+          <div className="home-content" aria-label="사자성어 학습 콘텐츠">
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>미리 보기</span>
+                <h2>오늘의 예시 성어</h2>
+                <p>
+                  한자 모양과 한글 독음, 뜻을 함께 보면 빈칸 문제와 뜻풀이 문제를
+                  더 자연스럽게 풀 수 있습니다.
+                </p>
+              </div>
+              <ul className="idiom-preview-list">
+                {HOME_PREVIEW_IDIOMS.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.idiom}</strong>
+                    <span>{item.reading}</span>
+                    <p>{item.meaning}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>게임 방식</span>
+                <h2>뜻과 한자를 번갈아 익혀요</h2>
+                <p>
+                  사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
+                  학습형 게임입니다.
+                </p>
+              </div>
+              <div className="home-guide-grid">
+                {HOME_GAME_GUIDE.map((item) => (
+                  <article className="home-guide-item" key={item.title}>
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="home-content-section">
+              <div className="home-section-heading">
+                <span>수록 데이터 안내</span>
+                <h2>한자, 독음, 뜻을 함께 정리했습니다</h2>
+              </div>
+              <ul className="home-data-list">
+                {HOME_DATA_NOTES.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1754,9 +2409,9 @@ function GameView({
     <section className={gameViewClassName}>
       <div className="question-frame">
         <span className="question-type">
-          {currentQuestion.type === "A" ? "빈칸 한자" : "뜻 보고 맞히기"}
+          {QUESTION_TYPE_LABELS[currentQuestion.type] || "문제"}
         </span>
-        {currentQuestion.type === "A" ? (
+        {BLANK_PROMPT_TYPES.includes(currentQuestion.type) ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
             {[...currentQuestion.prompt].map((char, index) => {
               const isBlank = char === "?";
@@ -1852,16 +2507,23 @@ function ResultView({
   dailyLeaderboard,
   difficulty,
   exportState,
+  grade,
   history,
+  mode,
   onExportImage,
   onExportText,
   onHome,
   onRestart,
+  onShowSavedWords,
+  onToggleSaveWord,
   playerProfile,
+  savedWords,
   score,
   stats,
+  subMode,
 }) {
-  const grade = getGrade(accuracy);
+  const resultTitle = getResultTitle(accuracy, mode, subMode);
+  const isGradeMode = mode === "grade";
 
   return (
     <section className="result-view">
@@ -1869,7 +2531,7 @@ function ResultView({
         <span className="kicker">
           <FaTrophy /> 게임 결과
         </span>
-        <h1>{grade}</h1>
+        <h1>{resultTitle}</h1>
         <div className="score-line">
           <strong>{score}</strong>
           <span>개 정답</span>
@@ -1877,17 +2539,25 @@ function ResultView({
         <p>
           정확도 {accuracy}% · 시도 {history.length}문제 · 난이도{" "}
           {DIFFICULTIES[difficulty].label}
+          {isGradeMode && (
+            <>
+              {" "}
+              · {GRADE_LABELS[grade]} · {SUB_MODE_LABELS[subMode]}
+            </>
+          )}
         </p>
         <div className="best-strip">
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
         </div>
-        <DailyLeaderboard
-          difficulty={difficulty}
-          leaderboard={dailyLeaderboard}
-          limit={5}
-          variant="result"
-        />
+        {!isGradeMode && (
+          <DailyLeaderboard
+            difficulty={difficulty}
+            leaderboard={dailyLeaderboard}
+            limit={5}
+            variant="result"
+          />
+        )}
       </div>
 
       <div className="history-panel">
@@ -1899,25 +2569,38 @@ function ResultView({
           {history.length === 0 ? (
             <p className="empty-history">아직 기록된 문제가 없어요. 바로 다시 도전해보세요.</p>
           ) : (
-            history.map((record, index) => (
-              <article className="history-item" key={`${record.idiomId}-${index}`}>
-                <span className={`result-mark ${record.correct ? "is-right" : "is-miss"}`}>
-                  {record.correct ? <FaCheck /> : <FaTimes />}
-                </span>
-                <div>
-                  <strong>{record.source.idiom}</strong>
-                  <small>
-                    {record.source.reading} · {record.source.meaning}
-                  </small>
-                  {!record.correct && (
-                    <em>
-                      내 답: {record.userAnswer ?? "시간 초과"} · 정답: {record.answer}
-                    </em>
-                  )}
-                </div>
-                <time>{record.timeSpent.toFixed(1)}초</time>
-              </article>
-            ))
+            history.map((record, index) => {
+              const isSaved = savedWords.some((item) => item.id === record.source.id);
+
+              return (
+                <article className="history-item" key={`${record.sourceId}-${index}`}>
+                  <span className={`result-mark ${record.correct ? "is-right" : "is-miss"}`}>
+                    {record.correct ? <FaCheck /> : <FaTimes />}
+                  </span>
+                  <div>
+                    <strong>{record.source.idiom}</strong>
+                    <small>
+                      {record.source.reading} · {record.source.meaning}
+                    </small>
+                    {!record.correct && (
+                      <em>
+                        내 답: {record.userAnswer ?? "시간 초과"} · 정답: {record.answer}
+                      </em>
+                    )}
+                  </div>
+                  <time>{record.timeSpent.toFixed(1)}초</time>
+                  <button
+                    aria-label={isSaved ? "저장 취소" : "단어 저장"}
+                    aria-pressed={isSaved}
+                    className={`history-save-button ${isSaved ? "is-saved" : ""}`}
+                    onClick={() => onToggleSaveWord(record.source)}
+                    type="button"
+                  >
+                    <FaStar />
+                  </button>
+                </article>
+              );
+            })
           )}
         </div>
       </div>
@@ -1941,6 +2624,9 @@ function ResultView({
           type="button"
         >
           <FaImage /> {exportState === "image" ? "이미지 저장됨" : "이미지 저장"}
+        </button>
+        <button className="secondary-action" onClick={onShowSavedWords} type="button">
+          <FaStar /> 저장한 단어 ({savedWords.length})
         </button>
         <button className="primary-action" onClick={onRestart} type="button">
           <FaRedoAlt /> 다시 하기

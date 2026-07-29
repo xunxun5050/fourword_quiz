@@ -406,11 +406,16 @@ button:focus-visible {
   padding: clamp(24px, 6vh, 62px) 0 clamp(28px, 7vh, 72px);
 }
 
-.theme-toggle {
+.home-toggle-row {
   position: absolute;
   top: clamp(14px, 2.5vw, 26px);
   right: clamp(14px, 2.5vw, 26px);
   z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.theme-toggle {
   display: inline-flex;
   gap: 6px;
   align-items: center;
@@ -834,6 +839,64 @@ button:focus-visible {
   text-decoration: none;
 }
 
+.saved-words-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.saved-words-actions .secondary-action {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+.saved-words-list {
+  display: grid;
+  gap: 12px;
+}
+
+.saved-word-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 246, 0.7);
+}
+
+.saved-word-item strong {
+  display: block;
+  color: var(--ink);
+  font-family:
+    "Songti SC", "Noto Serif CJK KR", "AppleMyungjo", "Nanum Myeongjo", serif;
+  font-size: 1.16rem;
+  line-height: 1.1;
+}
+
+.saved-word-item small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(22, 32, 39, 0.74);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.saved-word-remove {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: rgba(22, 32, 39, 0.6);
+}
+
 .kicker {
   display: inline-flex;
   gap: 10px;
@@ -960,6 +1023,104 @@ button:focus-visible {
   line-height: 0.9;
   text-shadow: 0 6px 0 rgba(22, 32, 39, 0.14);
   animation: countdown-pop 0.32s ease;
+}
+
+.exit-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 25, 32, 0.55);
+}
+
+.exit-confirm-card {
+  display: grid;
+  gap: 14px;
+  max-width: 360px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.exit-confirm-card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.exit-confirm-card p {
+  margin: 0;
+  color: rgba(22, 32, 39, 0.75);
+  font-size: 0.95rem;
+}
+
+.exit-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.info-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 4vw, 32px);
+  background: rgba(15, 25, 32, 0.55);
+}
+
+.info-modal-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: min(680px, 100%);
+  max-height: min(88vh, 860px);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.info-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px clamp(16px, 3vw, 26px);
+  border-bottom: 2px solid var(--line);
+  background: rgba(255, 253, 246, 0.98);
+}
+
+.info-modal-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.info-modal-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.info-modal-body {
+  overflow-y: auto;
+  padding: clamp(16px, 3vw, 26px);
 }
 
 .result-summary,
@@ -1523,11 +1684,29 @@ button:focus-visible {
 
 .history-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 12px;
   align-items: start;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.history-save-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: rgba(22, 32, 39, 0.3);
+  font-size: 1rem;
+}
+
+.history-save-button.is-saved {
+  border-color: var(--yellow);
+  background: rgba(255, 201, 40, 0.16);
+  color: #c98a00;
 }
 
 .history-item strong {
@@ -2270,6 +2449,11 @@ button:focus-visible {
 
   .history-item time {
     grid-column: 2;
+  }
+
+  .history-save-button {
+    grid-column: 2;
+    justify-self: end;
   }
 
   .result-actions {
