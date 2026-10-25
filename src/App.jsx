@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   FaBolt,
   FaCalendarDay,
@@ -23,6 +23,19 @@ import {
 import idioms from "./data/idioms.json";
 import hanjaChars from "./data/hanjaChars.json";
 import hanjaWords from "./data/hanjaWords.json";
+import {
+  closeTossView,
+  getTossUserKey,
+  isTossEnvironment,
+  openTossLeaderboard,
+  submitTossScore,
+  subscribeTossBack,
+  triggerTossHaptic,
+} from "./toss.js";
+
+// 앱인토스 미니앱(또는 개발 서버의 devtools mock)에서 실행 중인지. 웹(Vercel)에서는 false.
+const IS_TOSS = isTossEnvironment();
+const APP_NAME = "사자성어 급수전";
 
 const TOTAL_SECONDS = 60;
 const COUNTDOWN_SECONDS = 3;
@@ -76,7 +89,7 @@ const GAME_THEMES = {
   notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
 };
 const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
-  "사자성어 퀴즈 건의",
+  "사자성어 급수전 건의",
 )}&body=${encodeURIComponent("건의 내용을 적어주세요.")}`;
 const INFO_PAGE_LINKS = [
   { label: "건의하기", path: "/ko/feedback" },
@@ -90,7 +103,7 @@ const INFO_PAGES = {
   "/ko/feedback": {
     title: "건의하기",
     summary:
-      "사자성어 퀴즈가 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
+      "사자성어 급수전이 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
     sections: [
       {
         heading: "어떤 의견이든 좋아요",
@@ -164,7 +177,7 @@ const INFO_PAGES = {
     ],
     actions: [
       {
-        href: "mailto:contact@oshizi.com?subject=%EC%82%AC%EC%9E%90%EC%84%B1%EC%96%B4%20%ED%80%B4%EC%A6%88%20%EB%AC%B8%EC%9D%98",
+        href: `mailto:contact@oshizi.com?subject=${encodeURIComponent("사자성어 급수전 문의")}`,
         label: "contact@oshizi.com",
       },
     ],
@@ -172,7 +185,7 @@ const INFO_PAGES = {
   "/ko/terms": {
     title: "이용약관",
     summary:
-      "사자성어 퀴즈를 이용하기 전에 알아두면 좋은 기본 약관입니다.",
+      "사자성어 급수전을 이용하기 전에 알아두면 좋은 기본 약관입니다.",
     sections: [
       {
         heading: "서비스 목적",
@@ -200,7 +213,7 @@ const INFO_PAGES = {
   "/ko/privacy": {
     title: "개인정보",
     summary:
-      "사자성어 퀴즈에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
+      "사자성어 급수전에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
     sections: [
       {
         heading: "저장되는 정보",
@@ -1039,7 +1052,7 @@ function buildResultImageBlob({ accuracy, difficulty, history, score }) {
 
     context.fillStyle = "#162027";
     context.font = "900 54px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
-    context.fillText("사자성어 퀴즈 결과", 64, 84);
+    context.fillText("사자성어 급수전 결과", 64, 84);
     context.fillStyle = "#f25a48";
     context.font = "900 88px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
     context.fillText(`${score}개 정답`, 64, 180);
@@ -1364,6 +1377,18 @@ function reducer(state, action) {
       };
     case "MARK_SAVED":
       return { ...state, resultSaved: true };
+    case "SHIFT_TIME": {
+      // 앱이 백그라운드에 있거나 종료 확인창이 떠 있던 시간만큼 타이머 기준 시각을 뒤로 민다.
+      if (!(action.delta > 0)) return state;
+      const shift = (value) => (value == null ? value : value + action.delta);
+      return {
+        ...state,
+        totalStartedAt: shift(state.totalStartedAt),
+        questionStartedAt: shift(state.questionStartedAt),
+        countdownStartedAt: shift(state.countdownStartedAt),
+        feedbackUntil: shift(state.feedbackUntil),
+      };
+    }
     default:
       return state;
   }
@@ -1377,13 +1402,18 @@ function App() {
   const [exportState, setExportState] = useState("idle");
   const [gameTheme, setGameTheme] = useState(loadGameTheme);
   const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
-  const [playerProfile] = useState(loadPlayerProfile);
+  const [playerProfile, setPlayerProfile] = useState(loadPlayerProfile);
   const [infoPath, setInfoPath] = useState(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showGameInfo, setShowGameInfo] = useState(false);
   const [savedWords, setSavedWords] = useState(loadSavedWords);
   const [showSavedWords, setShowSavedWords] = useState(false);
   const [savedWordsExportState, setSavedWordsExportState] = useState("idle");
+  const [isHidden, setIsHidden] = useState(
+    () => typeof document !== "undefined" && document.hidden,
+  );
+  // 앱이 백그라운드로 가거나 종료 확인창이 떠 있는 동안에는 게임 시간이 흐르지 않는다.
+  const shouldPause = isHidden || showExitConfirm;
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1400,7 +1430,7 @@ function App() {
   const accuracy = getAccuracy(state.score, state.attempted);
 
   useEffect(() => {
-    document.title = infoPage ? `${infoPage.title} | 사자성어 퀴즈` : "사자성어 퀴즈";
+    document.title = infoPage ? `${infoPage.title} | ${APP_NAME}` : APP_NAME;
   }, [infoPage]);
 
   useEffect(() => {
@@ -1417,18 +1447,55 @@ function App() {
 
   useEffect(() => {
     if (
-      state.phase !== "countdown" &&
-      state.phase !== "playing" &&
-      state.phase !== "feedback"
+      shouldPause ||
+      (state.phase !== "countdown" &&
+        state.phase !== "playing" &&
+        state.phase !== "feedback")
     ) {
       return undefined;
     }
 
     const interval = window.setInterval(() => setNow(Date.now()), 100);
     return () => window.clearInterval(interval);
-  }, [state.phase]);
+  }, [state.phase, shouldPause]);
+
+  // 일시정지가 끝나는 순간(cleanup) 멈춰 있던 시간만큼 타이머 기준 시각을 뒤로 민다.
+  useEffect(() => {
+    if (!shouldPause) return undefined;
+
+    const pausedAt = Date.now();
+    return () => {
+      dispatch({ type: "SHIFT_TIME", delta: Date.now() - pausedAt });
+      setNow(Date.now());
+    };
+  }, [shouldPause]);
 
   useEffect(() => {
+    function handleVisibilityChange() {
+      setIsHidden(document.hidden);
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getTossUserKey().then((userKey) => {
+      if (cancelled || !userKey) return;
+      setPlayerProfile((current) => ({ ...current, playerId: userKey }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    // 토스 미니앱에는 /api/leaderboard 서버가 없으므로 웹에서만 공유 리더보드를 불러온다.
+    if (IS_TOSS) return undefined;
+
     let cancelled = false;
 
     async function refreshLeaderboard() {
@@ -1499,7 +1566,7 @@ function App() {
     if (state.phase !== "result" || state.resultSaved) return;
 
     const leaderboardEntry =
-      state.mode === "casual" && state.attempted > 0
+      !IS_TOSS && state.mode === "casual" && state.attempted > 0
         ? buildLeaderboardEntry({
             accuracy,
             difficulty: state.difficulty,
@@ -1519,6 +1586,10 @@ function App() {
         ? updateDailyLeaderboard(dailyLeaderboard, leaderboardEntry)
         : dailyLeaderboard;
     saveStats(nextStats);
+    if (IS_TOSS && state.mode === "casual" && state.attempted > 0) {
+      // 토스 게임센터 리더보드(캐주얼 모드 점수만). 웹 리더보드와 같은 기준이다.
+      submitTossScore(state.score);
+    }
     if (leaderboardEntry) {
       saveDailyLeaderboard(nextLeaderboard);
       submitSharedLeaderboard(leaderboardEntry)
@@ -1559,6 +1630,12 @@ function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   });
+
+  // 토스 상단 뒤로가기. 구독은 한 번만 하고, 항상 최신 상태를 보는 핸들러를 ref로 넘긴다.
+  const nativeBackHandlerRef = useRef(() => {});
+  nativeBackHandlerRef.current = handleNativeBack;
+
+  useEffect(() => subscribeTossBack(() => nativeBackHandlerRef.current()), []);
 
   const resultLabel = useMemo(() => {
     if (state.lastResult === "correct") return "정답!";
@@ -1606,6 +1683,36 @@ function App() {
     setShowExitConfirm(false);
   }
 
+  // 토스 상단 뒤로가기(또는 안드로이드 뒤로가기). 리스너가 등록되면 기본 동작이
+  // 막히므로, 홈에서는 직접 화면을 닫는다.
+  function handleNativeBack() {
+    if (showExitConfirm) {
+      setShowExitConfirm(false);
+      return;
+    }
+    if (showGameInfo) {
+      setShowGameInfo(false);
+      return;
+    }
+    if (showSavedWords) {
+      setShowSavedWords(false);
+      return;
+    }
+    if (infoPath) {
+      setInfoPath(null);
+      return;
+    }
+    if (state.phase === "playing" || state.phase === "feedback") {
+      setShowExitConfirm(true);
+      return;
+    }
+    if (state.phase !== "home") {
+      dispatch({ type: "HOME" });
+      return;
+    }
+    closeTossView();
+  }
+
   function showLeaderboardPreview() {
     dispatch({ type: "SHOW_LEADERBOARD", difficulty: state.difficulty });
   }
@@ -1634,7 +1741,8 @@ function App() {
   function submitAnswer(answer) {
     if (state.phase !== "playing") return;
     const correct = answer === state.currentQuestion.answer;
-    if (navigator.vibrate) {
+    // 토스에서는 SDK 햅틱(iOS WebView는 navigator.vibrate 미지원), 웹에서는 진동으로 폴백.
+    if (!triggerTossHaptic(correct ? "success" : "error") && navigator.vibrate) {
       navigator.vibrate(correct ? 30 : [25, 25, 25]);
     }
     if (!soundMuted) {
@@ -1765,9 +1873,12 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
+            onOpenLeaderboard={openTossLeaderboard}
             onShowGameInfo={() => setShowGameInfo(true)}
             onSoundToggle={toggleSoundMuted}
-            onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
+            onStart={
+              state.mode === "casual" && !IS_TOSS ? showLeaderboardPreview : startGame
+            }
             onThemeToggle={toggleGameTheme}
             soundMuted={soundMuted}
           />
@@ -1813,6 +1924,7 @@ function App() {
             onExportImage={exportImageResult}
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
+            onOpenLeaderboard={openTossLeaderboard}
             onRestart={startGame}
             onShowSavedWords={() => setShowSavedWords(true)}
             onToggleSaveWord={toggleSavedWord}
@@ -1852,7 +1964,7 @@ function InfoPage({ onHome, page }) {
         </button>
 
         <header className="info-header">
-          <span>사자성어 퀴즈</span>
+          <span>{APP_NAME}</span>
           <h1>{page.title}</h1>
           <p>{page.summary}</p>
         </header>
@@ -1891,7 +2003,7 @@ function SavedWordsView({ exportState, onExportImage, onExportText, onHome, onRe
         </button>
 
         <header className="info-header">
-          <span>사자성어 퀴즈</span>
+          <span>{APP_NAME}</span>
           <h1>저장한 단어</h1>
           <p>결과 화면에서 별표를 눌러 저장한 성어와 단어를 모아볼 수 있어요.</p>
         </header>
@@ -1964,11 +2076,11 @@ function Hud({
 
   return (
     <header className="hud">
-      <div className="logo-lockup" aria-label="사자성어 퀴즈">
+      <div className="logo-lockup" aria-label={APP_NAME}>
         <span className="logo-hanja" aria-hidden="true">四字</span>
         <span className="logo-copy">
           <span>사자성어</span>
-          <strong>퀴즈</strong>
+          <strong>급수전</strong>
         </span>
         <span className="logo-spark" aria-hidden="true">!</span>
       </div>
@@ -2053,6 +2165,7 @@ function HomeView({
   onGradeChange,
   onModeChange,
   onNavigateInfo,
+  onOpenLeaderboard,
   onShowGameInfo,
   onSoundToggle,
   onStart,
@@ -2091,6 +2204,19 @@ function HomeView({
           {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
           <span>{soundMuted ? "무음" : "소리"}</span>
         </button>
+
+        {IS_TOSS && (
+          <button
+            aria-label="리더보드 보기"
+            className="theme-toggle"
+            onClick={onOpenLeaderboard}
+            title="리더보드"
+            type="button"
+          >
+            <FaMedal aria-hidden="true" />
+            <span>순위</span>
+          </button>
+        )}
 
         <button
           aria-label="게임 설명 보기"
@@ -2312,7 +2438,7 @@ function GameInfoModal({ onClose }) {
                 <span>게임 방식</span>
                 <h2>뜻과 한자를 번갈아 익혀요</h2>
                 <p>
-                  사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
+                  사자성어 급수전은 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
                   학습형 게임입니다.
                 </p>
               </div>
@@ -2513,6 +2639,7 @@ function ResultView({
   onExportImage,
   onExportText,
   onHome,
+  onOpenLeaderboard,
   onRestart,
   onShowSavedWords,
   onToggleSaveWord,
@@ -2550,13 +2677,18 @@ function ResultView({
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
         </div>
-        {!isGradeMode && (
+        {!isGradeMode && !IS_TOSS && (
           <DailyLeaderboard
             difficulty={difficulty}
             leaderboard={dailyLeaderboard}
             limit={5}
             variant="result"
           />
+        )}
+        {!isGradeMode && IS_TOSS && (
+          <button className="secondary-action toss-leaderboard-button" onClick={onOpenLeaderboard} type="button">
+            <FaMedal /> 토스 게임센터 리더보드 보기
+          </button>
         )}
       </div>
 
