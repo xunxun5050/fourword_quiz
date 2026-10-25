@@ -131,6 +131,22 @@ Vercel에 배포할 수 있는 정적 Vite 앱입니다.
 Google AdSense 연동을 제거했습니다(`VITE_ADSENSE_CLIENT` 환경변수는 더 이상 읽지 않습니다).
 기존 웹 배포에서 광고 수익을 계속 운영하려면 별도 브랜치/빌드로 분리하는 것을 검토하세요.
 
+## 앱인토스 미니앱 빌드
+
+앱인토스(Apps in Toss) 출시용 번들은 `@apps-in-toss/web-framework` 3.x로 만듭니다. 설정은
+[apps-in-toss.config.ts](apps-in-toss.config.ts)에 있습니다.
+
+```bash
+npm run build   # vite build → dist/ads.txt 제거 → ait build  =>  sajaseongeo-geupsujeon.ait 생성
+npm run deploy  # ait deploy (사전에 `ait token add`로 API 키 등록 필요)
+```
+
+- `appName`(`sajaseongeo-geupsujeon`)은 콘솔에 등록하는 앱 이름과 같아야 하고, 등록 후에는 수정할 수 없습니다.
+- 앱 표시 이름·로고·썸네일·스크린샷은 설정 파일이 아니라 앱인토스 콘솔에서 등록합니다.
+- 웹(Vercel) 배포는 `vercel-build`(`vite build`만 실행)를 쓰므로 `.ait` 생성과 무관하고 `ads.txt`도 그대로 유지됩니다.
+- `npm run dev` 화면 좌상단의 **AIT** 버튼은 devtools 패널(SDK mock)이며 프로덕션 번들에는 포함되지 않습니다.
+- `*.ait` 파일은 `.gitignore`에 포함되어 커밋되지 않습니다.
+
 ## 프로젝트 구조
 
 ```text
