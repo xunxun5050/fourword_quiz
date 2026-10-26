@@ -10,7 +10,6 @@ import {
   FaImage,
   FaInfoCircle,
   FaMedal,
-  FaPalette,
   FaPlay,
   FaRedoAlt,
   FaStar,
@@ -46,7 +45,6 @@ const STORAGE_KEYS = {
   bestAccuracy: "sjse_best_accuracy",
   playCount: "sjse_play_count",
   dailyLeaderboard: "sjse_daily_leaderboard",
-  gameTheme: "sjse_game_theme",
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
   soundMuted: "sjse_sound_muted",
@@ -85,10 +83,6 @@ const QUESTION_TYPE_LABELS = {
   WB: "빈칸 한자 채우기",
 };
 const BLANK_PROMPT_TYPES = ["A", "WB", "HE"];
-const GAME_THEMES = {
-  hanji: { label: "한지", description: "한지 보드", next: "notebook" },
-  notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
-};
 const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
   "사자성어 급수전 건의",
 )}&body=${encodeURIComponent("건의 내용을 적어주세요.")}`;
@@ -756,13 +750,6 @@ function loadPlayerProfile() {
   return profile;
 }
 
-function loadGameTheme() {
-  if (typeof window === "undefined") return "hanji";
-
-  const savedTheme = localStorage.getItem(STORAGE_KEYS.gameTheme);
-  return GAME_THEMES[savedTheme] ? savedTheme : "hanji";
-}
-
 function loadSoundMuted() {
   if (typeof window === "undefined") return false;
   return localStorage.getItem(STORAGE_KEYS.soundMuted) === "1";
@@ -1401,7 +1388,7 @@ function App() {
   const [stats, setStats] = useState(loadStats);
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
-  const [gameTheme, setGameTheme] = useState(loadGameTheme);
+  const [notice, setNotice] = useState(null);
   const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
   const [playerProfile, setPlayerProfile] = useState(loadPlayerProfile);
   const [infoPath, setInfoPath] = useState(null);
@@ -1435,8 +1422,10 @@ function App() {
   }, [infoPage]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.gameTheme, gameTheme);
-  }, [gameTheme]);
+    if (!notice) return undefined;
+    const timer = window.setTimeout(() => setNotice(null), 2800);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
@@ -1733,8 +1722,13 @@ function App() {
     });
   }
 
-  function toggleGameTheme() {
-    setGameTheme((currentTheme) => GAME_THEMES[currentTheme]?.next || "hanji");
+  async function handleOpenLeaderboard() {
+    const result = await openTossLeaderboard();
+    if (result === "unsupported") {
+      setNotice("토스 앱을 최신 버전으로 업데이트하면 순위를 볼 수 있어요.");
+    } else if (result !== "ok") {
+      setNotice("순위를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+    }
   }
 
   function toggleSoundMuted() {
@@ -1841,7 +1835,7 @@ function App() {
   }
 
   return (
-    <main className={`app-shell is-${state.phase}-phase theme-${gameTheme}`}>
+    <main className={`app-shell is-${state.phase}-phase theme-hanji`}>
       <div className="arcade-stage">
         {state.phase !== "countdown" &&
           state.phase !== "leaderboard" &&
@@ -1865,7 +1859,6 @@ function App() {
         {state.phase === "home" && (
           <HomeView
             difficulty={state.difficulty}
-            gameTheme={gameTheme}
             mode={state.mode}
             grade={state.grade}
             subMode={state.subMode}
@@ -1876,13 +1869,12 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
-            onOpenLeaderboard={openTossLeaderboard}
+            onOpenLeaderboard={handleOpenLeaderboard}
             onShowGameInfo={() => setShowGameInfo(true)}
             onSoundToggle={toggleSoundMuted}
             onStart={
               state.mode === "casual" && !IS_TOSS ? showLeaderboardPreview : startGame
             }
-            onThemeToggle={toggleGameTheme}
             soundMuted={soundMuted}
           />
         )}
@@ -1927,7 +1919,7 @@ function App() {
             onExportImage={exportImageResult}
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
-            onOpenLeaderboard={openTossLeaderboard}
+            onOpenLeaderboard={handleOpenLeaderboard}
             onRestart={startGame}
             onShowSavedWords={() => setShowSavedWords(true)}
             onToggleSaveWord={toggleSavedWord}
@@ -1954,6 +1946,12 @@ function App() {
       )}
 
       {showGameInfo && <GameInfoModal onClose={() => setShowGameInfo(false)} />}
+
+      {notice && (
+        <div className="app-notice" role="status">
+          {notice}
+        </div>
+      )}
     </main>
   );
 }
@@ -2161,7 +2159,6 @@ function Metric({ danger = false, icon, label, value }) {
 
 function HomeView({
   difficulty,
-  gameTheme,
   grade,
   mode,
   onDifficultyChange,
@@ -2173,29 +2170,15 @@ function HomeView({
   onSoundToggle,
   onStart,
   onSubModeChange,
-  onThemeToggle,
   soundMuted,
   subMode,
 }) {
-  const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
-  const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
   const isGradeMode = mode === "grade";
   const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
   return (
     <section className="home-view">
       <div className="home-toggle-row">
-        <button
-          aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
-          className="theme-toggle"
-          onClick={onThemeToggle}
-          title={`${currentTheme.description} 테마`}
-          type="button"
-        >
-          <FaPalette aria-hidden="true" />
-          <span>{currentTheme.label}</span>
-        </button>
-
         <button
           aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
           aria-pressed={soundMuted}

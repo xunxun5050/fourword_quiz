@@ -52,13 +52,17 @@ export function triggerTossHaptic(type) {
   return true;
 }
 
+// "ok" | "unsupported"(토스 앱 버전이 낮음) | "error". 호출자가 사용자에게 안내할 수 있게 결과를 돌려준다.
 export async function openTossLeaderboard() {
   const sdk = await loadSdk();
-  if (!sdk) return;
+  if (!sdk) return "error";
   try {
+    if (sdk.Game.openLeaderboard.isSupported?.() === false) return "unsupported";
     await sdk.Game.openLeaderboard();
-  } catch {
-    // 앱 버전이 낮으면 아무 일도 일어나지 않는다.
+    return "ok";
+  } catch (error) {
+    console.error("openLeaderboard failed", error);
+    return "error";
   }
 }
 
