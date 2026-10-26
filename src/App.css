@@ -382,7 +382,7 @@ button:focus-visible {
   line-height: 1.05;
 }
 
-.icon-home {
+.icon-sound {
   display: grid;
   width: clamp(52px, 5vw, 62px);
   height: clamp(52px, 5vw, 62px);
@@ -395,7 +395,7 @@ button:focus-visible {
   box-shadow: 0 6px 0 #03080b;
 }
 
-.icon-home:disabled {
+.icon-sound:disabled {
   opacity: 0.45;
 }
 
@@ -1952,7 +1952,7 @@ button:focus-visible {
     font-size: 0.82rem;
   }
 
-  .icon-home {
+  .icon-sound {
     width: 44px;
     height: 44px;
     font-size: 1.35rem;
@@ -2015,7 +2015,7 @@ button:focus-visible {
     font-size: 0.82rem;
   }
 
-  .app-shell:not(.is-home-phase):not(.is-countdown-phase) .icon-home {
+  .app-shell:not(.is-home-phase):not(.is-countdown-phase) .icon-sound {
     width: 34px;
     height: 34px;
     font-size: 1.05rem;

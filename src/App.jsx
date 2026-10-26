@@ -1849,9 +1849,10 @@ function App() {
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onHome={requestHome}
+            onSoundToggle={toggleSoundMuted}
             questionNumber={state.questionNumber}
             score={state.score}
+            soundMuted={soundMuted}
             totalLeft={totalLeft}
           />
         )}
@@ -2064,14 +2065,14 @@ function Hud({
   grade,
   mode,
   onDifficultyChange,
-  onHome,
+  onSoundToggle,
   phase,
   questionNumber,
   score,
+  soundMuted,
   subMode,
   totalLeft,
 }) {
-  const homeDisabled = phase === "home";
   const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
   const isGradeMode = mode === "grade";
 
@@ -2132,14 +2133,14 @@ function Hud({
       )}
 
       <button
-        aria-label="홈으로"
-        className="icon-home"
-        disabled={homeDisabled}
-        onClick={onHome}
-        title="홈으로"
+        aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
+        aria-pressed={soundMuted}
+        className="icon-sound"
+        onClick={onSoundToggle}
+        title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
         type="button"
       >
-        <FaHome />
+        {soundMuted ? <FaVolumeMute /> : <FaVolumeUp />}
       </button>
     </header>
   );
