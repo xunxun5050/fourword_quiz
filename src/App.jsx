@@ -323,6 +323,7 @@ const initialState = {
   attempted: 0,
   history: [],
   usedIds: [],
+  savedQueue: [],
   selectedAnswer: null,
   lastResult: null,
   totalStartedAt: null,
@@ -572,6 +573,36 @@ function makeWordQuestion(usedIds, grade) {
     type === "WM" ? makeWordMeaningQuestion(item, wordPool) : makeWordBlankQuestion(item, wordPool);
 
   return { question, usedIds: [...usedIds, item.id] };
+}
+
+// 저장한 단어(문제 복기에서 별표로 저장한 항목)를 원래 데이터에서 찾아 시험 문제로 만든다.
+function resolveSavedItem(entry) {
+  if (/^H/.test(entry.id)) {
+    const item = hanjaChars.find((candidate) => candidate.id === entry.id);
+    return item ? { kind: "char", item } : null;
+  }
+  if (/^W/.test(entry.id)) {
+    const item = hanjaWords.find((candidate) => candidate.id === entry.id);
+    return item ? { kind: "word", item } : null;
+  }
+  const item = idioms.find((candidate) => candidate.id === entry.id);
+  return item ? { kind: "idiom", item } : null;
+}
+
+function makeSavedQuestion({ kind, item }) {
+  if (kind === "char") {
+    return makeHunEumQuestion(
+      item,
+      hanjaChars.filter((candidate) => candidate.grade === item.grade),
+    );
+  }
+  if (kind === "word") {
+    const pool = hanjaWords.filter((candidate) => candidate.grade === item.grade);
+    return Math.random() < 0.5
+      ? makeWordMeaningQuestion(item, pool)
+      : makeWordBlankQuestion(item, pool);
+  }
+  return Math.random() < 0.5 ? makeTypeAQuestion(item, idioms) : makeTypeBQuestion(item, idioms);
 }
 
 function buildNextQuestion(usedIds, { mode, grade, subMode }) {
@@ -1271,6 +1302,22 @@ function reducer(state, action) {
         subMode: action.subMode,
         countdownStartedAt: action.now,
       };
+    case "SAVED_START": {
+      return {
+        ...initialState,
+        phase: "playing",
+        mode: "saved",
+        difficulty: state.difficulty,
+        grade: state.grade,
+        subMode: state.subMode,
+        currentQuestion: makeSavedQuestion(action.queue[0]),
+        questionNumber: 1,
+        savedQueue: action.queue,
+        totalStartedAt: action.now,
+        questionStartedAt: action.now,
+        resultSaved: false,
+      };
+    }
     case "START": {
       const now = action.now;
       const { question, usedIds } = buildNextQuestion([], {
@@ -1329,11 +1376,15 @@ function reducer(state, action) {
     }
     case "NEXT": {
       if (state.phase !== "feedback") return state;
-      const { question, usedIds } = buildNextQuestion(state.usedIds, {
-        mode: state.mode,
-        grade: state.grade,
-        subMode: state.subMode,
-      });
+      const savedNext = state.mode === "saved" ? state.savedQueue[state.questionNumber] : null;
+      const { question, usedIds } =
+        state.mode === "saved"
+          ? { question: savedNext ? makeSavedQuestion(savedNext) : null, usedIds: state.usedIds }
+          : buildNextQuestion(state.usedIds, {
+              mode: state.mode,
+              grade: state.grade,
+              subMode: state.subMode,
+            });
       if (!question) {
         return { ...state, phase: "result", currentQuestion: null, resultSaved: false };
       }
@@ -1364,7 +1415,7 @@ function reducer(state, action) {
       return {
         ...initialState,
         difficulty: state.difficulty,
-        mode: state.mode,
+        mode: state.mode === "saved" ? "casual" : state.mode,
         grade: state.grade,
         subMode: state.subMode,
       };
@@ -1529,12 +1580,15 @@ function App() {
 
     if (state.phase !== "playing" && state.phase !== "feedback") return;
 
-    if (totalLeft <= 0) {
+    // 저장한 단어 시험은 시간 제한이 없다.
+    const isTimed = state.mode !== "saved";
+
+    if (isTimed && totalLeft <= 0) {
       dispatch({ type: "END" });
       return;
     }
 
-    if (state.phase === "playing" && questionLeft <= 0) {
+    if (isTimed && state.phase === "playing" && questionLeft <= 0) {
       dispatch({ type: "ANSWER", answer: null, now });
       return;
     }
@@ -1548,12 +1602,18 @@ function App() {
     state.countdownStartedAt,
     state.difficulty,
     state.feedbackUntil,
+    state.mode,
     state.phase,
     totalLeft,
   ]);
 
   useEffect(() => {
     if (state.phase !== "result" || state.resultSaved) return;
+
+    if (state.mode === "saved") {
+      dispatch({ type: "MARK_SAVED" });
+      return;
+    }
 
     const leaderboardEntry =
       state.mode === "casual" && state.attempted > 0
@@ -1709,6 +1769,15 @@ function App() {
     dispatch({ type: "SHOW_LEADERBOARD", difficulty: state.difficulty });
   }
 
+  function startSavedQuiz() {
+    const queue = shuffle(savedWords.map(resolveSavedItem).filter(Boolean));
+    if (queue.length === 0) return;
+
+    const startedAt = Date.now();
+    setNow(startedAt);
+    dispatch({ type: "SAVED_START", queue, now: startedAt });
+  }
+
   function startGame() {
     const startedAt = Date.now();
     setNow(startedAt);
@@ -1841,6 +1910,7 @@ function App() {
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
             questionNumber={state.questionNumber}
+            savedTotal={state.savedQueue.length}
             score={state.score}
             totalLeft={totalLeft}
           />
@@ -1861,10 +1931,13 @@ function App() {
             onNavigateInfo={navigateInfoPage}
             onOpenLeaderboard={showLeaderboardPreview}
             onShowGameInfo={() => setShowGameInfo(true)}
+            onShowSavedWords={() => setShowSavedWords(true)}
             onSoundToggle={toggleSoundMuted}
+            onStartSavedQuiz={startSavedQuiz}
             onStart={
               state.mode === "casual" && !IS_TOSS ? showLeaderboardPreview : startGame
             }
+            savedCount={savedWords.length}
             soundMuted={soundMuted}
           />
         )}
@@ -1895,6 +1968,7 @@ function App() {
             selectedAnswer={state.selectedAnswer}
             soundMuted={soundMuted}
             totalLeft={totalLeft}
+            untimed={state.mode === "saved"}
           />
         )}
 
@@ -1911,7 +1985,7 @@ function App() {
             onExportImage={exportImageResult}
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
-            onRestart={startGame}
+            onRestart={state.mode === "saved" ? startSavedQuiz : startGame}
             onShowSavedWords={() => setShowSavedWords(true)}
             onToggleSaveWord={toggleSavedWord}
             playerProfile={playerProfile}
@@ -2052,6 +2126,7 @@ function Hud({
   onDifficultyChange,
   phase,
   questionNumber,
+  savedTotal,
   score,
   subMode,
   totalLeft,
@@ -2072,7 +2147,15 @@ function Hud({
 
       {phase !== "home" && (
         <div className="hud-metrics" aria-label="게임 정보">
-          <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
+          {mode === "saved" ? (
+            <Metric
+              icon={<FaStar />}
+              label="남은 문제"
+              value={Math.max(0, savedTotal - Math.max(1, questionNumber || 1) + 1)}
+            />
+          ) : (
+            <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
+          )}
           <Metric icon={<FaTrophy />} label="점수" value={score} />
           <Metric icon={<FaBolt />} label="문제" value={`Q.${Math.max(1, questionNumber || 1)}`} />
         </div>
@@ -2092,6 +2175,11 @@ function Hud({
               {value.label}
             </button>
           ))}
+        </div>
+      ) : mode === "saved" ? (
+        <div aria-label="저장한 단어 시험" className="difficulty-chip">
+          <span>모드</span>
+          <strong>저장한 단어</strong>
         </div>
       ) : (
         <div
@@ -2141,12 +2229,16 @@ function HomeView({
   onNavigateInfo,
   onOpenLeaderboard,
   onShowGameInfo,
+  onShowSavedWords,
   onSoundToggle,
   onStart,
+  onStartSavedQuiz,
   onSubModeChange,
+  savedCount,
   soundMuted,
   subMode,
 }) {
+  const [savedMenuOpen, setSavedMenuOpen] = useState(false);
   const isGradeMode = mode === "grade";
   const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
@@ -2219,6 +2311,33 @@ function HomeView({
                 급수 대비
               </button>
             </div>
+          </div>
+
+          <div className="saved-words-menu">
+            <button
+              aria-expanded={savedMenuOpen}
+              className="saved-words-toggle"
+              onClick={() => setSavedMenuOpen((open) => !open)}
+              type="button"
+            >
+              <FaStar aria-hidden="true" /> 저장한 단어 ({savedCount})
+            </button>
+            {savedMenuOpen && (
+              <div className="saved-words-options">
+                <button className="difficulty-button" onClick={onShowSavedWords} type="button">
+                  단어 보기
+                </button>
+                <button
+                  className="difficulty-button"
+                  disabled={savedCount === 0}
+                  onClick={onStartSavedQuiz}
+                  title={savedCount === 0 ? "저장한 단어가 없어요" : undefined}
+                  type="button"
+                >
+                  저장한 단어 시험
+                </button>
+              </div>
+            )}
           </div>
 
           {isGradeMode && (
@@ -2479,12 +2598,14 @@ function GameView({
   resultLabel,
   selectedAnswer,
   soundMuted,
+  untimed,
 }) {
   const isFeedback = Boolean(lastResult);
   const showEasyHints = difficulty === "easy";
   const hasPromptReadings = showEasyHints && currentQuestion.type === "A";
   const gameViewClassName = [
     "game-view",
+    untimed ? "is-untimed" : "",
     lastResult ? `is-${lastResult}` : "",
     hasPromptReadings ? "has-prompt-readings" : "",
   ]
@@ -2538,13 +2659,15 @@ function GameView({
         )}
       </div>
 
-      <div className={`timer-row is-${timerTone}`}>
-        <FaStopwatch aria-hidden="true" />
-        <div className="timer-track" aria-label="문제 타이머">
-          <span style={{ width: `${questionProgress * 100}%` }} />
+      {!untimed && (
+        <div className={`timer-row is-${timerTone}`}>
+          <FaStopwatch aria-hidden="true" />
+          <div className="timer-track" aria-label="문제 타이머">
+            <span style={{ width: `${questionProgress * 100}%` }} />
+          </div>
+          <strong>{displaySeconds(questionLeft)}초</strong>
         </div>
-        <strong>{displaySeconds(questionLeft)}초</strong>
-      </div>
+      )}
 
       <div className={`choice-grid ${showEasyHints ? "has-easy-hints" : ""}`}>
         {currentQuestion.choices.map((choice, index) => {
@@ -2635,8 +2758,8 @@ function ResultView({
           <span>개 정답</span>
         </div>
         <p>
-          정확도 {accuracy}% · 시도 {history.length}문제 · 난이도{" "}
-          {DIFFICULTIES[difficulty].label}
+          정확도 {accuracy}% · 시도 {history.length}문제
+          {mode !== "saved" && <> · 난이도 {DIFFICULTIES[difficulty].label}</>}
           {isGradeMode && (
             <>
               {" "}
@@ -2644,11 +2767,13 @@ function ResultView({
             </>
           )}
         </p>
-        <div className="best-strip">
-          최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
-          {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
-        </div>
-        {!isGradeMode && (
+        {mode !== "saved" && (
+          <div className="best-strip">
+            최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
+            {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
+          </div>
+        )}
+        {mode === "casual" && (
           <DailyLeaderboard
             difficulty={difficulty}
             leaderboard={dailyLeaderboard}

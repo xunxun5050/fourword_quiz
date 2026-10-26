@@ -407,6 +407,39 @@ button:focus-visible {
   padding: clamp(24px, 6vh, 62px) 0 clamp(28px, 7vh, 72px);
 }
 
+.saved-words-menu {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  justify-items: center;
+}
+
+.saved-words-toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(17, 24, 39, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 253, 246, 0.76);
+  color: rgba(17, 24, 39, 0.86);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.saved-words-toggle svg {
+  color: #f2a900;
+}
+
+.saved-words-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
 .home-toggle-row {
   position: absolute;
   top: clamp(14px, 2.5vw, 26px);
@@ -1302,6 +1335,10 @@ button:focus-visible {
   grid-template-rows: minmax(110px, 0.82fr) auto minmax(170px, 1fr) auto;
   gap: clamp(10px, 1.7vh, 18px);
   padding: clamp(14px, 2.8vh, 32px) clamp(20px, 6vw, 92px) clamp(76px, 9vh, 96px);
+}
+
+.game-view.is-untimed {
+  grid-template-rows: minmax(110px, 1fr) minmax(170px, 1.2fr) auto;
 }
 
 .game-view.is-wrong {
