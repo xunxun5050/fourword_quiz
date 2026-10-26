@@ -127,3 +127,36 @@ export function subscribeTossBack(handler) {
     if (unsubscribe) unsubscribe();
   };
 }
+
+// 토스 앱의 상태바/하단 바에 가려지지 않도록 SDK의 safe area 값을 CSS 변수로 내려준다.
+// 토스 밖에서는 아무것도 하지 않아서 CSS의 env(safe-area-inset-*) 기본값이 그대로 쓰인다.
+export function syncTossSafeArea() {
+  if (!isTossEnvironment()) return () => {};
+
+  let cancelled = false;
+  let unsubscribe = null;
+
+  const apply = (insets) => {
+    if (!insets) return;
+    const style = document.documentElement.style;
+    style.setProperty("--safe-top", `${insets.top ?? 0}px`);
+    style.setProperty("--safe-right", `${insets.right ?? 0}px`);
+    style.setProperty("--safe-bottom", `${insets.bottom ?? 0}px`);
+    style.setProperty("--safe-left", `${insets.left ?? 0}px`);
+  };
+
+  loadSdk().then((sdk) => {
+    if (!sdk || cancelled) return;
+    try {
+      apply(sdk.SafeArea.get());
+      unsubscribe = sdk.SafeArea.subscribe({ onEvent: apply });
+    } catch {
+      unsubscribe = null;
+    }
+  });
+
+  return () => {
+    cancelled = true;
+    if (unsubscribe) unsubscribe();
+  };
+}

@@ -30,6 +30,7 @@ import {
   openTossLeaderboard,
   submitTossScore,
   subscribeTossBack,
+  syncTossSafeArea,
   triggerTossHaptic,
 } from "./toss.js";
 
@@ -1636,6 +1637,8 @@ function App() {
   nativeBackHandlerRef.current = handleNativeBack;
 
   useEffect(() => subscribeTossBack(() => nativeBackHandlerRef.current()), []);
+
+  useEffect(() => syncTossSafeArea(), []);
 
   const resultLabel = useMemo(() => {
     if (state.lastResult === "correct") return "정답!";
