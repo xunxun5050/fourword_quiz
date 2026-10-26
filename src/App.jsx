@@ -24,9 +24,9 @@ import hanjaChars from "./data/hanjaChars.json";
 import hanjaWords from "./data/hanjaWords.json";
 import {
   closeTossView,
+  getTossNickname,
   getTossUserKey,
   isTossEnvironment,
-  openTossLeaderboard,
   submitTossScore,
   subscribeTossBack,
   syncTossSafeArea,
@@ -811,8 +811,13 @@ async function parseJsonResponse(response) {
   return response.json();
 }
 
+// 토스 미니앱은 웹과 다른 도메인에서 열리므로 Vercel에 배포된 서버를 절대 주소로 부른다.
+const LEADERBOARD_API_URL = IS_TOSS
+  ? "https://fourword-quiz.vercel.app/api/leaderboard"
+  : "/api/leaderboard";
+
 async function fetchSharedLeaderboard() {
-  const response = await fetch("/api/leaderboard", {
+  const response = await fetch(LEADERBOARD_API_URL, {
     cache: "no-store",
     headers: { Accept: "application/json" },
   });
@@ -822,7 +827,7 @@ async function fetchSharedLeaderboard() {
 }
 
 async function submitSharedLeaderboard(entry) {
-  const response = await fetch("/api/leaderboard", {
+  const response = await fetch(LEADERBOARD_API_URL, {
     body: JSON.stringify(entry),
     cache: "no-store",
     headers: {
@@ -1388,7 +1393,6 @@ function App() {
   const [stats, setStats] = useState(loadStats);
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
-  const [notice, setNotice] = useState(null);
   const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
   const [playerProfile, setPlayerProfile] = useState(loadPlayerProfile);
   const [infoPath, setInfoPath] = useState(null);
@@ -1420,12 +1424,6 @@ function App() {
   useEffect(() => {
     document.title = infoPage ? `${infoPage.title} | ${APP_NAME}` : APP_NAME;
   }, [infoPage]);
-
-  useEffect(() => {
-    if (!notice) return undefined;
-    const timer = window.setTimeout(() => setNotice(null), 2800);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
@@ -1476,6 +1474,11 @@ function App() {
       if (cancelled || !userKey) return;
       setPlayerProfile((current) => ({ ...current, playerId: userKey }));
     });
+    // 토스 게임센터 프로필의 닉네임이 있으면 리더보드에 그 이름으로 기록한다.
+    getTossNickname().then((nickname) => {
+      if (cancelled || !nickname) return;
+      setPlayerProfile((current) => ({ ...current, nickname }));
+    });
 
     return () => {
       cancelled = true;
@@ -1483,9 +1486,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // 토스 미니앱에는 /api/leaderboard 서버가 없으므로 웹에서만 공유 리더보드를 불러온다.
-    if (IS_TOSS) return undefined;
-
     let cancelled = false;
 
     async function refreshLeaderboard() {
@@ -1556,7 +1556,7 @@ function App() {
     if (state.phase !== "result" || state.resultSaved) return;
 
     const leaderboardEntry =
-      !IS_TOSS && state.mode === "casual" && state.attempted > 0
+      state.mode === "casual" && state.attempted > 0
         ? buildLeaderboardEntry({
             accuracy,
             difficulty: state.difficulty,
@@ -1722,15 +1722,6 @@ function App() {
     });
   }
 
-  async function handleOpenLeaderboard() {
-    const result = await openTossLeaderboard();
-    if (result === "unsupported") {
-      setNotice("토스 앱을 최신 버전으로 업데이트하면 순위를 볼 수 있어요.");
-    } else if (result !== "ok") {
-      setNotice("순위를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
-    }
-  }
-
   function toggleSoundMuted() {
     setSoundMuted((currentMuted) => !currentMuted);
   }
@@ -1849,10 +1840,8 @@ function App() {
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onSoundToggle={toggleSoundMuted}
             questionNumber={state.questionNumber}
             score={state.score}
-            soundMuted={soundMuted}
             totalLeft={totalLeft}
           />
         )}
@@ -1870,7 +1859,7 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
-            onOpenLeaderboard={handleOpenLeaderboard}
+            onOpenLeaderboard={showLeaderboardPreview}
             onShowGameInfo={() => setShowGameInfo(true)}
             onSoundToggle={toggleSoundMuted}
             onStart={
@@ -1899,10 +1888,12 @@ function App() {
             onAnswer={submitAnswer}
             onFinish={() => dispatch({ type: "END" })}
             onHome={requestHome}
+            onSoundToggle={toggleSoundMuted}
             questionLeft={questionLeft}
             questionProgress={questionProgress}
             resultLabel={resultLabel}
             selectedAnswer={state.selectedAnswer}
+            soundMuted={soundMuted}
             totalLeft={totalLeft}
           />
         )}
@@ -1920,7 +1911,6 @@ function App() {
             onExportImage={exportImageResult}
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
-            onOpenLeaderboard={handleOpenLeaderboard}
             onRestart={startGame}
             onShowSavedWords={() => setShowSavedWords(true)}
             onToggleSaveWord={toggleSavedWord}
@@ -1948,11 +1938,6 @@ function App() {
 
       {showGameInfo && <GameInfoModal onClose={() => setShowGameInfo(false)} />}
 
-      {notice && (
-        <div className="app-notice" role="status">
-          {notice}
-        </div>
-      )}
     </main>
   );
 }
@@ -2065,11 +2050,9 @@ function Hud({
   grade,
   mode,
   onDifficultyChange,
-  onSoundToggle,
   phase,
   questionNumber,
   score,
-  soundMuted,
   subMode,
   totalLeft,
 }) {
@@ -2132,16 +2115,6 @@ function Hud({
         </div>
       )}
 
-      <button
-        aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
-        aria-pressed={soundMuted}
-        className="icon-sound"
-        onClick={onSoundToggle}
-        title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
-        type="button"
-      >
-        {soundMuted ? <FaVolumeMute /> : <FaVolumeUp />}
-      </button>
     </header>
   );
 }
@@ -2500,10 +2473,12 @@ function GameView({
   onAnswer,
   onFinish,
   onHome,
+  onSoundToggle,
   questionLeft,
   questionProgress,
   resultLabel,
   selectedAnswer,
+  soundMuted,
 }) {
   const isFeedback = Boolean(lastResult);
   const showEasyHints = difficulty === "easy";
@@ -2524,6 +2499,16 @@ function GameView({
         <span className="question-type">
           {QUESTION_TYPE_LABELS[currentQuestion.type] || "문제"}
         </span>
+        <button
+          aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
+          aria-pressed={soundMuted}
+          className="question-sound"
+          onClick={onSoundToggle}
+          title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
+          type="button"
+        >
+          {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
+        </button>
         {BLANK_PROMPT_TYPES.includes(currentQuestion.type) ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
             {[...currentQuestion.prompt].map((char, index) => {
@@ -2626,7 +2611,6 @@ function ResultView({
   onExportImage,
   onExportText,
   onHome,
-  onOpenLeaderboard,
   onRestart,
   onShowSavedWords,
   onToggleSaveWord,
@@ -2664,18 +2648,13 @@ function ResultView({
           최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
           {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
         </div>
-        {!isGradeMode && !IS_TOSS && (
+        {!isGradeMode && (
           <DailyLeaderboard
             difficulty={difficulty}
             leaderboard={dailyLeaderboard}
             limit={5}
             variant="result"
           />
-        )}
-        {!isGradeMode && IS_TOSS && (
-          <button className="secondary-action toss-leaderboard-button" onClick={onOpenLeaderboard} type="button">
-            <FaMedal /> 토스 게임센터 리더보드 보기
-          </button>
         )}
       </div>
 

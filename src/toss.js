@@ -52,17 +52,15 @@ export function triggerTossHaptic(type) {
   return true;
 }
 
-// "ok" | "unsupported"(토스 앱 버전이 낮음) | "error". 호출자가 사용자에게 안내할 수 있게 결과를 돌려준다.
-export async function openTossLeaderboard() {
+// 토스 게임센터 프로필의 닉네임. 프로필이 없거나 앱 버전이 낮으면 null.
+export async function getTossNickname() {
   const sdk = await loadSdk();
-  if (!sdk) return "error";
+  if (!sdk) return null;
   try {
-    if (sdk.Game.openLeaderboard.isSupported?.() === false) return "unsupported";
-    await sdk.Game.openLeaderboard();
-    return "ok";
-  } catch (error) {
-    console.error("openLeaderboard failed", error);
-    return "error";
+    const profile = await sdk.Game.getUserProfile();
+    return profile?.statusCode === "SUCCESS" && profile.nickname ? profile.nickname : null;
+  } catch {
+    return null;
   }
 }
 

@@ -113,7 +113,15 @@ function createEntry(payload) {
   };
 }
 
+function setCorsHeaders(response) {
+  // 토스 미니앱(다른 도메인)에서도 기록을 읽고 쓸 수 있게 한다.
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+}
+
 function sendJson(response, status, body) {
+  setCorsHeaders(response);
   response.statusCode = status;
   response.setHeader("Content-Type", "application/json; charset=utf-8");
   response.setHeader("Cache-Control", "no-store");
@@ -147,6 +155,13 @@ async function writeLeaderboard(leaderboard) {
 }
 
 export default async function handler(request, response) {
+  if (request.method === "OPTIONS") {
+    setCorsHeaders(response);
+    response.statusCode = 204;
+    response.end();
+    return;
+  }
+
   if (request.method === "GET") {
     const leaderboard = await readLeaderboard();
     sendJson(response, 200, { leaderboard });
