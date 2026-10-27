@@ -2532,7 +2532,8 @@
     "idiom": "三三五五",
     "reading": "삼삼오오",
     "meaning": "서넛 또는 대여섯 사람이 짝을 지어 무리를 이룬 모양.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "8"
   },
   {
     "id": "318",
@@ -2603,7 +2604,8 @@
     "idiom": "父母兄弟",
     "reading": "부모형제",
     "meaning": "아버지, 어머니, 형제를 아울러 이르는 말.",
-    "category": "관계"
+    "category": "관계",
+    "grade": "8"
   },
   {
     "id": "327",
@@ -2618,14 +2620,16 @@
     "idiom": "東西南北",
     "reading": "동서남북",
     "meaning": "동쪽, 서쪽, 남쪽, 북쪽. 곧 모든 방향.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "8"
   },
   {
     "id": "329",
     "idiom": "東西古今",
     "reading": "동서고금",
     "meaning": "동양과 서양, 옛날과 지금. 곧 모든 때와 곳.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "jun5"
   },
   {
     "id": "330",
@@ -2655,7 +2659,8 @@
     "idiom": "一字千金",
     "reading": "일자천금",
     "meaning": "글자 하나의 값이 천금이라는 뜻으로, 뛰어난 글을 이르는 말.",
-    "category": "평가"
+    "category": "평가",
+    "grade": "jun5"
   },
   {
     "id": "334",
@@ -2844,7 +2849,8 @@
     "idiom": "生年月日",
     "reading": "생년월일",
     "meaning": "태어난 해와 달과 날.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "6"
   },
   {
     "id": "358",
@@ -3026,7 +3032,8 @@
     "idiom": "靑天白日",
     "reading": "청천백일",
     "meaning": "맑게 갠 대낮. 죄가 없음이 밝혀짐.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "6"
   },
   {
     "id": "381",
@@ -3057,7 +3064,8 @@
     "idiom": "上下左右",
     "reading": "상하좌우",
     "meaning": "위, 아래, 왼쪽, 오른쪽. 곧 모든 방향.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "7"
   },
   {
     "id": "385",
@@ -3579,7 +3587,8 @@
     "idiom": "名山大川",
     "reading": "명산대천",
     "meaning": "이름난 산과 큰 내.",
-    "category": "상황"
+    "category": "상황",
+    "grade": "6"
   },
   {
     "id": "451",
@@ -4196,5 +4205,37 @@
     "meaning": "꽃 피는 아침과 달 밝은 저녁. 경치 좋은 때.",
     "category": "상황",
     "grade": "5"
+  },
+  {
+    "id": "529",
+    "idiom": "天上天下",
+    "reading": "천상천하",
+    "meaning": "하늘 위와 하늘 아래. 곧 온 세상.",
+    "category": "상황",
+    "grade": "6"
+  },
+  {
+    "id": "530",
+    "idiom": "木人石心",
+    "reading": "목인석심",
+    "meaning": "나무로 된 사람과 돌 같은 마음. 뜻이 굳어 흔들리지 않음.",
+    "category": "태도",
+    "grade": "6"
+  },
+  {
+    "id": "531",
+    "idiom": "同姓同本",
+    "reading": "동성동본",
+    "meaning": "성도 같고 본관도 같음.",
+    "category": "관계",
+    "grade": "jun5"
+  },
+  {
+    "id": "532",
+    "idiom": "生生世世",
+    "reading": "생생세세",
+    "meaning": "다시 태어나는 모든 세상. 곧 영원히.",
+    "category": "인생",
+    "grade": "jun5"
   }
 ]

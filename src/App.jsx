@@ -70,7 +70,8 @@ const GRADE_LABELS = {
   jun3: "준3급",
   3: "3급",
 };
-const IDIOM_ENABLED_GRADES = new Set(["5", "jun4", "4", "jun3", "3"]);
+const LOW_IDIOM_GRADES = new Set(["8", "7", "6", "jun5"]);
+const MIN_IDIOM_DISTRACTOR_POOL = 8;
 const SUB_MODE_LABELS = {
   idiom: "사자성어",
   word: "단어",
@@ -458,8 +459,16 @@ function makeQuestion(usedIds) {
   };
 }
 
+function getGradeIdiomPool(grade) {
+  if (!LOW_IDIOM_GRADES.has(grade)) return idioms.filter((item) => item.grade === grade);
+
+  // 8~준5급은 수록 사자성어가 적어서 그 급수 이하의 사자성어를 모두 출제한다.
+  const limit = GRADE_KEYS.indexOf(grade);
+  return idioms.filter((item) => item.grade && GRADE_KEYS.indexOf(item.grade) <= limit);
+}
+
 function makeGradeIdiomQuestion(usedIds, grade) {
-  const pool = idioms.filter((item) => item.grade === grade);
+  const pool = getGradeIdiomPool(grade);
   const remaining = pool.filter((item) => !usedIds.includes(item.id));
   if (remaining.length === 0) {
     return { question: null, usedIds };
@@ -467,7 +476,9 @@ function makeGradeIdiomQuestion(usedIds, grade) {
 
   const item = sample(remaining);
   const type = Math.random() < 0.5 ? "A" : "B";
-  const question = type === "A" ? makeTypeAQuestion(item, pool) : makeTypeBQuestion(item, pool);
+  const choicePool = pool.length >= MIN_IDIOM_DISTRACTOR_POOL ? pool : idioms;
+  const question =
+    type === "A" ? makeTypeAQuestion(item, choicePool) : makeTypeBQuestion(item, choicePool);
 
   return {
     question,
@@ -1272,19 +1283,10 @@ function reducer(state, action) {
       return state.phase === "home" ? { ...state, difficulty: action.difficulty } : state;
     case "SET_MODE":
       return state.phase === "home" ? { ...state, mode: action.mode } : state;
-    case "SET_GRADE": {
-      if (state.phase !== "home") return state;
-      const nextSubMode =
-        !IDIOM_ENABLED_GRADES.has(action.grade) && state.subMode === "idiom"
-          ? "word"
-          : state.subMode;
-      return { ...state, grade: action.grade, subMode: nextSubMode };
-    }
-    case "SET_SUBMODE": {
-      if (state.phase !== "home") return state;
-      if (action.subMode === "idiom" && !IDIOM_ENABLED_GRADES.has(state.grade)) return state;
-      return { ...state, subMode: action.subMode };
-    }
+    case "SET_GRADE":
+      return state.phase === "home" ? { ...state, grade: action.grade } : state;
+    case "SET_SUBMODE":
+      return state.phase === "home" ? { ...state, subMode: action.subMode } : state;
     case "SHOW_LEADERBOARD":
       return {
         ...initialState,
@@ -2240,7 +2242,6 @@ function HomeView({
 }) {
   const [savedMenuOpen, setSavedMenuOpen] = useState(false);
   const isGradeMode = mode === "grade";
-  const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
   return (
     <section className="home-view">
@@ -2365,11 +2366,7 @@ function HomeView({
                   <button
                     aria-pressed={subMode === "idiom"}
                     className={`difficulty-button ${subMode === "idiom" ? "is-active" : ""}`}
-                    disabled={idiomDisabled}
                     onClick={() => onSubModeChange("idiom")}
-                    title={
-                      idiomDisabled ? "5급부터 사자성어 문제가 나와요" : undefined
-                    }
                     type="button"
                   >
                     사자성어
