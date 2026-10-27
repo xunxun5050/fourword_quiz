@@ -22,12 +22,30 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* 토스 미니앱에서는 JS가 SDK의 safe area 값으로 덮어쓴다. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --app-h: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
 html,
 body,
 #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+html,
+body {
+  background: #f3ddc3;
+}
+
+#root {
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 body {
@@ -51,7 +69,7 @@ button:focus-visible {
 
 .app-shell {
   display: grid;
-  height: 100dvh;
+  height: var(--app-h);
   min-height: 0;
   overflow: hidden;
   padding: clamp(8px, 1.4vw, 20px);
@@ -84,7 +102,7 @@ button:focus-visible {
 
 .app-shell.is-info-phase {
   align-items: start;
-  height: 100dvh;
+  height: var(--app-h);
   overflow-y: auto;
   padding: clamp(18px, 4vw, 54px);
   background: #f3ddc3;
@@ -131,7 +149,7 @@ button:focus-visible {
 
 .app-shell.is-home-phase .arcade-stage {
   grid-template-rows: 1fr;
-  min-height: 100dvh;
+  min-height: var(--app-h);
   height: auto;
   max-width: 860px;
   overflow: visible;
@@ -364,23 +382,6 @@ button:focus-visible {
   line-height: 1.05;
 }
 
-.icon-home {
-  display: grid;
-  width: clamp(52px, 5vw, 62px);
-  height: clamp(52px, 5vw, 62px);
-  place-items: center;
-  border: 2px solid rgba(255, 255, 255, 0.24);
-  border-radius: 8px;
-  background: linear-gradient(180deg, #2a333b, #111a21);
-  color: white;
-  font-size: 1.85rem;
-  box-shadow: 0 6px 0 #03080b;
-}
-
-.icon-home:disabled {
-  opacity: 0.45;
-}
-
 .home-view,
 .countdown-view,
 .leaderboard-preview-view,
@@ -401,15 +402,48 @@ button:focus-visible {
 .home-hero {
   display: grid;
   width: 100%;
-  min-height: min(720px, 100dvh);
+  min-height: min(720px, var(--app-h));
   place-items: center;
   padding: clamp(24px, 6vh, 62px) 0 clamp(28px, 7vh, 72px);
+}
+
+.saved-words-menu {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  justify-items: center;
+}
+
+.saved-words-toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(17, 24, 39, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 253, 246, 0.76);
+  color: rgba(17, 24, 39, 0.86);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.saved-words-toggle svg {
+  color: #f2a900;
+}
+
+.saved-words-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
 }
 
 .home-toggle-row {
   position: absolute;
   top: clamp(14px, 2.5vw, 26px);
-  right: clamp(14px, 2.5vw, 26px);
+  left: clamp(14px, 2.5vw, 26px);
   z-index: 3;
   display: flex;
   gap: 8px;
@@ -1303,6 +1337,10 @@ button:focus-visible {
   padding: clamp(14px, 2.8vh, 32px) clamp(20px, 6vw, 92px) clamp(76px, 9vh, 96px);
 }
 
+.game-view.is-untimed {
+  grid-template-rows: minmax(110px, 1fr) minmax(170px, 1.2fr) auto;
+}
+
 .game-view.is-wrong {
   animation: shake 0.28s ease;
 }
@@ -1333,6 +1371,22 @@ button:focus-visible {
   background: rgba(9, 135, 143, 0.12);
   color: var(--teal-dark);
   font-weight: 950;
+}
+
+.question-sound {
+  position: absolute;
+  top: 16px;
+  right: clamp(22px, 4vw, 54px);
+  z-index: 2;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(9, 135, 143, 0.12);
+  color: var(--teal-dark);
+  font-size: 1.1rem;
 }
 
 .hanja-prompt {
@@ -1876,7 +1930,7 @@ button:focus-visible {
   }
 
   .arcade-stage {
-    height: calc(100dvh - 20px);
+    height: calc(var(--app-h) - 20px);
     min-height: 0;
     border-width: 3px;
     border-radius: 8px;
@@ -1884,7 +1938,7 @@ button:focus-visible {
 
   .app-shell.is-home-phase .arcade-stage {
     grid-template-rows: 1fr;
-    min-height: calc(100dvh - 20px);
+    min-height: calc(var(--app-h) - 20px);
   }
 
   .app-shell.is-home-phase .hud {
@@ -1927,12 +1981,6 @@ button:focus-visible {
     height: 22px;
     transform: translate(-5px, -7px) rotate(12deg);
     font-size: 0.82rem;
-  }
-
-  .icon-home {
-    width: 44px;
-    height: 44px;
-    font-size: 1.35rem;
   }
 
   .app-shell:not(.is-home-phase):not(.is-countdown-phase) .hud {
@@ -1992,13 +2040,6 @@ button:focus-visible {
     font-size: 0.82rem;
   }
 
-  .app-shell:not(.is-home-phase):not(.is-countdown-phase) .icon-home {
-    width: 34px;
-    height: 34px;
-    font-size: 1.05rem;
-    box-shadow: 0 3px 0 #03080b;
-  }
-
   .hud-metrics {
     grid-template-columns: repeat(3, 1fr);
     border-inline: 0;
@@ -2054,7 +2095,7 @@ button:focus-visible {
   }
 
   .home-hero {
-    min-height: calc(100dvh - 20px);
+    min-height: calc(var(--app-h) - 20px);
     padding: 22px 0 26px;
   }
 
@@ -2302,6 +2343,14 @@ button:focus-visible {
     font-size: 0.74rem;
   }
 
+  .question-sound {
+    top: 8px;
+    right: 18px;
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+  }
+
   .choice-grid {
     grid-template-columns: 1fr;
     gap: 9px;
@@ -2357,7 +2406,7 @@ button:focus-visible {
   }
 
   .app-shell.is-result-phase .arcade-stage {
-    min-height: calc(100dvh - 20px);
+    min-height: calc(var(--app-h) - 20px);
     height: auto;
   }
 

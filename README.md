@@ -77,7 +77,7 @@ npm run build
 ## 데이터셋
 
 사자성어 데이터는 `src/data/idioms.json`에 있습니다.  
-현재 300개의 사자성어가 포함되어 있으며, 각 항목은 아래 형식을 따릅니다.
+현재 528개의 사자성어가 포함되어 있으며(급수 대비용 한자어는 `src/data/hanjaWords.json`), 각 항목은 아래 형식을 따릅니다.
 
 ```json
 {
@@ -137,15 +137,23 @@ Google AdSense 연동을 제거했습니다(`VITE_ADSENSE_CLIENT` 환경변수�
 [apps-in-toss.config.ts](apps-in-toss.config.ts)에 있습니다.
 
 ```bash
-npm run build   # vite build → dist/ads.txt 제거 → ait build  =>  sajaseongeo-geupsujeon.ait 생성
+npm run build   # vite build → dist/ads.txt 제거 → ait build  =>  quizlion.ait 생성
 npm run deploy  # ait deploy (사전에 `ait token add`로 API 키 등록 필요)
 ```
 
-- `appName`(`sajaseongeo-geupsujeon`)은 콘솔에 등록하는 앱 이름과 같아야 하고, 등록 후에는 수정할 수 없습니다.
+- `appName`(`quizlion`)은 콘솔에 등록하는 앱 이름과 같아야 하고, 등록 후에는 수정할 수 없습니다.
 - 앱 표시 이름·로고·썸네일·스크린샷은 설정 파일이 아니라 앱인토스 콘솔에서 등록합니다.
 - 웹(Vercel) 배포는 `vercel-build`(`vite build`만 실행)를 쓰므로 `.ait` 생성과 무관하고 `ads.txt`도 그대로 유지됩니다.
 - `npm run dev` 화면 좌상단의 **AIT** 버튼은 devtools 패널(SDK mock)이며 프로덕션 번들에는 포함되지 않습니다.
 - `*.ait` 파일은 `.gitignore`에 포함되어 커밋되지 않습니다.
+
+토스 환경(`src/toss.js`)에서만 동작하는 기능이며, 웹에서는 모두 no-op이거나 기존 동작으로 대체됩니다.
+
+- 리더보드: 토스 게임센터 연동. 캐주얼 모드 점수만, 이 기기의 제출 최고점을 넘을 때만 제출합니다. 앱인토스 콘솔에서 게임 리더보드를 먼저 설정해야 합니다(설정 전에는 제출이 조용히 실패하고 다음 판에 재시도).
+- 뒤로가기: 플레이 중에는 나가기 확인 모달, 홈에서는 미니앱 종료
+- 앱이 백그라운드로 가거나 모달이 열리면 타이머 일시정지
+- 햅틱: 정답/오답 시 SDK 햅틱 (웹은 `navigator.vibrate`)
+- 개발 서버에서 `?web=1`을 붙이면 토스 mock 없이 웹 동작을 그대로 확인할 수 있습니다.
 
 ## 프로젝트 구조
 

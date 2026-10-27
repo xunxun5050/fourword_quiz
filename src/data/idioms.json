@@ -341,7 +341,10 @@
     "reading": "감언이설",
     "meaning": "남을 꾀기 위한 달콤하고 이로운 듯한 말.",
     "category": "처세",
-    "grade": "4"
+    "grade": "4",
+    "exam": [
+      112
+    ]
   },
   {
     "id": "044",
@@ -397,7 +400,10 @@
     "reading": "사필귀정",
     "meaning": "모든 일은 결국 바른 이치대로 돌아감.",
     "category": "인과",
-    "grade": "jun3"
+    "grade": "jun3",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "051",
@@ -549,7 +555,10 @@
     "reading": "동고동락",
     "meaning": "괴로움과 즐거움을 함께 나눔.",
     "category": "관계",
-    "grade": "jun4"
+    "grade": "jun4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "070",
@@ -613,7 +622,10 @@
     "reading": "문전성시",
     "meaning": "찾아오는 사람이 많아 문 앞이 시장처럼 붐빔.",
     "category": "상황",
-    "grade": "5"
+    "grade": "jun4",
+    "exam": [
+      112
+    ]
   },
   {
     "id": "078",
@@ -893,7 +905,10 @@
     "reading": "기승전결",
     "meaning": "글이나 이야기의 전개가 시작, 발전, 전환, 마무리로 짜임.",
     "category": "완성",
-    "grade": "3"
+    "grade": "3",
+    "exam": [
+      112
+    ]
   },
   {
     "id": "113",
@@ -1501,7 +1516,10 @@
     "reading": "무용지물",
     "meaning": "쓸모가 전혀 없는 물건이나 사람.",
     "category": "평가",
-    "grade": "3"
+    "grade": "3",
+    "exam": [
+      112
+    ]
   },
   {
     "id": "189",
@@ -1549,7 +1567,10 @@
     "reading": "백골난망",
     "meaning": "죽어서도 잊기 어려울 만큼 큰 은혜를 입음.",
     "category": "감정",
-    "grade": "jun3"
+    "grade": "jun3",
+    "exam": [
+      112
+    ]
   },
   {
     "id": "195",
@@ -2405,7 +2426,10 @@
     "reading": "정정당당",
     "meaning": "태도나 처지가 바르고 떳떳함.",
     "category": "태도",
-    "grade": "jun4"
+    "grade": "jun4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "302",
@@ -2413,7 +2437,10 @@
     "reading": "문일지십",
     "meaning": "하나를 들으면 열을 앎, 매우 총명함.",
     "category": "지혜",
-    "grade": "jun4"
+    "grade": "jun4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "303",
@@ -2421,7 +2448,10 @@
     "reading": "청산유수",
     "meaning": "막힘없이 썩 잘하는 말을 비유적으로 이르는 말.",
     "category": "평가",
-    "grade": "jun4"
+    "grade": "jun4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "304",
@@ -2429,7 +2459,10 @@
     "reading": "이목구비",
     "meaning": "귀, 눈, 입, 코를 아울러 이르는 말, 또는 그것들로 이루어진 얼굴 생김새.",
     "category": "인물",
-    "grade": "4"
+    "grade": "4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "305",
@@ -2437,7 +2470,10 @@
     "reading": "대서특필",
     "meaning": "누구나 알게 크게 여러 사람의 눈에 띄게 씀.",
     "category": "평가",
-    "grade": "4"
+    "grade": "4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "306",
@@ -2445,7 +2481,11 @@
     "reading": "불사이군",
     "meaning": "두 임금을 섬기지 않음.",
     "category": "처세",
-    "grade": "4"
+    "grade": "4",
+    "exam": [
+      111,
+      112
+    ]
   },
   {
     "id": "307",
@@ -2453,7 +2493,10 @@
     "reading": "다정다감",
     "meaning": "정이 많고 감정이 풍부함.",
     "category": "감정",
-    "grade": "4"
+    "grade": "4",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "308",
@@ -2461,7 +2504,10 @@
     "reading": "양춘가절",
     "meaning": "따뜻하고 좋은 봄철.",
     "category": "상황",
-    "grade": "jun3"
+    "grade": "jun3",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "309",
@@ -2469,7 +2515,10 @@
     "reading": "자강불식",
     "meaning": "스스로 힘써 몸과 마음을 가다듬어 쉬지 않음.",
     "category": "노력",
-    "grade": "jun3"
+    "grade": "jun3",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "310",
@@ -2477,7 +2526,10 @@
     "reading": "이구동성",
     "meaning": "여러 사람의 말이 한결같음.",
     "category": "관계",
-    "grade": "jun3"
+    "grade": "jun3",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "311",
@@ -2485,7 +2537,10 @@
     "reading": "일장일단",
     "meaning": "장점도 있고 단점도 있음.",
     "category": "평가",
-    "grade": "5"
+    "grade": "5",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "312",
@@ -2493,7 +2548,10 @@
     "reading": "피골상접",
     "meaning": "살가죽과 뼈가 맞닿을 정도로 몹시 여윔.",
     "category": "상황",
-    "grade": "3"
+    "grade": "3",
+    "exam": [
+      111
+    ]
   },
   {
     "id": "313",
@@ -2518,5 +2576,1738 @@
     "meaning": "환경에 적응하는 생물만이 살아남고 그러지 못한 것은 도태되는 현상.",
     "category": "지혜",
     "grade": "jun3"
+  },
+  {
+    "id": "316",
+    "idiom": "一心同體",
+    "reading": "일심동체",
+    "meaning": "한마음 한 몸이라는 뜻으로, 서로 굳게 뭉침을 이르는 말.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "317",
+    "idiom": "三三五五",
+    "reading": "삼삼오오",
+    "meaning": "서넛 또는 대여섯 사람이 짝을 지어 무리를 이룬 모양.",
+    "category": "상황",
+    "grade": "6",
+    "exam": [
+      112
+    ]
+  },
+  {
+    "id": "318",
+    "idiom": "四面八方",
+    "reading": "사면팔방",
+    "meaning": "모든 방향이나 방면.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "319",
+    "idiom": "千萬多幸",
+    "reading": "천만다행",
+    "meaning": "매우 다행함.",
+    "category": "감정",
+    "grade": "jun4"
+  },
+  {
+    "id": "320",
+    "idiom": "天下第一",
+    "reading": "천하제일",
+    "meaning": "세상에서 첫째가는 것.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "321",
+    "idiom": "天下無敵",
+    "reading": "천하무적",
+    "meaning": "세상에 견줄 만한 적이 없음.",
+    "category": "기세",
+    "grade": "4"
+  },
+  {
+    "id": "322",
+    "idiom": "世上萬事",
+    "reading": "세상만사",
+    "meaning": "세상의 모든 일.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "323",
+    "idiom": "人山人海",
+    "reading": "인산인해",
+    "meaning": "사람이 산과 바다를 이룰 만큼 많이 모인 모양.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "324",
+    "idiom": "人生無常",
+    "reading": "인생무상",
+    "meaning": "인생이 덧없음.",
+    "category": "인생",
+    "grade": "4"
+  },
+  {
+    "id": "325",
+    "idiom": "生老病死",
+    "reading": "생로병사",
+    "meaning": "사람이 겪는 네 가지 괴로움, 곧 태어남·늙음·병듦·죽음.",
+    "category": "인생",
+    "grade": "jun4"
+  },
+  {
+    "id": "326",
+    "idiom": "父母兄弟",
+    "reading": "부모형제",
+    "meaning": "아버지, 어머니, 형제를 아울러 이르는 말.",
+    "category": "관계"
+  },
+  {
+    "id": "327",
+    "idiom": "男女老少",
+    "reading": "남녀노소",
+    "meaning": "남자와 여자, 늙은이와 젊은이. 곧 모든 사람.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "328",
+    "idiom": "東西南北",
+    "reading": "동서남북",
+    "meaning": "동쪽, 서쪽, 남쪽, 북쪽. 곧 모든 방향.",
+    "category": "상황",
+    "grade": "6",
+    "exam": [
+      111
+    ]
+  },
+  {
+    "id": "329",
+    "idiom": "東西古今",
+    "reading": "동서고금",
+    "meaning": "동양과 서양, 옛날과 지금. 곧 모든 때와 곳.",
+    "category": "상황"
+  },
+  {
+    "id": "330",
+    "idiom": "大明天地",
+    "reading": "대명천지",
+    "meaning": "아주 밝은 세상.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "331",
+    "idiom": "一生一代",
+    "reading": "일생일대",
+    "meaning": "살아 있는 동안.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "332",
+    "idiom": "一心不亂",
+    "reading": "일심불란",
+    "meaning": "한마음으로 흐트러짐이 없음.",
+    "category": "태도"
+  },
+  {
+    "id": "333",
+    "idiom": "一字千金",
+    "reading": "일자천금",
+    "meaning": "글자 하나의 값이 천금이라는 뜻으로, 뛰어난 글을 이르는 말.",
+    "category": "평가"
+  },
+  {
+    "id": "334",
+    "idiom": "一寸光陰",
+    "reading": "일촌광음",
+    "meaning": "매우 짧은 시간.",
+    "category": "인생",
+    "grade": "jun3"
+  },
+  {
+    "id": "335",
+    "idiom": "一問一答",
+    "reading": "일문일답",
+    "meaning": "한 번 묻고 한 번 대답함.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "336",
+    "idiom": "二八靑春",
+    "reading": "이팔청춘",
+    "meaning": "열여섯 살 안팎의 젊은 나이.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "337",
+    "idiom": "三十六計",
+    "reading": "삼십육계",
+    "meaning": "서른여섯 가지 꾀. 형세가 불리할 때 달아나는 일.",
+    "category": "처세",
+    "grade": "5"
+  },
+  {
+    "id": "338",
+    "idiom": "四通八達",
+    "reading": "사통팔달",
+    "meaning": "길이 사방팔방으로 통함.",
+    "category": "상황",
+    "grade": "jun3"
+  },
+  {
+    "id": "339",
+    "idiom": "四海兄弟",
+    "reading": "사해형제",
+    "meaning": "온 세상 사람이 모두 형제와 같음.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "340",
+    "idiom": "五風十雨",
+    "reading": "오풍십우",
+    "meaning": "바람이 고르고 비가 알맞게 내림. 태평한 세상.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "341",
+    "idiom": "十人十色",
+    "reading": "십인십색",
+    "meaning": "사람마다 생각이나 모습이 다름.",
+    "category": "평가",
+    "grade": "5"
+  },
+  {
+    "id": "342",
+    "idiom": "百年大計",
+    "reading": "백년대계",
+    "meaning": "먼 앞날까지 내다보고 세우는 큰 계획.",
+    "category": "지혜",
+    "grade": "5"
+  },
+  {
+    "id": "343",
+    "idiom": "千差萬別",
+    "reading": "천차만별",
+    "meaning": "여러 가지 사물이 모두 차이가 있고 다름.",
+    "category": "평가"
+  },
+  {
+    "id": "344",
+    "idiom": "千萬意外",
+    "reading": "천만의외",
+    "meaning": "전혀 생각하지 못함.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "345",
+    "idiom": "千變萬化",
+    "reading": "천변만화",
+    "meaning": "끝없이 변화함.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "346",
+    "idiom": "千秋萬代",
+    "reading": "천추만대",
+    "meaning": "아주 오랜 세월.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "347",
+    "idiom": "萬古不變",
+    "reading": "만고불변",
+    "meaning": "오랜 세월이 지나도 변하지 않음.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "348",
+    "idiom": "萬里長天",
+    "reading": "만리장천",
+    "meaning": "아득히 높고 먼 하늘.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "349",
+    "idiom": "萬里長城",
+    "reading": "만리장성",
+    "meaning": "매우 긴 성. 넘기 어려운 장벽.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "350",
+    "idiom": "天地神明",
+    "reading": "천지신명",
+    "meaning": "하늘과 땅의 모든 신령.",
+    "category": "인물",
+    "grade": "5"
+  },
+  {
+    "id": "351",
+    "idiom": "天下太平",
+    "reading": "천하태평",
+    "meaning": "세상이 매우 평화로움.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "352",
+    "idiom": "天高馬肥",
+    "reading": "천고마비",
+    "meaning": "하늘이 높고 말이 살찐다는 뜻으로, 가을을 이르는 말.",
+    "category": "상황"
+  },
+  {
+    "id": "353",
+    "idiom": "天人共怒",
+    "reading": "천인공노",
+    "meaning": "하늘과 사람이 함께 분노할 만큼 큰 죄악.",
+    "category": "감정",
+    "grade": "jun3"
+  },
+  {
+    "id": "354",
+    "idiom": "天災地變",
+    "reading": "천재지변",
+    "meaning": "자연 현상으로 일어나는 재앙.",
+    "category": "위기",
+    "grade": "4"
+  },
+  {
+    "id": "355",
+    "idiom": "生死苦樂",
+    "reading": "생사고락",
+    "meaning": "삶과 죽음, 괴로움과 즐거움.",
+    "category": "인생",
+    "grade": "jun4"
+  },
+  {
+    "id": "356",
+    "idiom": "生死存亡",
+    "reading": "생사존망",
+    "meaning": "죽느냐 사느냐 하는 판가름.",
+    "category": "위기",
+    "grade": "4"
+  },
+  {
+    "id": "357",
+    "idiom": "生年月日",
+    "reading": "생년월일",
+    "meaning": "태어난 해와 달과 날.",
+    "category": "상황"
+  },
+  {
+    "id": "358",
+    "idiom": "父傳子傳",
+    "reading": "부전자전",
+    "meaning": "아버지가 아들에게 대대로 전함.",
+    "category": "인과",
+    "grade": "4"
+  },
+  {
+    "id": "359",
+    "idiom": "父子有親",
+    "reading": "부자유친",
+    "meaning": "아버지와 아들 사이에는 친애가 있어야 함.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "360",
+    "idiom": "子子孫孫",
+    "reading": "자자손손",
+    "meaning": "여러 대의 자손.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "361",
+    "idiom": "男女有別",
+    "reading": "남녀유별",
+    "meaning": "남자와 여자 사이에는 분별이 있어야 함.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "362",
+    "idiom": "男尊女卑",
+    "reading": "남존여비",
+    "meaning": "남자를 높이고 여자를 낮게 보는 일.",
+    "category": "평가"
+  },
+  {
+    "id": "363",
+    "idiom": "女必從夫",
+    "reading": "여필종부",
+    "meaning": "아내는 반드시 남편의 뜻을 따라야 함.",
+    "category": "관계",
+    "grade": "3"
+  },
+  {
+    "id": "364",
+    "idiom": "夫婦有別",
+    "reading": "부부유별",
+    "meaning": "부부 사이에는 각자 맡은 일이 다름.",
+    "category": "관계",
+    "grade": "4"
+  },
+  {
+    "id": "365",
+    "idiom": "老少同樂",
+    "reading": "노소동락",
+    "meaning": "늙은이와 젊은이가 함께 즐김.",
+    "category": "관계",
+    "grade": "5"
+  },
+  {
+    "id": "366",
+    "idiom": "老當益壯",
+    "reading": "노당익장",
+    "meaning": "나이가 들어도 기력이 더욱 왕성함.",
+    "category": "노력",
+    "grade": "jun3"
+  },
+  {
+    "id": "367",
+    "idiom": "人命在天",
+    "reading": "인명재천",
+    "meaning": "사람의 목숨은 하늘에 달려 있음.",
+    "category": "인생",
+    "grade": "jun4"
+  },
+  {
+    "id": "368",
+    "idiom": "人事不省",
+    "reading": "인사불성",
+    "meaning": "정신을 잃어 의식이 없음.",
+    "category": "상황",
+    "grade": "jun4"
+  },
+  {
+    "id": "369",
+    "idiom": "人之常情",
+    "reading": "인지상정",
+    "meaning": "사람이면 누구나 가지는 보통의 마음.",
+    "category": "감정",
+    "grade": "3"
+  },
+  {
+    "id": "370",
+    "idiom": "人才登用",
+    "reading": "인재등용",
+    "meaning": "재능 있는 사람을 뽑아 씀.",
+    "category": "지혜",
+    "grade": "5"
+  },
+  {
+    "id": "371",
+    "idiom": "人定勝天",
+    "reading": "인정승천",
+    "meaning": "사람의 노력으로 하늘을 이김.",
+    "category": "노력",
+    "grade": "jun4"
+  },
+  {
+    "id": "372",
+    "idiom": "山川草木",
+    "reading": "산천초목",
+    "meaning": "산, 내, 풀, 나무. 곧 자연.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "373",
+    "idiom": "山高水長",
+    "reading": "산고수장",
+    "meaning": "산은 높고 물은 길게 흐름. 어진 이의 덕이 높음.",
+    "category": "평가",
+    "grade": "5"
+  },
+  {
+    "id": "374",
+    "idiom": "木本水源",
+    "reading": "목본수원",
+    "meaning": "나무의 뿌리와 물의 근원. 사물의 근본.",
+    "category": "지혜",
+    "grade": "3"
+  },
+  {
+    "id": "375",
+    "idiom": "金石之交",
+    "reading": "금석지교",
+    "meaning": "쇠와 돌처럼 굳고 변하지 않는 사귐.",
+    "category": "관계",
+    "grade": "3"
+  },
+  {
+    "id": "376",
+    "idiom": "金玉滿堂",
+    "reading": "금옥만당",
+    "meaning": "금과 옥이 집에 가득함. 재물이 많음.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "377",
+    "idiom": "白衣民族",
+    "reading": "백의민족",
+    "meaning": "흰옷을 즐겨 입는 민족. 곧 우리 민족.",
+    "category": "인물",
+    "grade": "jun4"
+  },
+  {
+    "id": "378",
+    "idiom": "白雲孤飛",
+    "reading": "백운고비",
+    "meaning": "흰 구름이 외로이 떠감. 타향에서 부모를 그리워함.",
+    "category": "감정",
+    "grade": "3"
+  },
+  {
+    "id": "379",
+    "idiom": "白手乾達",
+    "reading": "백수건달",
+    "meaning": "돈 한 푼 없이 빈둥거리는 사람.",
+    "category": "인물",
+    "grade": "3"
+  },
+  {
+    "id": "380",
+    "idiom": "靑天白日",
+    "reading": "청천백일",
+    "meaning": "맑게 갠 대낮. 죄가 없음이 밝혀짐.",
+    "category": "상황"
+  },
+  {
+    "id": "381",
+    "idiom": "靑雲之志",
+    "reading": "청운지지",
+    "meaning": "높은 벼슬에 오르려는 큰 뜻.",
+    "category": "노력",
+    "grade": "3"
+  },
+  {
+    "id": "382",
+    "idiom": "左之右之",
+    "reading": "좌지우지",
+    "meaning": "제 마음대로 다룸.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "383",
+    "idiom": "右往左往",
+    "reading": "우왕좌왕",
+    "meaning": "이리저리 갈팡질팡함.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "384",
+    "idiom": "上下左右",
+    "reading": "상하좌우",
+    "meaning": "위, 아래, 왼쪽, 오른쪽. 곧 모든 방향.",
+    "category": "상황"
+  },
+  {
+    "id": "385",
+    "idiom": "上行下效",
+    "reading": "상행하효",
+    "meaning": "윗사람이 하는 일을 아랫사람이 본받음.",
+    "category": "인과",
+    "grade": "4"
+  },
+  {
+    "id": "386",
+    "idiom": "上古時代",
+    "reading": "상고시대",
+    "meaning": "아주 오래된 옛날.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "387",
+    "idiom": "上善若水",
+    "reading": "상선약수",
+    "meaning": "가장 좋은 것은 물과 같음.",
+    "category": "지혜",
+    "grade": "jun3"
+  },
+  {
+    "id": "388",
+    "idiom": "下學上達",
+    "reading": "하학상달",
+    "meaning": "쉬운 것부터 배워 깊은 이치에 이름.",
+    "category": "학습",
+    "grade": "jun3"
+  },
+  {
+    "id": "389",
+    "idiom": "內聖外王",
+    "reading": "내성외왕",
+    "meaning": "안으로는 성인의 덕을 갖추고 밖으로는 왕의 도를 행함.",
+    "category": "인물",
+    "grade": "4"
+  },
+  {
+    "id": "390",
+    "idiom": "出將入相",
+    "reading": "출장입상",
+    "meaning": "나가서는 장수, 들어와서는 재상. 문무를 겸비함.",
+    "category": "인물",
+    "grade": "4"
+  },
+  {
+    "id": "391",
+    "idiom": "入山修道",
+    "reading": "입산수도",
+    "meaning": "산에 들어가 도를 닦음.",
+    "category": "노력",
+    "grade": "jun3"
+  },
+  {
+    "id": "392",
+    "idiom": "大驚失色",
+    "reading": "대경실색",
+    "meaning": "몹시 놀라 얼굴빛이 변함.",
+    "category": "감정",
+    "grade": "3"
+  },
+  {
+    "id": "393",
+    "idiom": "大言壯談",
+    "reading": "대언장담",
+    "meaning": "큰소리치며 자신 있게 말함.",
+    "category": "태도",
+    "grade": "jun3"
+  },
+  {
+    "id": "394",
+    "idiom": "大聲痛哭",
+    "reading": "대성통곡",
+    "meaning": "큰 소리로 몹시 슬피 욺.",
+    "category": "감정"
+  },
+  {
+    "id": "395",
+    "idiom": "大同團結",
+    "reading": "대동단결",
+    "meaning": "여럿이 한데 뭉침.",
+    "category": "관계",
+    "grade": "4"
+  },
+  {
+    "id": "396",
+    "idiom": "大逆無道",
+    "reading": "대역무도",
+    "meaning": "하늘의 도리에 어긋나는 큰 죄.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "397",
+    "idiom": "手足之情",
+    "reading": "수족지정",
+    "meaning": "형제 사이의 정.",
+    "category": "관계",
+    "grade": "3"
+  },
+  {
+    "id": "398",
+    "idiom": "足脫不及",
+    "reading": "족탈불급",
+    "meaning": "능력이나 재주가 따라가지 못함.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "399",
+    "idiom": "口耳之學",
+    "reading": "구이지학",
+    "meaning": "들은 것을 곧 남에게 전할 뿐 자기 것으로 하지 못하는 학문.",
+    "category": "학습",
+    "grade": "3"
+  },
+  {
+    "id": "400",
+    "idiom": "口傳心授",
+    "reading": "구전심수",
+    "meaning": "입으로 전하고 마음으로 가르침.",
+    "category": "학습",
+    "grade": "4"
+  },
+  {
+    "id": "401",
+    "idiom": "口尙乳臭",
+    "reading": "구상유취",
+    "meaning": "입에서 젖내가 남. 말이나 행동이 어림.",
+    "category": "평가"
+  },
+  {
+    "id": "402",
+    "idiom": "年年歲歲",
+    "reading": "연년세세",
+    "meaning": "해마다.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "403",
+    "idiom": "年中行事",
+    "reading": "연중행사",
+    "meaning": "해마다 일정하게 하는 행사.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "404",
+    "idiom": "心心相印",
+    "reading": "심심상인",
+    "meaning": "말하지 않아도 마음과 마음이 통함.",
+    "category": "관계",
+    "grade": "jun3"
+  },
+  {
+    "id": "405",
+    "idiom": "同名異人",
+    "reading": "동명이인",
+    "meaning": "이름은 같으나 다른 사람.",
+    "category": "인물",
+    "grade": "jun3"
+  },
+  {
+    "id": "406",
+    "idiom": "同價紅裳",
+    "reading": "동가홍상",
+    "meaning": "같은 값이면 더 좋은 것을 택함.",
+    "category": "처세"
+  },
+  {
+    "id": "407",
+    "idiom": "同工異曲",
+    "reading": "동공이곡",
+    "meaning": "재주는 같으나 표현이 다름.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "408",
+    "idiom": "自問自答",
+    "reading": "자문자답",
+    "meaning": "스스로 묻고 스스로 대답함.",
+    "category": "태도",
+    "grade": "5"
+  },
+  {
+    "id": "409",
+    "idiom": "自力更生",
+    "reading": "자력갱생",
+    "meaning": "남의 도움 없이 스스로의 힘으로 살아감.",
+    "category": "노력",
+    "grade": "jun3"
+  },
+  {
+    "id": "410",
+    "idiom": "自給自足",
+    "reading": "자급자족",
+    "meaning": "필요한 물건을 스스로 만들어 씀.",
+    "category": "노력",
+    "grade": "4"
+  },
+  {
+    "id": "411",
+    "idiom": "自古以來",
+    "reading": "자고이래",
+    "meaning": "예로부터 지금까지.",
+    "category": "상황",
+    "grade": "jun4"
+  },
+  {
+    "id": "412",
+    "idiom": "自作自受",
+    "reading": "자작자수",
+    "meaning": "자기가 한 일의 결과를 자기가 받음.",
+    "category": "인과",
+    "grade": "jun3"
+  },
+  {
+    "id": "413",
+    "idiom": "自愛自重",
+    "reading": "자애자중",
+    "meaning": "스스로를 아끼고 몸가짐을 조심함.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "414",
+    "idiom": "主客一體",
+    "reading": "주객일체",
+    "meaning": "주인과 손님이 한 몸처럼 가까움.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "415",
+    "idiom": "不遠千里",
+    "reading": "불원천리",
+    "meaning": "천 리 길도 멀다 하지 않음.",
+    "category": "노력",
+    "grade": "5"
+  },
+  {
+    "id": "416",
+    "idiom": "不問可知",
+    "reading": "불문가지",
+    "meaning": "묻지 않아도 알 수 있음.",
+    "category": "지혜",
+    "grade": "jun4"
+  },
+  {
+    "id": "417",
+    "idiom": "不知其數",
+    "reading": "부지기수",
+    "meaning": "그 수를 알 수 없을 만큼 많음.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "418",
+    "idiom": "不言可想",
+    "reading": "불언가상",
+    "meaning": "말하지 않아도 알 수 있음.",
+    "category": "지혜",
+    "grade": "jun3"
+  },
+  {
+    "id": "419",
+    "idiom": "不老長生",
+    "reading": "불로장생",
+    "meaning": "늙지 않고 오래 삶.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "420",
+    "idiom": "不平不滿",
+    "reading": "불평불만",
+    "meaning": "못마땅하게 여겨 투덜거림.",
+    "category": "감정",
+    "grade": "jun3"
+  },
+  {
+    "id": "421",
+    "idiom": "不義之財",
+    "reading": "불의지재",
+    "meaning": "옳지 못한 방법으로 모은 재물.",
+    "category": "평가",
+    "grade": "3"
+  },
+  {
+    "id": "422",
+    "idiom": "文明開化",
+    "reading": "문명개화",
+    "meaning": "문명이 열려 발달함.",
+    "category": "성장",
+    "grade": "jun4"
+  },
+  {
+    "id": "423",
+    "idiom": "世世孫孫",
+    "reading": "세세손손",
+    "meaning": "대대로 이어 내려오는 자손.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "424",
+    "idiom": "世世代代",
+    "reading": "세세대대",
+    "meaning": "거듭된 여러 대.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "425",
+    "idiom": "少年易老",
+    "reading": "소년이로",
+    "meaning": "소년은 쉬이 늙음. 세월이 빠름.",
+    "category": "인생",
+    "grade": "3"
+  },
+  {
+    "id": "426",
+    "idiom": "食不甘味",
+    "reading": "식불감미",
+    "meaning": "걱정이 있어 음식 맛을 모름.",
+    "category": "감정",
+    "grade": "4"
+  },
+  {
+    "id": "427",
+    "idiom": "本然之性",
+    "reading": "본연지성",
+    "meaning": "사람이 본래 타고난 성품.",
+    "category": "인물",
+    "grade": "3"
+  },
+  {
+    "id": "428",
+    "idiom": "本來面目",
+    "reading": "본래면목",
+    "meaning": "본디 타고난 모습.",
+    "category": "인물",
+    "grade": "5"
+  },
+  {
+    "id": "429",
+    "idiom": "見利思義",
+    "reading": "견리사의",
+    "meaning": "이익을 보면 의로운지 먼저 생각함.",
+    "category": "처세",
+    "grade": "4"
+  },
+  {
+    "id": "430",
+    "idiom": "見危致命",
+    "reading": "견위치명",
+    "meaning": "위태로운 일을 보면 목숨을 바침.",
+    "category": "태도",
+    "grade": "jun3"
+  },
+  {
+    "id": "431",
+    "idiom": "高山流水",
+    "reading": "고산유수",
+    "meaning": "높은 산과 흐르는 물. 지기를 만난 기쁨.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "432",
+    "idiom": "空前絶後",
+    "reading": "공전절후",
+    "meaning": "이전에도 없고 이후에도 없음.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "433",
+    "idiom": "交友以信",
+    "reading": "교우이신",
+    "meaning": "벗을 사귐에 믿음으로써 함.",
+    "category": "관계",
+    "grade": "jun4"
+  },
+  {
+    "id": "434",
+    "idiom": "近朱者赤",
+    "reading": "근주자적",
+    "meaning": "붉은 것을 가까이하면 붉어짐. 환경의 영향.",
+    "category": "인과",
+    "grade": "jun3"
+  },
+  {
+    "id": "435",
+    "idiom": "今昔之感",
+    "reading": "금석지감",
+    "meaning": "지금과 옛날의 차이가 매우 큼.",
+    "category": "감정",
+    "grade": "3"
+  },
+  {
+    "id": "436",
+    "idiom": "多才多能",
+    "reading": "다재다능",
+    "meaning": "재주와 능력이 많음.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "437",
+    "idiom": "多事多難",
+    "reading": "다사다난",
+    "meaning": "여러 가지 일도 많고 어려움도 많음.",
+    "category": "상황",
+    "grade": "jun3"
+  },
+  {
+    "id": "438",
+    "idiom": "單一民族",
+    "reading": "단일민족",
+    "meaning": "하나의 혈통으로 이루어진 민족.",
+    "category": "인물",
+    "grade": "jun3"
+  },
+  {
+    "id": "439",
+    "idiom": "同心協力",
+    "reading": "동심협력",
+    "meaning": "마음을 같이하여 힘을 합침.",
+    "category": "관계",
+    "grade": "4"
+  },
+  {
+    "id": "440",
+    "idiom": "讀書百遍",
+    "reading": "독서백편",
+    "meaning": "책을 백 번 읽음. 반복하여 읽음.",
+    "category": "학습"
+  },
+  {
+    "id": "441",
+    "idiom": "讀書三到",
+    "reading": "독서삼도",
+    "meaning": "독서에는 눈, 입, 마음이 모두 필요함.",
+    "category": "학습",
+    "grade": "4"
+  },
+  {
+    "id": "442",
+    "idiom": "讀書尙友",
+    "reading": "독서상우",
+    "meaning": "책을 읽으며 옛 현인을 벗으로 삼음.",
+    "category": "학습",
+    "grade": "3"
+  },
+  {
+    "id": "443",
+    "idiom": "獨立自主",
+    "reading": "독립자주",
+    "meaning": "남에게 의지하지 않고 스스로 섬.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "444",
+    "idiom": "獨立自尊",
+    "reading": "독립자존",
+    "meaning": "남에게 의지하지 않고 자기를 높임.",
+    "category": "태도",
+    "grade": "jun3"
+  },
+  {
+    "id": "445",
+    "idiom": "獨也靑靑",
+    "reading": "독야청청",
+    "meaning": "홀로 변함없이 푸르름.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "446",
+    "idiom": "登高自卑",
+    "reading": "등고자비",
+    "meaning": "높은 곳에 오르려면 낮은 곳에서 시작함.",
+    "category": "지혜"
+  },
+  {
+    "id": "447",
+    "idiom": "萬事休矣",
+    "reading": "만사휴의",
+    "meaning": "모든 일이 끝장났음.",
+    "category": "위기",
+    "grade": "3"
+  },
+  {
+    "id": "448",
+    "idiom": "勞而無功",
+    "reading": "노이무공",
+    "meaning": "애써 일했으나 보람이 없음.",
+    "category": "노력",
+    "grade": "3"
+  },
+  {
+    "id": "449",
+    "idiom": "立身出世",
+    "reading": "입신출세",
+    "meaning": "성공하여 이름을 날림.",
+    "category": "성장",
+    "grade": "5"
+  },
+  {
+    "id": "450",
+    "idiom": "名山大川",
+    "reading": "명산대천",
+    "meaning": "이름난 산과 큰 내.",
+    "category": "상황"
+  },
+  {
+    "id": "451",
+    "idiom": "名不虛傳",
+    "reading": "명불허전",
+    "meaning": "명성이 헛되이 퍼지지 않음.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "452",
+    "idiom": "名門巨族",
+    "reading": "명문거족",
+    "meaning": "이름난 집안과 큰 일가.",
+    "category": "인물",
+    "grade": "jun3"
+  },
+  {
+    "id": "453",
+    "idiom": "無所不爲",
+    "reading": "무소불위",
+    "meaning": "하지 못하는 일이 없음.",
+    "category": "기세",
+    "grade": "4"
+  },
+  {
+    "id": "454",
+    "idiom": "無爲自然",
+    "reading": "무위자연",
+    "meaning": "꾸밈없이 자연 그대로 살아감.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "455",
+    "idiom": "無不通知",
+    "reading": "무불통지",
+    "meaning": "모르는 것이 없음.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "456",
+    "idiom": "無所不能",
+    "reading": "무소불능",
+    "meaning": "못 하는 것이 없음.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "457",
+    "idiom": "物我一體",
+    "reading": "물아일체",
+    "meaning": "사물과 자신이 하나가 됨.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "458",
+    "idiom": "物極必反",
+    "reading": "물극필반",
+    "meaning": "사물이 극에 달하면 반드시 되돌아옴.",
+    "category": "지혜",
+    "grade": "4"
+  },
+  {
+    "id": "459",
+    "idiom": "美風良俗",
+    "reading": "미풍양속",
+    "meaning": "아름답고 좋은 풍속.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "460",
+    "idiom": "百害無益",
+    "reading": "백해무익",
+    "meaning": "해롭기만 하고 이로움이 없음.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "461",
+    "idiom": "百家爭鳴",
+    "reading": "백가쟁명",
+    "meaning": "많은 학자가 자유롭게 논쟁함.",
+    "category": "관계",
+    "grade": "3",
+    "exam": [
+      112
+    ]
+  },
+  {
+    "id": "462",
+    "idiom": "百藥之長",
+    "reading": "백약지장",
+    "meaning": "모든 약 가운데 으뜸. 술을 이르는 말.",
+    "category": "평가",
+    "grade": "3"
+  },
+  {
+    "id": "463",
+    "idiom": "福過災生",
+    "reading": "복과재생",
+    "meaning": "복이 지나치면 재앙이 생김.",
+    "category": "인과",
+    "grade": "4"
+  },
+  {
+    "id": "464",
+    "idiom": "四顧無親",
+    "reading": "사고무친",
+    "meaning": "사방을 둘러보아도 친한 사람이 없음.",
+    "category": "상황"
+  },
+  {
+    "id": "465",
+    "idiom": "事親以孝",
+    "reading": "사친이효",
+    "meaning": "효도로써 부모를 섬김.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "466",
+    "idiom": "事實無根",
+    "reading": "사실무근",
+    "meaning": "근거가 없음.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "467",
+    "idiom": "死生決斷",
+    "reading": "사생결단",
+    "meaning": "죽기를 각오하고 결정함.",
+    "category": "태도",
+    "grade": "jun3"
+  },
+  {
+    "id": "468",
+    "idiom": "死而後已",
+    "reading": "사이후이",
+    "meaning": "죽은 뒤에야 그만둠. 끝까지 노력함.",
+    "category": "노력",
+    "grade": "3"
+  },
+  {
+    "id": "469",
+    "idiom": "賞善罰惡",
+    "reading": "상선벌악",
+    "meaning": "착한 사람에게 상을 주고 악한 사람에게 벌을 줌.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "470",
+    "idiom": "生殺與奪",
+    "reading": "생살여탈",
+    "meaning": "살리고 죽이고 주고 빼앗음.",
+    "category": "기세"
+  },
+  {
+    "id": "471",
+    "idiom": "先難後獲",
+    "reading": "선난후획",
+    "meaning": "어려운 일을 먼저 하고 보답은 나중에 얻음.",
+    "category": "처세"
+  },
+  {
+    "id": "472",
+    "idiom": "說往說來",
+    "reading": "설왕설래",
+    "meaning": "말이 오고 감.",
+    "category": "관계",
+    "grade": "4"
+  },
+  {
+    "id": "473",
+    "idiom": "歲月如流",
+    "reading": "세월여류",
+    "meaning": "세월이 물같이 빨리 흐름.",
+    "category": "인생",
+    "grade": "4"
+  },
+  {
+    "id": "474",
+    "idiom": "送舊迎新",
+    "reading": "송구영신",
+    "meaning": "묵은 해를 보내고 새해를 맞음.",
+    "category": "상황",
+    "grade": "3"
+  },
+  {
+    "id": "475",
+    "idiom": "實事求是",
+    "reading": "실사구시",
+    "meaning": "사실에 근거하여 참된 이치를 찾음.",
+    "category": "학습",
+    "grade": "4"
+  },
+  {
+    "id": "476",
+    "idiom": "始終如一",
+    "reading": "시종여일",
+    "meaning": "처음과 끝이 한결같음.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "477",
+    "idiom": "愛國愛族",
+    "reading": "애국애족",
+    "meaning": "나라와 겨레를 사랑함.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "478",
+    "idiom": "愛人如己",
+    "reading": "애인여기",
+    "meaning": "남을 자기 몸처럼 사랑함.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "479",
+    "idiom": "言語道斷",
+    "reading": "언어도단",
+    "meaning": "말문이 막힐 만큼 어이없음.",
+    "category": "감정",
+    "grade": "jun3"
+  },
+  {
+    "id": "480",
+    "idiom": "與民同樂",
+    "reading": "여민동락",
+    "meaning": "백성과 함께 즐김.",
+    "category": "관계",
+    "grade": "jun3"
+  },
+  {
+    "id": "481",
+    "idiom": "勇氣百倍",
+    "reading": "용기백배",
+    "meaning": "용기가 몇 배로 늘어남.",
+    "category": "기세",
+    "grade": "4"
+  },
+  {
+    "id": "482",
+    "idiom": "遠近各處",
+    "reading": "원근각처",
+    "meaning": "멀고 가까운 여러 곳.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "483",
+    "idiom": "遠水近火",
+    "reading": "원수근화",
+    "meaning": "먼 데 있는 물은 가까운 불을 끄지 못함.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "484",
+    "idiom": "有始有終",
+    "reading": "유시유종",
+    "meaning": "처음과 끝이 있음. 끝까지 책임짐.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "485",
+    "idiom": "唯我獨尊",
+    "reading": "유아독존",
+    "meaning": "세상에서 오직 나만 존귀함.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "486",
+    "idiom": "以德報怨",
+    "reading": "이덕보원",
+    "meaning": "원수를 덕으로 갚음.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "487",
+    "idiom": "以毒制毒",
+    "reading": "이독제독",
+    "meaning": "독을 독으로 다스림.",
+    "category": "지혜"
+  },
+  {
+    "id": "488",
+    "idiom": "利用厚生",
+    "reading": "이용후생",
+    "meaning": "기구를 잘 쓰고 삶을 넉넉하게 함.",
+    "category": "지혜",
+    "grade": "3"
+  },
+  {
+    "id": "489",
+    "idiom": "異曲同工",
+    "reading": "이곡동공",
+    "meaning": "곡은 다르나 솜씨는 같음.",
+    "category": "평가",
+    "grade": "jun3"
+  },
+  {
+    "id": "490",
+    "idiom": "日久月深",
+    "reading": "일구월심",
+    "meaning": "날이 갈수록 더함.",
+    "category": "감정",
+    "grade": "3"
+  },
+  {
+    "id": "491",
+    "idiom": "日新月異",
+    "reading": "일신월이",
+    "meaning": "날마다 달마다 새로워짐.",
+    "category": "성장",
+    "grade": "jun3"
+  },
+  {
+    "id": "492",
+    "idiom": "日進月步",
+    "reading": "일진월보",
+    "meaning": "날로 달로 계속 발전함.",
+    "category": "성장",
+    "grade": "4"
+  },
+  {
+    "id": "493",
+    "idiom": "一意專心",
+    "reading": "일의전심",
+    "meaning": "한 가지에 마음을 집중함.",
+    "category": "태도",
+    "grade": "jun3"
+  },
+  {
+    "id": "494",
+    "idiom": "一擧一動",
+    "reading": "일거일동",
+    "meaning": "하나하나의 모든 동작.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "495",
+    "idiom": "長生不死",
+    "reading": "장생불사",
+    "meaning": "오래 살고 죽지 않음.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "496",
+    "idiom": "電光石火",
+    "reading": "전광석화",
+    "meaning": "번개와 부싯돌의 불. 매우 짧은 시간.",
+    "category": "기세",
+    "grade": "5"
+  },
+  {
+    "id": "497",
+    "idiom": "前代未聞",
+    "reading": "전대미문",
+    "meaning": "지금까지 들어 본 적이 없음.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "498",
+    "idiom": "前途有望",
+    "reading": "전도유망",
+    "meaning": "앞길이 기대됨.",
+    "category": "평가"
+  },
+  {
+    "id": "499",
+    "idiom": "全心全力",
+    "reading": "전심전력",
+    "meaning": "온 마음과 힘.",
+    "category": "노력",
+    "grade": "5"
+  },
+  {
+    "id": "500",
+    "idiom": "全知全能",
+    "reading": "전지전능",
+    "meaning": "모든 것을 알고 모든 일을 할 수 있음.",
+    "category": "평가",
+    "grade": "jun4"
+  },
+  {
+    "id": "501",
+    "idiom": "朝變夕改",
+    "reading": "조변석개",
+    "meaning": "계획이나 일을 자주 뜯어고침.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "502",
+    "idiom": "晝耕夜讀",
+    "reading": "주경야독",
+    "meaning": "낮에는 밭 갈고 밤에는 책 읽음.",
+    "category": "노력",
+    "grade": "jun3"
+  },
+  {
+    "id": "503",
+    "idiom": "知行合一",
+    "reading": "지행합일",
+    "meaning": "아는 것과 행하는 것이 같음.",
+    "category": "학습",
+    "grade": "jun4"
+  },
+  {
+    "id": "504",
+    "idiom": "知過必改",
+    "reading": "지과필개",
+    "meaning": "잘못을 알면 반드시 고침.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "505",
+    "idiom": "知足不辱",
+    "reading": "지족불욕",
+    "meaning": "만족할 줄 알면 욕되지 않음.",
+    "category": "처세"
+  },
+  {
+    "id": "506",
+    "idiom": "志在千里",
+    "reading": "지재천리",
+    "meaning": "뜻이 천 리에 있음. 큰 뜻을 품음.",
+    "category": "노력",
+    "grade": "4"
+  },
+  {
+    "id": "507",
+    "idiom": "此日彼日",
+    "reading": "차일피일",
+    "meaning": "오늘 내일 하며 자꾸 미룸.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "508",
+    "idiom": "千客萬來",
+    "reading": "천객만래",
+    "meaning": "많은 손님이 계속 찾아옴.",
+    "category": "상황",
+    "grade": "jun4"
+  },
+  {
+    "id": "509",
+    "idiom": "千軍萬馬",
+    "reading": "천군만마",
+    "meaning": "많은 군사와 말. 아주 강한 힘.",
+    "category": "기세",
+    "grade": "5"
+  },
+  {
+    "id": "510",
+    "idiom": "千思萬考",
+    "reading": "천사만고",
+    "meaning": "여러 가지로 깊이 생각함.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "511",
+    "idiom": "天長地久",
+    "reading": "천장지구",
+    "meaning": "하늘과 땅처럼 영원함.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "512",
+    "idiom": "草衣木食",
+    "reading": "초의목식",
+    "meaning": "풀로 옷을 해 입고 나무 열매를 먹음. 소박한 생활.",
+    "category": "인생",
+    "grade": "5"
+  },
+  {
+    "id": "513",
+    "idiom": "寸鐵殺人",
+    "reading": "촌철살인",
+    "meaning": "짧은 말로 사람의 마음을 깊이 찌름.",
+    "category": "지혜",
+    "grade": "jun3"
+  },
+  {
+    "id": "514",
+    "idiom": "春夏秋冬",
+    "reading": "춘하추동",
+    "meaning": "봄, 여름, 가을, 겨울.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "515",
+    "idiom": "忠君愛國",
+    "reading": "충군애국",
+    "meaning": "임금에게 충성하고 나라를 사랑함.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "516",
+    "idiom": "忠孝一致",
+    "reading": "충효일치",
+    "meaning": "충성과 효도가 같은 근본에서 나옴.",
+    "category": "지혜",
+    "grade": "4"
+  },
+  {
+    "id": "517",
+    "idiom": "太平聖代",
+    "reading": "태평성대",
+    "meaning": "어진 임금이 다스려 평화로운 시대.",
+    "category": "상황",
+    "grade": "4"
+  },
+  {
+    "id": "518",
+    "idiom": "泰然自若",
+    "reading": "태연자약",
+    "meaning": "마음에 충격을 받아도 아무렇지 않은 듯함.",
+    "category": "태도",
+    "grade": "3"
+  },
+  {
+    "id": "519",
+    "idiom": "平身低頭",
+    "reading": "평신저두",
+    "meaning": "몸을 굽히고 머리를 숙임.",
+    "category": "태도",
+    "grade": "4"
+  },
+  {
+    "id": "520",
+    "idiom": "風月主人",
+    "reading": "풍월주인",
+    "meaning": "자연을 즐기는 사람.",
+    "category": "인물",
+    "grade": "jun4"
+  },
+  {
+    "id": "521",
+    "idiom": "必有曲折",
+    "reading": "필유곡절",
+    "meaning": "반드시 까닭이 있음.",
+    "category": "지혜"
+  },
+  {
+    "id": "522",
+    "idiom": "學而時習",
+    "reading": "학이시습",
+    "meaning": "배우고 때때로 익힘.",
+    "category": "학습",
+    "grade": "3"
+  },
+  {
+    "id": "523",
+    "idiom": "行方不明",
+    "reading": "행방불명",
+    "meaning": "간 곳이나 방향을 알 수 없음.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "524",
+    "idiom": "行雲流水",
+    "reading": "행운유수",
+    "meaning": "구름이 가고 물이 흐르듯 자연스러움.",
+    "category": "태도",
+    "grade": "jun4"
+  },
+  {
+    "id": "525",
+    "idiom": "虛張聲勢",
+    "reading": "허장성세",
+    "meaning": "실속 없이 큰소리를 침.",
+    "category": "태도"
+  },
+  {
+    "id": "526",
+    "idiom": "形形色色",
+    "reading": "형형색색",
+    "meaning": "모양과 빛깔이 갖가지임.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "527",
+    "idiom": "好衣好食",
+    "reading": "호의호식",
+    "meaning": "좋은 옷을 입고 좋은 음식을 먹음.",
+    "category": "인생",
+    "grade": "4"
+  },
+  {
+    "id": "528",
+    "idiom": "花朝月夕",
+    "reading": "화조월석",
+    "meaning": "꽃 피는 아침과 달 밝은 저녁. 경치 좋은 때.",
+    "category": "상황",
+    "grade": "5"
+  },
+  {
+    "id": "529",
+    "idiom": "玉衣玉食",
+    "reading": "옥의옥식",
+    "meaning": "좋은 옷을 입고 맛있는 음식을 먹음.",
+    "category": "상황",
+    "grade": "jun5",
+    "exam": [
+      112
+    ]
+  },
+  {
+    "id": "530",
+    "idiom": "樂山樂水",
+    "reading": "요산요수",
+    "meaning": "산수의 자연을 즐기고 좋아함.",
+    "category": "태도",
+    "grade": "5",
+    "exam": [
+      112
+    ]
+  },
+  {
+    "id": "531",
+    "idiom": "各界各層",
+    "reading": "각계각층",
+    "meaning": "사회의 각 분야의 각 계층.",
+    "category": "상황",
+    "grade": "3",
+    "exam": [
+      112
+    ]
+  },
+  {
+    "id": "532",
+    "idiom": "積小成大",
+    "reading": "적소성대",
+    "meaning": "작거나 적은 것도 쌓이면 크게 되거나 많아짐.",
+    "category": "노력",
+    "grade": "3",
+    "exam": [
+      112
+    ]
   }
 ]

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   FaBolt,
   FaCalendarDay,
@@ -10,7 +10,6 @@ import {
   FaImage,
   FaInfoCircle,
   FaMedal,
-  FaPalette,
   FaPlay,
   FaRedoAlt,
   FaStar,
@@ -23,6 +22,20 @@ import {
 import idioms from "./data/idioms.json";
 import hanjaChars from "./data/hanjaChars.json";
 import hanjaWords from "./data/hanjaWords.json";
+import {
+  closeTossView,
+  getTossNickname,
+  getTossUserKey,
+  isTossEnvironment,
+  submitTossScore,
+  subscribeTossBack,
+  syncTossSafeArea,
+  triggerTossHaptic,
+} from "./toss.js";
+
+// 앱인토스 미니앱(또는 개발 서버의 devtools mock)에서 실행 중인지. 웹(Vercel)에서는 false.
+const IS_TOSS = isTossEnvironment();
+const APP_NAME = "사자성어 급수전";
 
 const TOTAL_SECONDS = 60;
 const COUNTDOWN_SECONDS = 3;
@@ -32,7 +45,6 @@ const STORAGE_KEYS = {
   bestAccuracy: "sjse_best_accuracy",
   playCount: "sjse_play_count",
   dailyLeaderboard: "sjse_daily_leaderboard",
-  gameTheme: "sjse_game_theme",
   nickname: "sjse_nickname",
   playerId: "sjse_player_id",
   soundMuted: "sjse_sound_muted",
@@ -58,7 +70,9 @@ const GRADE_LABELS = {
   jun3: "준3급",
   3: "3급",
 };
-const IDIOM_ENABLED_GRADES = new Set(["5", "jun4", "4", "jun3", "3"]);
+const IDIOM_ENABLED_GRADES = new Set(GRADE_KEYS.slice(GRADE_KEYS.indexOf("6")));
+const LOW_IDIOM_GRADES = new Set(["6", "jun5"]);
+const MIN_IDIOM_DISTRACTOR_POOL = 8;
 const SUB_MODE_LABELS = {
   idiom: "사자성어",
   word: "단어",
@@ -71,12 +85,8 @@ const QUESTION_TYPE_LABELS = {
   WB: "빈칸 한자 채우기",
 };
 const BLANK_PROMPT_TYPES = ["A", "WB", "HE"];
-const GAME_THEMES = {
-  hanji: { label: "한지", description: "한지 보드", next: "notebook" },
-  notebook: { label: "노트", description: "코랄 노트", next: "hanji" },
-};
 const FEEDBACK_MAILTO = `mailto:contact@oshizi.com?subject=${encodeURIComponent(
-  "사자성어 퀴즈 건의",
+  "사자성어 급수전 건의",
 )}&body=${encodeURIComponent("건의 내용을 적어주세요.")}`;
 const INFO_PAGE_LINKS = [
   { label: "건의하기", path: "/ko/feedback" },
@@ -90,7 +100,7 @@ const INFO_PAGES = {
   "/ko/feedback": {
     title: "건의하기",
     summary:
-      "사자성어 퀴즈가 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
+      "사자성어 급수전이 더 재미있고 정확해질 수 있도록 의견을 보내주세요.",
     sections: [
       {
         heading: "어떤 의견이든 좋아요",
@@ -164,7 +174,7 @@ const INFO_PAGES = {
     ],
     actions: [
       {
-        href: "mailto:contact@oshizi.com?subject=%EC%82%AC%EC%9E%90%EC%84%B1%EC%96%B4%20%ED%80%B4%EC%A6%88%20%EB%AC%B8%EC%9D%98",
+        href: `mailto:contact@oshizi.com?subject=${encodeURIComponent("사자성어 급수전 문의")}`,
         label: "contact@oshizi.com",
       },
     ],
@@ -172,7 +182,7 @@ const INFO_PAGES = {
   "/ko/terms": {
     title: "이용약관",
     summary:
-      "사자성어 퀴즈를 이용하기 전에 알아두면 좋은 기본 약관입니다.",
+      "사자성어 급수전을 이용하기 전에 알아두면 좋은 기본 약관입니다.",
     sections: [
       {
         heading: "서비스 목적",
@@ -200,7 +210,7 @@ const INFO_PAGES = {
   "/ko/privacy": {
     title: "개인정보",
     summary:
-      "사자성어 퀴즈에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
+      "사자성어 급수전에서 저장하거나 사용할 수 있는 정보와 목적을 안내합니다.",
     sections: [
       {
         heading: "저장되는 정보",
@@ -315,6 +325,7 @@ const initialState = {
   attempted: 0,
   history: [],
   usedIds: [],
+  savedQueue: [],
   selectedAnswer: null,
   lastResult: null,
   totalStartedAt: null,
@@ -449,8 +460,16 @@ function makeQuestion(usedIds) {
   };
 }
 
+function getGradeIdiomPool(grade) {
+  if (!LOW_IDIOM_GRADES.has(grade)) return idioms.filter((item) => item.grade === grade);
+
+  // 6급·준5급은 기출 사자성어가 1~2개뿐이라 그 급수 이하의 사자성어를 모두 출제한다.
+  const limit = GRADE_KEYS.indexOf(grade);
+  return idioms.filter((item) => item.grade && GRADE_KEYS.indexOf(item.grade) <= limit);
+}
+
 function makeGradeIdiomQuestion(usedIds, grade) {
-  const pool = idioms.filter((item) => item.grade === grade);
+  const pool = getGradeIdiomPool(grade);
   const remaining = pool.filter((item) => !usedIds.includes(item.id));
   if (remaining.length === 0) {
     return { question: null, usedIds };
@@ -458,7 +477,9 @@ function makeGradeIdiomQuestion(usedIds, grade) {
 
   const item = sample(remaining);
   const type = Math.random() < 0.5 ? "A" : "B";
-  const question = type === "A" ? makeTypeAQuestion(item, pool) : makeTypeBQuestion(item, pool);
+  const choicePool = pool.length >= MIN_IDIOM_DISTRACTOR_POOL ? pool : idioms;
+  const question =
+    type === "A" ? makeTypeAQuestion(item, choicePool) : makeTypeBQuestion(item, choicePool);
 
   return {
     question,
@@ -564,6 +585,36 @@ function makeWordQuestion(usedIds, grade) {
     type === "WM" ? makeWordMeaningQuestion(item, wordPool) : makeWordBlankQuestion(item, wordPool);
 
   return { question, usedIds: [...usedIds, item.id] };
+}
+
+// 저장한 단어(문제 복기에서 별표로 저장한 항목)를 원래 데이터에서 찾아 시험 문제로 만든다.
+function resolveSavedItem(entry) {
+  if (/^H/.test(entry.id)) {
+    const item = hanjaChars.find((candidate) => candidate.id === entry.id);
+    return item ? { kind: "char", item } : null;
+  }
+  if (/^W/.test(entry.id)) {
+    const item = hanjaWords.find((candidate) => candidate.id === entry.id);
+    return item ? { kind: "word", item } : null;
+  }
+  const item = idioms.find((candidate) => candidate.id === entry.id);
+  return item ? { kind: "idiom", item } : null;
+}
+
+function makeSavedQuestion({ kind, item }) {
+  if (kind === "char") {
+    return makeHunEumQuestion(
+      item,
+      hanjaChars.filter((candidate) => candidate.grade === item.grade),
+    );
+  }
+  if (kind === "word") {
+    const pool = hanjaWords.filter((candidate) => candidate.grade === item.grade);
+    return Math.random() < 0.5
+      ? makeWordMeaningQuestion(item, pool)
+      : makeWordBlankQuestion(item, pool);
+  }
+  return Math.random() < 0.5 ? makeTypeAQuestion(item, idioms) : makeTypeBQuestion(item, idioms);
 }
 
 function buildNextQuestion(usedIds, { mode, grade, subMode }) {
@@ -742,13 +793,6 @@ function loadPlayerProfile() {
   return profile;
 }
 
-function loadGameTheme() {
-  if (typeof window === "undefined") return "hanji";
-
-  const savedTheme = localStorage.getItem(STORAGE_KEYS.gameTheme);
-  return GAME_THEMES[savedTheme] ? savedTheme : "hanji";
-}
-
 function loadSoundMuted() {
   if (typeof window === "undefined") return false;
   return localStorage.getItem(STORAGE_KEYS.soundMuted) === "1";
@@ -810,8 +854,13 @@ async function parseJsonResponse(response) {
   return response.json();
 }
 
+// 토스 미니앱은 웹과 다른 도메인에서 열리므로 Vercel에 배포된 서버를 절대 주소로 부른다.
+const LEADERBOARD_API_URL = IS_TOSS
+  ? "https://fourword-quiz.vercel.app/api/leaderboard"
+  : "/api/leaderboard";
+
 async function fetchSharedLeaderboard() {
-  const response = await fetch("/api/leaderboard", {
+  const response = await fetch(LEADERBOARD_API_URL, {
     cache: "no-store",
     headers: { Accept: "application/json" },
   });
@@ -821,7 +870,7 @@ async function fetchSharedLeaderboard() {
 }
 
 async function submitSharedLeaderboard(entry) {
-  const response = await fetch("/api/leaderboard", {
+  const response = await fetch(LEADERBOARD_API_URL, {
     body: JSON.stringify(entry),
     cache: "no-store",
     headers: {
@@ -1039,7 +1088,7 @@ function buildResultImageBlob({ accuracy, difficulty, history, score }) {
 
     context.fillStyle = "#162027";
     context.font = "900 54px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
-    context.fillText("사자성어 퀴즈 결과", 64, 84);
+    context.fillText("사자성어 급수전 결과", 64, 84);
     context.fillStyle = "#f25a48";
     context.font = "900 88px Apple SD Gothic Neo, Malgun Gothic, sans-serif";
     context.fillText(`${score}개 정답`, 64, 180);
@@ -1265,6 +1314,22 @@ function reducer(state, action) {
         subMode: action.subMode,
         countdownStartedAt: action.now,
       };
+    case "SAVED_START": {
+      return {
+        ...initialState,
+        phase: "playing",
+        mode: "saved",
+        difficulty: state.difficulty,
+        grade: state.grade,
+        subMode: state.subMode,
+        currentQuestion: makeSavedQuestion(action.queue[0]),
+        questionNumber: 1,
+        savedQueue: action.queue,
+        totalStartedAt: action.now,
+        questionStartedAt: action.now,
+        resultSaved: false,
+      };
+    }
     case "START": {
       const now = action.now;
       const { question, usedIds } = buildNextQuestion([], {
@@ -1323,11 +1388,15 @@ function reducer(state, action) {
     }
     case "NEXT": {
       if (state.phase !== "feedback") return state;
-      const { question, usedIds } = buildNextQuestion(state.usedIds, {
-        mode: state.mode,
-        grade: state.grade,
-        subMode: state.subMode,
-      });
+      const savedNext = state.mode === "saved" ? state.savedQueue[state.questionNumber] : null;
+      const { question, usedIds } =
+        state.mode === "saved"
+          ? { question: savedNext ? makeSavedQuestion(savedNext) : null, usedIds: state.usedIds }
+          : buildNextQuestion(state.usedIds, {
+              mode: state.mode,
+              grade: state.grade,
+              subMode: state.subMode,
+            });
       if (!question) {
         return { ...state, phase: "result", currentQuestion: null, resultSaved: false };
       }
@@ -1358,12 +1427,24 @@ function reducer(state, action) {
       return {
         ...initialState,
         difficulty: state.difficulty,
-        mode: state.mode,
+        mode: state.mode === "saved" ? "casual" : state.mode,
         grade: state.grade,
         subMode: state.subMode,
       };
     case "MARK_SAVED":
       return { ...state, resultSaved: true };
+    case "SHIFT_TIME": {
+      // 앱이 백그라운드에 있거나 종료 확인창이 떠 있던 시간만큼 타이머 기준 시각을 뒤로 민다.
+      if (!(action.delta > 0)) return state;
+      const shift = (value) => (value == null ? value : value + action.delta);
+      return {
+        ...state,
+        totalStartedAt: shift(state.totalStartedAt),
+        questionStartedAt: shift(state.questionStartedAt),
+        countdownStartedAt: shift(state.countdownStartedAt),
+        feedbackUntil: shift(state.feedbackUntil),
+      };
+    }
     default:
       return state;
   }
@@ -1375,15 +1456,19 @@ function App() {
   const [stats, setStats] = useState(loadStats);
   const [dailyLeaderboard, setDailyLeaderboard] = useState(loadDailyLeaderboard);
   const [exportState, setExportState] = useState("idle");
-  const [gameTheme, setGameTheme] = useState(loadGameTheme);
   const [soundMuted, setSoundMuted] = useState(loadSoundMuted);
-  const [playerProfile] = useState(loadPlayerProfile);
+  const [playerProfile, setPlayerProfile] = useState(loadPlayerProfile);
   const [infoPath, setInfoPath] = useState(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showGameInfo, setShowGameInfo] = useState(false);
   const [savedWords, setSavedWords] = useState(loadSavedWords);
   const [showSavedWords, setShowSavedWords] = useState(false);
   const [savedWordsExportState, setSavedWordsExportState] = useState("idle");
+  const [isHidden, setIsHidden] = useState(
+    () => typeof document !== "undefined" && document.hidden,
+  );
+  // 앱이 백그라운드로 가거나 종료 확인창이 떠 있는 동안에는 게임 시간이 흐르지 않는다.
+  const shouldPause = isHidden || showExitConfirm;
 
   const questionDuration = DIFFICULTIES[state.difficulty].seconds;
   const totalLeft = secondsLeft(state.totalStartedAt, TOTAL_SECONDS, now);
@@ -1400,12 +1485,8 @@ function App() {
   const accuracy = getAccuracy(state.score, state.attempted);
 
   useEffect(() => {
-    document.title = infoPage ? `${infoPage.title} | 사자성어 퀴즈` : "사자성어 퀴즈";
+    document.title = infoPage ? `${infoPage.title} | ${APP_NAME}` : APP_NAME;
   }, [infoPage]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.gameTheme, gameTheme);
-  }, [gameTheme]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.soundMuted, soundMuted ? "1" : "0");
@@ -1417,16 +1498,55 @@ function App() {
 
   useEffect(() => {
     if (
-      state.phase !== "countdown" &&
-      state.phase !== "playing" &&
-      state.phase !== "feedback"
+      shouldPause ||
+      (state.phase !== "countdown" &&
+        state.phase !== "playing" &&
+        state.phase !== "feedback")
     ) {
       return undefined;
     }
 
     const interval = window.setInterval(() => setNow(Date.now()), 100);
     return () => window.clearInterval(interval);
-  }, [state.phase]);
+  }, [state.phase, shouldPause]);
+
+  // 일시정지가 끝나는 순간(cleanup) 멈춰 있던 시간만큼 타이머 기준 시각을 뒤로 민다.
+  useEffect(() => {
+    if (!shouldPause) return undefined;
+
+    const pausedAt = Date.now();
+    return () => {
+      dispatch({ type: "SHIFT_TIME", delta: Date.now() - pausedAt });
+      setNow(Date.now());
+    };
+  }, [shouldPause]);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      setIsHidden(document.hidden);
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getTossUserKey().then((userKey) => {
+      if (cancelled || !userKey) return;
+      setPlayerProfile((current) => ({ ...current, playerId: userKey }));
+    });
+    // 토스 게임센터 프로필의 닉네임이 있으면 리더보드에 그 이름으로 기록한다.
+    getTossNickname().then((nickname) => {
+      if (cancelled || !nickname) return;
+      setPlayerProfile((current) => ({ ...current, nickname }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1472,12 +1592,15 @@ function App() {
 
     if (state.phase !== "playing" && state.phase !== "feedback") return;
 
-    if (totalLeft <= 0) {
+    // 저장한 단어 시험은 시간 제한이 없다.
+    const isTimed = state.mode !== "saved";
+
+    if (isTimed && totalLeft <= 0) {
       dispatch({ type: "END" });
       return;
     }
 
-    if (state.phase === "playing" && questionLeft <= 0) {
+    if (isTimed && state.phase === "playing" && questionLeft <= 0) {
       dispatch({ type: "ANSWER", answer: null, now });
       return;
     }
@@ -1491,12 +1614,18 @@ function App() {
     state.countdownStartedAt,
     state.difficulty,
     state.feedbackUntil,
+    state.mode,
     state.phase,
     totalLeft,
   ]);
 
   useEffect(() => {
     if (state.phase !== "result" || state.resultSaved) return;
+
+    if (state.mode === "saved") {
+      dispatch({ type: "MARK_SAVED" });
+      return;
+    }
 
     const leaderboardEntry =
       state.mode === "casual" && state.attempted > 0
@@ -1519,6 +1648,10 @@ function App() {
         ? updateDailyLeaderboard(dailyLeaderboard, leaderboardEntry)
         : dailyLeaderboard;
     saveStats(nextStats);
+    if (IS_TOSS && state.mode === "casual" && state.attempted > 0) {
+      // 토스 게임센터 리더보드(캐주얼 모드 점수만). 웹 리더보드와 같은 기준이다.
+      submitTossScore(state.score);
+    }
     if (leaderboardEntry) {
       saveDailyLeaderboard(nextLeaderboard);
       submitSharedLeaderboard(leaderboardEntry)
@@ -1559,6 +1692,14 @@ function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   });
+
+  // 토스 상단 뒤로가기. 구독은 한 번만 하고, 항상 최신 상태를 보는 핸들러를 ref로 넘긴다.
+  const nativeBackHandlerRef = useRef(() => {});
+  nativeBackHandlerRef.current = handleNativeBack;
+
+  useEffect(() => subscribeTossBack(() => nativeBackHandlerRef.current()), []);
+
+  useEffect(() => syncTossSafeArea(), []);
 
   const resultLabel = useMemo(() => {
     if (state.lastResult === "correct") return "정답!";
@@ -1606,8 +1747,47 @@ function App() {
     setShowExitConfirm(false);
   }
 
+  // 토스 상단 뒤로가기(또는 안드로이드 뒤로가기). 리스너가 등록되면 기본 동작이
+  // 막히므로, 홈에서는 직접 화면을 닫는다.
+  function handleNativeBack() {
+    if (showExitConfirm) {
+      setShowExitConfirm(false);
+      return;
+    }
+    if (showGameInfo) {
+      setShowGameInfo(false);
+      return;
+    }
+    if (showSavedWords) {
+      setShowSavedWords(false);
+      return;
+    }
+    if (infoPath) {
+      setInfoPath(null);
+      return;
+    }
+    if (state.phase === "playing" || state.phase === "feedback") {
+      setShowExitConfirm(true);
+      return;
+    }
+    if (state.phase !== "home") {
+      dispatch({ type: "HOME" });
+      return;
+    }
+    closeTossView();
+  }
+
   function showLeaderboardPreview() {
     dispatch({ type: "SHOW_LEADERBOARD", difficulty: state.difficulty });
+  }
+
+  function startSavedQuiz() {
+    const queue = shuffle(savedWords.map(resolveSavedItem).filter(Boolean));
+    if (queue.length === 0) return;
+
+    const startedAt = Date.now();
+    setNow(startedAt);
+    dispatch({ type: "SAVED_START", queue, now: startedAt });
   }
 
   function startGame() {
@@ -1623,10 +1803,6 @@ function App() {
     });
   }
 
-  function toggleGameTheme() {
-    setGameTheme((currentTheme) => GAME_THEMES[currentTheme]?.next || "hanji");
-  }
-
   function toggleSoundMuted() {
     setSoundMuted((currentMuted) => !currentMuted);
   }
@@ -1634,7 +1810,8 @@ function App() {
   function submitAnswer(answer) {
     if (state.phase !== "playing") return;
     const correct = answer === state.currentQuestion.answer;
-    if (navigator.vibrate) {
+    // 토스에서는 SDK 햅틱(iOS WebView는 navigator.vibrate 미지원), 웹에서는 진동으로 폴백.
+    if (!triggerTossHaptic(correct ? "success" : "error") && navigator.vibrate) {
       navigator.vibrate(correct ? 30 : [25, 25, 25]);
     }
     if (!soundMuted) {
@@ -1730,7 +1907,7 @@ function App() {
   }
 
   return (
-    <main className={`app-shell is-${state.phase}-phase theme-${gameTheme}`}>
+    <main className={`app-shell is-${state.phase}-phase theme-hanji`}>
       <div className="arcade-stage">
         {state.phase !== "countdown" &&
           state.phase !== "leaderboard" &&
@@ -1744,8 +1921,8 @@ function App() {
             onDifficultyChange={(difficulty) =>
               dispatch({ type: "SET_DIFFICULTY", difficulty })
             }
-            onHome={requestHome}
             questionNumber={state.questionNumber}
+            savedTotal={state.savedQueue.length}
             score={state.score}
             totalLeft={totalLeft}
           />
@@ -1754,7 +1931,6 @@ function App() {
         {state.phase === "home" && (
           <HomeView
             difficulty={state.difficulty}
-            gameTheme={gameTheme}
             mode={state.mode}
             grade={state.grade}
             subMode={state.subMode}
@@ -1765,10 +1941,15 @@ function App() {
             onGradeChange={(grade) => dispatch({ type: "SET_GRADE", grade })}
             onSubModeChange={(subMode) => dispatch({ type: "SET_SUBMODE", subMode })}
             onNavigateInfo={navigateInfoPage}
+            onOpenLeaderboard={showLeaderboardPreview}
             onShowGameInfo={() => setShowGameInfo(true)}
+            onShowSavedWords={() => setShowSavedWords(true)}
             onSoundToggle={toggleSoundMuted}
-            onStart={state.mode === "casual" ? showLeaderboardPreview : startGame}
-            onThemeToggle={toggleGameTheme}
+            onStartSavedQuiz={startSavedQuiz}
+            onStart={
+              state.mode === "casual" && !IS_TOSS ? showLeaderboardPreview : startGame
+            }
+            savedCount={savedWords.length}
             soundMuted={soundMuted}
           />
         )}
@@ -1792,11 +1973,14 @@ function App() {
             onAnswer={submitAnswer}
             onFinish={() => dispatch({ type: "END" })}
             onHome={requestHome}
+            onSoundToggle={toggleSoundMuted}
             questionLeft={questionLeft}
             questionProgress={questionProgress}
             resultLabel={resultLabel}
             selectedAnswer={state.selectedAnswer}
+            soundMuted={soundMuted}
             totalLeft={totalLeft}
+            untimed={state.mode === "saved"}
           />
         )}
 
@@ -1813,7 +1997,7 @@ function App() {
             onExportImage={exportImageResult}
             onExportText={exportTextResult}
             onHome={() => dispatch({ type: "HOME" })}
-            onRestart={startGame}
+            onRestart={state.mode === "saved" ? startSavedQuiz : startGame}
             onShowSavedWords={() => setShowSavedWords(true)}
             onToggleSaveWord={toggleSavedWord}
             playerProfile={playerProfile}
@@ -1839,6 +2023,7 @@ function App() {
       )}
 
       {showGameInfo && <GameInfoModal onClose={() => setShowGameInfo(false)} />}
+
     </main>
   );
 }
@@ -1852,7 +2037,7 @@ function InfoPage({ onHome, page }) {
         </button>
 
         <header className="info-header">
-          <span>사자성어 퀴즈</span>
+          <span>{APP_NAME}</span>
           <h1>{page.title}</h1>
           <p>{page.summary}</p>
         </header>
@@ -1891,7 +2076,7 @@ function SavedWordsView({ exportState, onExportImage, onExportText, onHome, onRe
         </button>
 
         <header className="info-header">
-          <span>사자성어 퀴즈</span>
+          <span>{APP_NAME}</span>
           <h1>저장한 단어</h1>
           <p>결과 화면에서 별표를 눌러 저장한 성어와 단어를 모아볼 수 있어요.</p>
         </header>
@@ -1951,31 +2136,38 @@ function Hud({
   grade,
   mode,
   onDifficultyChange,
-  onHome,
   phase,
   questionNumber,
+  savedTotal,
   score,
   subMode,
   totalLeft,
 }) {
-  const homeDisabled = phase === "home";
   const selectedDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
   const isGradeMode = mode === "grade";
 
   return (
     <header className="hud">
-      <div className="logo-lockup" aria-label="사자성어 퀴즈">
+      <div className="logo-lockup" aria-label={APP_NAME}>
         <span className="logo-hanja" aria-hidden="true">四字</span>
         <span className="logo-copy">
           <span>사자성어</span>
-          <strong>퀴즈</strong>
+          <strong>급수전</strong>
         </span>
         <span className="logo-spark" aria-hidden="true">!</span>
       </div>
 
       {phase !== "home" && (
         <div className="hud-metrics" aria-label="게임 정보">
-          <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
+          {mode === "saved" ? (
+            <Metric
+              icon={<FaStar />}
+              label="남은 문제"
+              value={Math.max(0, savedTotal - Math.max(1, questionNumber || 1) + 1)}
+            />
+          ) : (
+            <Metric icon={<FaClock />} label="전체 시간" value={formatClock(totalLeft)} danger={totalLeft < 10} />
+          )}
           <Metric icon={<FaTrophy />} label="점수" value={score} />
           <Metric icon={<FaBolt />} label="문제" value={`Q.${Math.max(1, questionNumber || 1)}`} />
         </div>
@@ -1995,6 +2187,11 @@ function Hud({
               {value.label}
             </button>
           ))}
+        </div>
+      ) : mode === "saved" ? (
+        <div aria-label="저장한 단어 시험" className="difficulty-chip">
+          <span>모드</span>
+          <strong>저장한 단어</strong>
         </div>
       ) : (
         <div
@@ -2018,16 +2215,6 @@ function Hud({
         </div>
       )}
 
-      <button
-        aria-label="홈으로"
-        className="icon-home"
-        disabled={homeDisabled}
-        onClick={onHome}
-        title="홈으로"
-        type="button"
-      >
-        <FaHome />
-      </button>
     </header>
   );
 }
@@ -2046,40 +2233,30 @@ function Metric({ danger = false, icon, label, value }) {
 
 function HomeView({
   difficulty,
-  gameTheme,
   grade,
   mode,
   onDifficultyChange,
   onGradeChange,
   onModeChange,
   onNavigateInfo,
+  onOpenLeaderboard,
   onShowGameInfo,
+  onShowSavedWords,
   onSoundToggle,
   onStart,
+  onStartSavedQuiz,
   onSubModeChange,
-  onThemeToggle,
+  savedCount,
   soundMuted,
   subMode,
 }) {
-  const currentTheme = GAME_THEMES[gameTheme] || GAME_THEMES.hanji;
-  const nextTheme = GAME_THEMES[currentTheme.next] || GAME_THEMES.hanji;
+  const [savedMenuOpen, setSavedMenuOpen] = useState(false);
   const isGradeMode = mode === "grade";
   const idiomDisabled = !IDIOM_ENABLED_GRADES.has(grade);
 
   return (
     <section className="home-view">
       <div className="home-toggle-row">
-        <button
-          aria-label={`현재 테마 ${currentTheme.description}. ${nextTheme.description} 테마로 변경`}
-          className="theme-toggle"
-          onClick={onThemeToggle}
-          title={`${currentTheme.description} 테마`}
-          type="button"
-        >
-          <FaPalette aria-hidden="true" />
-          <span>{currentTheme.label}</span>
-        </button>
-
         <button
           aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
           aria-pressed={soundMuted}
@@ -2091,6 +2268,19 @@ function HomeView({
           {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
           <span>{soundMuted ? "무음" : "소리"}</span>
         </button>
+
+        {IS_TOSS && (
+          <button
+            aria-label="리더보드 보기"
+            className="theme-toggle"
+            onClick={onOpenLeaderboard}
+            title="리더보드"
+            type="button"
+          >
+            <FaMedal aria-hidden="true" />
+            <span>순위</span>
+          </button>
+        )}
 
         <button
           aria-label="게임 설명 보기"
@@ -2135,6 +2325,33 @@ function HomeView({
             </div>
           </div>
 
+          <div className="saved-words-menu">
+            <button
+              aria-expanded={savedMenuOpen}
+              className="saved-words-toggle"
+              onClick={() => setSavedMenuOpen((open) => !open)}
+              type="button"
+            >
+              <FaStar aria-hidden="true" /> 저장한 단어 ({savedCount})
+            </button>
+            {savedMenuOpen && (
+              <div className="saved-words-options">
+                <button className="difficulty-button" onClick={onShowSavedWords} type="button">
+                  단어 보기
+                </button>
+                <button
+                  className="difficulty-button"
+                  disabled={savedCount === 0}
+                  onClick={onStartSavedQuiz}
+                  title={savedCount === 0 ? "저장한 단어가 없어요" : undefined}
+                  type="button"
+                >
+                  저장한 단어 시험
+                </button>
+              </div>
+            )}
+          </div>
+
           {isGradeMode && (
             <>
               <div className="difficulty-picker">
@@ -2162,9 +2379,7 @@ function HomeView({
                     className={`difficulty-button ${subMode === "idiom" ? "is-active" : ""}`}
                     disabled={idiomDisabled}
                     onClick={() => onSubModeChange("idiom")}
-                    title={
-                      idiomDisabled ? "5급부터 사자성어 문제가 나와요" : undefined
-                    }
+                    title={idiomDisabled ? "6급부터 사자성어 문제가 나와요" : undefined}
                     type="button"
                   >
                     사자성어
@@ -2312,7 +2527,7 @@ function GameInfoModal({ onClose }) {
                 <span>게임 방식</span>
                 <h2>뜻과 한자를 번갈아 익혀요</h2>
                 <p>
-                  사자성어 퀴즈는 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
+                  사자성어 급수전은 제한 시간 안에 뜻과 한자를 빠르게 연결해보는
                   학습형 게임입니다.
                 </p>
               </div>
@@ -2387,16 +2602,20 @@ function GameView({
   onAnswer,
   onFinish,
   onHome,
+  onSoundToggle,
   questionLeft,
   questionProgress,
   resultLabel,
   selectedAnswer,
+  soundMuted,
+  untimed,
 }) {
   const isFeedback = Boolean(lastResult);
   const showEasyHints = difficulty === "easy";
   const hasPromptReadings = showEasyHints && currentQuestion.type === "A";
   const gameViewClassName = [
     "game-view",
+    untimed ? "is-untimed" : "",
     lastResult ? `is-${lastResult}` : "",
     hasPromptReadings ? "has-prompt-readings" : "",
   ]
@@ -2411,6 +2630,16 @@ function GameView({
         <span className="question-type">
           {QUESTION_TYPE_LABELS[currentQuestion.type] || "문제"}
         </span>
+        <button
+          aria-label={soundMuted ? "효과음 켜기" : "효과음 끄기"}
+          aria-pressed={soundMuted}
+          className="question-sound"
+          onClick={onSoundToggle}
+          title={soundMuted ? "효과음 꺼짐" : "효과음 켜짐"}
+          type="button"
+        >
+          {soundMuted ? <FaVolumeMute aria-hidden="true" /> : <FaVolumeUp aria-hidden="true" />}
+        </button>
         {BLANK_PROMPT_TYPES.includes(currentQuestion.type) ? (
           <div className="hanja-prompt" aria-label={`문제 ${currentQuestion.prompt}`}>
             {[...currentQuestion.prompt].map((char, index) => {
@@ -2440,13 +2669,15 @@ function GameView({
         )}
       </div>
 
-      <div className={`timer-row is-${timerTone}`}>
-        <FaStopwatch aria-hidden="true" />
-        <div className="timer-track" aria-label="문제 타이머">
-          <span style={{ width: `${questionProgress * 100}%` }} />
+      {!untimed && (
+        <div className={`timer-row is-${timerTone}`}>
+          <FaStopwatch aria-hidden="true" />
+          <div className="timer-track" aria-label="문제 타이머">
+            <span style={{ width: `${questionProgress * 100}%` }} />
+          </div>
+          <strong>{displaySeconds(questionLeft)}초</strong>
         </div>
-        <strong>{displaySeconds(questionLeft)}초</strong>
-      </div>
+      )}
 
       <div className={`choice-grid ${showEasyHints ? "has-easy-hints" : ""}`}>
         {currentQuestion.choices.map((choice, index) => {
@@ -2537,8 +2768,8 @@ function ResultView({
           <span>개 정답</span>
         </div>
         <p>
-          정확도 {accuracy}% · 시도 {history.length}문제 · 난이도{" "}
-          {DIFFICULTIES[difficulty].label}
+          정확도 {accuracy}% · 시도 {history.length}문제
+          {mode !== "saved" && <> · 난이도 {DIFFICULTIES[difficulty].label}</>}
           {isGradeMode && (
             <>
               {" "}
@@ -2546,11 +2777,13 @@ function ResultView({
             </>
           )}
         </p>
-        <div className="best-strip">
-          최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
-          {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
-        </div>
-        {!isGradeMode && (
+        {mode !== "saved" && (
+          <div className="best-strip">
+            최고 기록 {stats.bestScore}개 · 최고 정확도 {stats.bestAccuracy}% · 총{" "}
+            {stats.playCount}회 플레이 · 닉네임 {playerProfile.nickname}
+          </div>
+        )}
+        {mode === "casual" && (
           <DailyLeaderboard
             difficulty={difficulty}
             leaderboard={dailyLeaderboard}

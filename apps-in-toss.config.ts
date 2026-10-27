@@ -2,7 +2,7 @@ import { defineConfig } from "@apps-in-toss/web-framework/config";
 
 export default defineConfig({
   // 콘솔에 등록하는 앱 이름과 반드시 동일해야 해요. 콘솔 등록 후에는 수정할 수 없어요.
-  appName: "sajaseongeo-geupsujeon",
+  appName: "quizlion",
   brand: {
     primaryColor: "#f25a48",
   },
